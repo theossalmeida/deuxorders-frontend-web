@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Order } from "@/types/orders";
 import { OrderStatusBadge } from "./OrderStatusBadge";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDateTime } from "@/lib/format";
 import { ChevronRight } from "lucide-react";
 
 interface Props {
@@ -23,7 +23,7 @@ export function OrderCard({ order }: Props) {
         <div className="flex items-center gap-2 flex-wrap">
           <OrderStatusBadge status={order.status} />
           <span className="text-xs text-muted-foreground">
-            Entrega: {formatDate(order.deliveryDate)}
+            Entrega: {formatDateTime(order.deliveryDate)}
           </span>
         </div>
       </div>

@@ -68,7 +68,7 @@ export default function NewOrderPage() {
     await createOrder.mutateAsync({
       input: {
         clientId: data.clientId,
-        deliveryDate: new Date(data.deliveryDate + "T12:00:00Z").toISOString(),
+        deliveryDate: new Date(data.deliveryDate).toISOString(),
         items,
         delivery: isDelivery ? address.trim() : undefined,
       },
@@ -115,7 +115,7 @@ export default function NewOrderPage() {
 
           <div className="space-y-1">
             <Label>Data de entrega</Label>
-            <Input type="date" {...register("deliveryDate")} />
+            <Input type="datetime-local" {...register("deliveryDate")} />
             {errors.deliveryDate && (
               <p className="text-xs text-destructive">{errors.deliveryDate.message}</p>
             )}
@@ -128,7 +128,7 @@ export default function NewOrderPage() {
               onValueChange={(v) => setIsDelivery((v ?? "pickup") === "delivery")}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue>{isDelivery ? "Entrega" : "Retirada"}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pickup">Retirada</SelectItem>

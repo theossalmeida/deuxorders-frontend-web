@@ -46,7 +46,7 @@ import {
   X,
   Ban,
 } from "lucide-react";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDateTime } from "@/lib/format";
 import {
   Order,
   OrderItem,
@@ -216,7 +216,7 @@ function EditOrderForm({
 
   // ── form state initialised from the loaded order ──
   const [status, setStatus] = useState<OrderStatus>(order.status);
-  const [deliveryDate, setDeliveryDate] = useState(order.deliveryDate.slice(0, 10));
+  const [deliveryDate, setDeliveryDate] = useState(order.deliveryDate.slice(0, 16));
   const [isDelivery, setIsDelivery] = useState(!isPickup(order.delivery));
   const [address, setAddress] = useState(
     !isPickup(order.delivery) ? (order.delivery ?? "") : ""
@@ -292,7 +292,7 @@ function EditOrderForm({
 
       await updateOrder.mutateAsync({
         status: ORDER_STATUS_INT[status],
-        deliveryDate: new Date(deliveryDate + "T12:00:00Z").toISOString(),
+        deliveryDate: new Date(deliveryDate).toISOString(),
         delivery: isDelivery ? address : null,
         items: allItems.length ? allItems : undefined,
         references: objectKeys.length ? objectKeys : undefined,
@@ -320,7 +320,7 @@ function EditOrderForm({
             #{order.id.slice(0, 8)} · {order.clientName}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Criado em {formatDate(order.deliveryDate)}
+            Entrega: {formatDateTime(order.deliveryDate)}
           </p>
         </div>
         <AlertDialog>
@@ -379,7 +379,7 @@ function EditOrderForm({
         <div className="space-y-1">
           <Label>Data de entrega</Label>
           <Input
-            type="date"
+            type="datetime-local"
             value={deliveryDate}
             onChange={(e) => setDeliveryDate(e.target.value)}
           />
@@ -392,7 +392,7 @@ function EditOrderForm({
             onValueChange={(v) => setIsDelivery((v ?? "pickup") === "delivery")}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue>{isDelivery ? "Entrega" : "Retirada"}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="pickup">Retirada</SelectItem>
