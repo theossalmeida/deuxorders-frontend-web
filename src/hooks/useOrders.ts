@@ -88,6 +88,32 @@ export function useCreateOrder() {
   });
 }
 
+export function useCancelOrderItem(orderId: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: string) =>
+      createOrdersApi(token!).cancelItem(orderId, productId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders", orderId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteReference(orderId: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (objectKey: string) =>
+      createOrdersApi(token!).deleteReference(orderId, objectKey),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders", orderId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 export function useUpdateOrder(id: string) {
   const token = useToken();
   const qc = useQueryClient();

@@ -36,6 +36,8 @@ export default function NewOrderPage() {
 
   const [items, setItems] = useState<OrderItemInput[]>([]);
   const [images, setImages] = useState<File[]>([]);
+  const [isDelivery, setIsDelivery] = useState(false);
+  const [address, setAddress] = useState("");
 
   const {
     register,
@@ -46,7 +48,6 @@ export default function NewOrderPage() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const clientId = watch("clientId") ?? "";
-
   const totalCents = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -60,11 +61,16 @@ export default function NewOrderPage() {
       toast.error("Adicione ao menos um item ao pedido.");
       return;
     }
+    if (isDelivery && !address.trim()) {
+      toast.error("Informe o endereço de entrega.");
+      return;
+    }
     await createOrder.mutateAsync({
       input: {
         clientId: data.clientId,
         deliveryDate: new Date(data.deliveryDate + "T12:00:00Z").toISOString(),
         items,
+        delivery: isDelivery ? address.trim() : undefined,
       },
       imageFiles: images,
     });
@@ -114,6 +120,33 @@ export default function NewOrderPage() {
               <p className="text-xs text-destructive">{errors.deliveryDate.message}</p>
             )}
           </div>
+
+          <div className="space-y-1">
+            <Label>Tipo de entrega</Label>
+            <Select
+              value={isDelivery ? "delivery" : "pickup"}
+              onValueChange={(v) => setIsDelivery((v ?? "pickup") === "delivery")}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pickup">Retirada</SelectItem>
+                <SelectItem value="delivery">Entrega</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {isDelivery && (
+            <div className="space-y-1">
+              <Label>Endereço de entrega</Label>
+              <Input
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Rua, número, complemento"
+              />
+            </div>
+          )}
         </div>
 
         <div className="space-y-4 rounded-xl border p-4">
@@ -187,7 +220,7 @@ export default function NewOrderPage() {
             style={{ backgroundColor: "#581629" }}
             disabled={isSubmitting || createOrder.isPending}
           >
-            {(isSubmitting || createOrder.isPending) ? (
+            {isSubmitting || createOrder.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               "Salvar Pedido"

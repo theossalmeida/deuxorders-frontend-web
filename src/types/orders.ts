@@ -31,6 +31,8 @@ export interface Order {
   totalValue: number;
   references: string[];
   items: OrderItem[];
+  /** null or "pickup" = Retirada; any other string = address for Entrega */
+  delivery: string | null;
 }
 
 export interface PaginatedOrders {
@@ -63,6 +65,7 @@ export interface CreateOrderInput {
   deliveryDate: string;
   items: OrderItemInput[];
   references?: string[];
+  delivery?: string;
 }
 
 export interface UpdateOrderInput {
@@ -70,6 +73,7 @@ export interface UpdateOrderInput {
   status?: number;
   items?: OrderItemUpdate[];
   references?: string[];
+  delivery?: string | null;
 }
 
 export interface PresignedUrlRequest {
