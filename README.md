@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DeuxOrders Web
+
+Web order management system for **Deuxcerie** — a responsive Next.js replication of the [iOS app](https://github.com/theossalmeida/deuxorders-frontend-ios).
+
+## Features
+
+- **Dashboard** — revenue charts, top products, top clients, date range filters, CSV/PDF export
+- **Orders** — list with search, status and date filters, create and edit orders with reference image uploads
+- **Products** — grid view, create/edit with image upload, active/inactive toggle
+- **Clients** — list with search, create/edit, active/inactive toggle
+- **Authentication** — secure login with multi-layer rate limiting and session management
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, TypeScript) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Data fetching | TanStack Query v5 |
+| Forms | React Hook Form + Zod |
+| Charts | Recharts |
+| Notifications | Sonner |
+
+## Security
+
+- JWT stored in an **httpOnly, SameSite=strict** cookie — never exposed to JavaScript
+- **Proxy middleware** blocks every unauthenticated request server-side
+- **Multi-layer rate limiter** on login: sliding window per IP + device fingerprint cookie (prevents multi-tab bypass), plus a hard IP cap as a second layer
+- **Client-side exponential backoff** after consecutive failures with a visible countdown
+- Backend hardening guide available in `rate_limiter_backend.md` (gitignored)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- Access to the Deuxcerie API (or a local instance at `http://localhost:5062`)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/theossalmeida/deuxorders-frontend-web.git
+cd deuxorders-frontend-web
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file at the project root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_API_URL=https://api-orders.deuxcerie.com.br/api/v1
+```
 
-## Learn More
+For local development against a local API:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5062/api/v1
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Running
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Development
+npm run dev
 
-## Deploy on Vercel
+# Production build
+npm run build
+npm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000). You will be redirected to `/login` until authenticated.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (protected)/        # Auth-gated pages (dashboard, orders, products, clients)
+│   ├── api/auth/           # Login, logout, and token API routes
+│   └── login/              # Public login page
+├── components/
+│   ├── dashboard/          # Summary cards, revenue chart, top products chart
+│   ├── layout/             # Sidebar, bottom nav, mobile header
+│   ├── orders/             # Order card, status badge, item form
+│   ├── clients/            # Client form
+│   ├── products/           # Product form
+│   ├── providers/          # React Query provider
+│   └── ui/                 # shadcn/ui primitives
+├── hooks/                  # Data-fetching hooks per domain
+├── lib/
+│   ├── api/                # Typed API service functions per domain
+│   ├── auth/               # JWT cookie session helpers
+│   ├── rate-limit/         # Server-side rate limiter
+│   └── format.ts           # Currency and date formatters
+└── types/                  # TypeScript types per domain
+```
+
+## API Reference
+
+All requests go to the backend at `NEXT_PUBLIC_API_URL`. Authentication uses `Authorization: Bearer <token>` on every request except `POST /auth/login`.
+
+See the full API contract in the [iOS repository](https://github.com/theossalmeida/deuxorders-frontend-ios/blob/main/API_REFERENCE.md).
+
+## Related
+
+- [iOS App](https://github.com/theossalmeida/deuxorders-frontend-ios) — original SwiftUI client
