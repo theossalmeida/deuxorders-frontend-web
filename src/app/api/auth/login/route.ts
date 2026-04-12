@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkLoginRateLimit } from "@/lib/rate-limit";
 import { setSessionToken } from "@/lib/auth/session";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api-orders.deuxcerie.com.br/api/v1";
+// BACKEND_URL is server-only and read at runtime (unlike NEXT_PUBLIC_* which
+// are baked at build time), so it can be changed in Vercel without a rebuild.
+const API_URL = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const rateLimit = await checkLoginRateLimit(req);
