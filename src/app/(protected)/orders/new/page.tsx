@@ -98,7 +98,11 @@ export default function NewOrderPage() {
               onValueChange={(v) => setValue("clientId", v ?? "", { shouldValidate: true })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um cliente" />
+                <SelectValue>
+                  {clientId
+                    ? ((clients.data ?? []).find((c) => c.id === clientId)?.name ?? "Selecione um cliente")
+                    : "Selecione um cliente"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {(clients.data ?? []).map((c) => (
