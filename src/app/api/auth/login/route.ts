@@ -57,19 +57,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   await setSessionToken(data.token);
 
-  // Set device fingerprint cookie for rate-limit multi-tab protection.
-  // A random ID is issued on first login and lives for 24 h.
-  const response = NextResponse.json({ ok: true });
-  if (!req.cookies.get("_dfp")) {
-    const fp = crypto.randomUUID();
-    response.cookies.set("_dfp", fp, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24,
-      path: "/",
-    });
-  }
-
-  return response;
+  // The _dfp fingerprint cookie is issued by the proxy on the first visit to /login,
+  // so it is already present by the time a login attempt is made.
+  // No further cookie work needed here.
+  return NextResponse.json({ ok: true });
 }

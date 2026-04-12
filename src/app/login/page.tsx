@@ -19,13 +19,29 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-const MAX_CLIENT_ATTEMPTS = 5;
+/**
+ * UX-only friction — does NOT provide security.
+ * The real rate limit is enforced server-side by checkLoginRateLimit().
+ * Refreshing the page or calling the API directly bypasses this entirely.
+ */
+const CLIENT_BACKOFF_THRESHOLD = 3;
 const BASE_COOLDOWN_MS = 5000;
+
+function sanitizeRedirect(raw: string | null): string {
+  if (!raw) return "/dashboard";
+  try {
+    const decoded = decodeURIComponent(raw);
+    if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
+  } catch {
+    // malformed percent-encoding
+  }
+  return "/dashboard";
+}
 
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const from = params.get("from") ?? "/dashboard";
+  const from = sanitizeRedirect(params.get("from"));
 
   const [attempts, setAttempts] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState(0);
@@ -55,7 +71,6 @@ function LoginForm() {
   }, [cooldownUntil]);
 
   const isCoolingDown = remaining > 0;
-  const isBlocked = attempts >= MAX_CLIENT_ATTEMPTS && isCoolingDown;
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -85,13 +100,18 @@ function LoginForm() {
       const body = await res.json().catch(() => ({ message: "Erro desconhecido." }));
       toast.error(body.message ?? "Erro ao autenticar.");
 
-      if (newAttempts >= 3) {
-        const delay = Math.min(BASE_COOLDOWN_MS * 2 ** (newAttempts - 3), 60000);
+      if (newAttempts >= CLIENT_BACKOFF_THRESHOLD) {
+        const delay = Math.min(BASE_COOLDOWN_MS * 2 ** (newAttempts - CLIENT_BACKOFF_THRESHOLD), 60000);
         setCooldownUntil(Date.now() + delay);
       }
     },
     [attempts, isCoolingDown, from, router]
   );
+
+  // Disable the button whenever cooling down OR submitting — not just when attempts exceed
+  // a threshold. isCoolingDown already covers the backoff window from both client-side
+  // exponential backoff and 429 responses from the server.
+  const isDisabled = isSubmitting || isCoolingDown;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -105,7 +125,7 @@ function LoginForm() {
           autoComplete="email"
           autoCapitalize="none"
           placeholder="seu@email.com"
-          disabled={isSubmitting || isBlocked}
+          disabled={isDisabled}
           {...register("email")}
         />
         {errors.email && (
@@ -122,7 +142,7 @@ function LoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          disabled={isSubmitting || isBlocked}
+          disabled={isDisabled}
           {...register("password")}
         />
         {errors.password && (
@@ -142,7 +162,7 @@ function LoginForm() {
       <Button
         type="submit"
         className="w-full bg-white text-[#581629] hover:bg-white/90 font-bold"
-        disabled={isSubmitting || isBlocked}
+        disabled={isDisabled}
       >
         {isSubmitting ? (
           <Loader2 className="h-4 w-4 animate-spin" />

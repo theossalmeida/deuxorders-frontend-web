@@ -2,8 +2,10 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { NextRequest } from "next/server";
 
 /**
- * Sliding-window rate limiter: 10 points per 60s per key.
- * Key = IP + device fingerprint cookie (prevents multi-tab bypass).
+ * Composite key limiter: IP + device fingerprint cookie.
+ * Prevents a single IP from using different fingerprint "slots" to multiply attempts.
+ * When no fingerprint is present the key is IP-only, so the same IP bucket is consumed
+ * regardless — there is no "no-fp" escape hatch.
  */
 const loginLimiter = new RateLimiterMemory({
   points: 10,
@@ -12,7 +14,7 @@ const loginLimiter = new RateLimiterMemory({
 });
 
 /**
- * Hard IP-only limiter as a second layer: 20 req/min regardless of fingerprint.
+ * Hard IP-only cap as a second independent layer.
  */
 const ipLimiter = new RateLimiterMemory({
   points: 20,
@@ -20,12 +22,23 @@ const ipLimiter = new RateLimiterMemory({
   blockDuration: 120,
 });
 
+/**
+ * Rate limiter for the token read endpoint to limit how fast a script can
+ * drain the session token (relevant in post-XSS scenarios).
+ */
+const tokenLimiter = new RateLimiterMemory({
+  points: 60,
+  duration: 60,
+  blockDuration: 30,
+});
+
+/**
+ * Reads the trusted IP set by the proxy middleware.
+ * The proxy overwrites this header from req.ip (Vercel Edge), so a client
+ * cannot spoof it via a user-supplied X-Forwarded-For value.
+ */
 function extractIp(req: NextRequest): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+  return req.headers.get("x-trusted-ip") ?? "unknown";
 }
 
 export interface RateLimitResult {
@@ -37,8 +50,12 @@ export async function checkLoginRateLimit(
   req: NextRequest
 ): Promise<RateLimitResult> {
   const ip = extractIp(req);
-  const fingerprint = req.cookies.get("_dfp")?.value ?? "no-fp";
-  const compositeKey = `${ip}__${fingerprint}`;
+  const fingerprint = req.cookies.get("_dfp")?.value;
+
+  // If no fingerprint cookie, key falls back to the IP alone.
+  // This means the attacker cannot get a fresh bucket by deleting the cookie —
+  // they would just consume the same IP bucket.
+  const compositeKey = fingerprint ? `${ip}__${fingerprint}` : ip;
 
   try {
     await Promise.all([
@@ -50,6 +67,22 @@ export async function checkLoginRateLimit(
     const rejection = rej as { msBeforeNext?: number };
     const retryAfterSeconds = Math.ceil(
       (rejection?.msBeforeNext ?? 60000) / 1000
+    );
+    return { allowed: false, retryAfterSeconds };
+  }
+}
+
+export async function checkTokenRateLimit(
+  req: NextRequest
+): Promise<RateLimitResult> {
+  const ip = extractIp(req);
+  try {
+    await tokenLimiter.consume(ip);
+    return { allowed: true, retryAfterSeconds: 0 };
+  } catch (rej: unknown) {
+    const rejection = rej as { msBeforeNext?: number };
+    const retryAfterSeconds = Math.ceil(
+      (rejection?.msBeforeNext ?? 30000) / 1000
     );
     return { allowed: false, retryAfterSeconds };
   }
