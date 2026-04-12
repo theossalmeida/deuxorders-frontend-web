@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkLoginRateLimit } from "@/lib/rate-limit";
 import { setSessionToken } from "@/lib/auth/session";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://api-orders.deuxcerie.com.br/api/v1";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const rateLimit = await checkLoginRateLimit(req);

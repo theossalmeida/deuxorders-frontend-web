@@ -51,7 +51,7 @@ export function createDashboardApi(token: string) {
       p.set("format", format);
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/dashboard/export?${p.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://api-orders.deuxcerie.com.br/api/v1"}/dashboard/export?${p.toString()}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
