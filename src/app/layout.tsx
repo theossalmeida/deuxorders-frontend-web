@@ -10,8 +10,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "DeuxOrders",
-  description: "Sistema de gestão de pedidos — Deuxcerie",
+  title: "Deuxcerie",
+  description: "Sistema de gestão de pedidos",
 };
 
 export default function RootLayout({

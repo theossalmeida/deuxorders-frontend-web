@@ -14,7 +14,7 @@ export default function ProtectedLayout({
       <div className="flex flex-1 flex-col min-w-0">
         <MobileHeader />
 
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-0 bg-slate-50">
           {children}
         </main>
       </div>

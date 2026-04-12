@@ -17,7 +17,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t"
+      className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t border-white/10 px-2 py-1 safe-area-pb"
       style={{ backgroundColor: "#581629" }}
     >
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
@@ -26,13 +26,19 @@ export function BottomNav() {
           <Link
             key={href}
             href={href}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center py-2 gap-1 text-[10px] font-medium transition-colors",
-              active ? "text-white" : "text-white/50"
-            )}
+            className="flex flex-1 flex-col items-center justify-center py-1.5 gap-1 transition-all"
           >
-            <Icon className={cn("h-5 w-5", active ? "opacity-100" : "opacity-50")} />
-            {label}
+            <span
+              className={cn(
+                "flex items-center justify-center w-10 h-6 rounded-full transition-all duration-200",
+                active ? "bg-white/20" : ""
+              )}
+            >
+              <Icon className={cn("h-5 w-5 transition-opacity", active ? "text-white opacity-100" : "text-white opacity-40")} />
+            </span>
+            <span className={cn("text-[10px] font-medium transition-opacity", active ? "text-white opacity-100" : "text-white opacity-40")}>
+              {label}
+            </span>
           </Link>
         );
       })}

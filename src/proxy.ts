@@ -91,5 +91,6 @@ export function proxy(req: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public/).*)"],
+  // Exclude Next.js internals, favicon, and all static file extensions served from public/
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf)$).*)"],
 };

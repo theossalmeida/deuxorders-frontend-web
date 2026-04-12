@@ -176,16 +176,32 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#581629" }}>
-      <div className="w-full max-w-sm px-6">
-        <div className="flex flex-col items-center mb-8">
-          <span className="text-white text-4xl font-bold tracking-tight">DeuxOrders</span>
-          <span className="text-white/60 text-sm mt-1">Gestão de pedidos Deuxcerie</span>
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ backgroundColor: "#581629" }}
+    >
+      {/* Subtle dot grid */}
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}
+      />
+      {/* Glow orbs */}
+      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full opacity-10 bg-white" />
+      <div className="absolute -bottom-56 -left-32 w-[500px] h-[500px] rounded-full opacity-5 bg-white" />
+
+      <div className="relative w-full max-w-sm px-6">
+        {/* Logo lockup */}
+        <div className="flex flex-col items-center mb-10">
+          <img src="/logo.jpeg" alt="Deuxcerie" className="h-12 w-auto object-contain mb-2" />
+          <span className="text-white/50 text-sm tracking-wide">Gestão de pedidos</span>
         </div>
 
-        <Suspense fallback={<div className="h-48" />}>
-          <LoginForm />
-        </Suspense>
+        {/* Form card */}
+        <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 shadow-2xl p-6">
+          <Suspense fallback={<div className="h-48" />}>
+            <LoginForm />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

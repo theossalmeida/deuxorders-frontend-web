@@ -42,4 +42,6 @@ next-env.d.ts
 
 .claude
 
-*.md
+CLAUDE.md
+AGENTS.md
+rate_limiter_backend.md

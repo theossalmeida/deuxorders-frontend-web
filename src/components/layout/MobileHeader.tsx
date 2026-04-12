@@ -18,7 +18,7 @@ export function MobileHeader() {
       className="flex md:hidden items-center justify-between px-4 py-3 border-b border-white/10"
       style={{ backgroundColor: "#581629" }}
     >
-      <span className="text-white font-bold text-lg tracking-tight">DeuxOrders</span>
+      <img src="/logo.jpeg" alt="Deuxcerie" className="h-7 w-auto object-contain" />
       <button
         onClick={handleLogout}
         className="text-white/70 hover:text-white p-1 transition-colors"

@@ -27,14 +27,17 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-60 h-screen sticky top-0 shrink-0 overflow-y-auto"
+      className="hidden md:flex flex-col w-64 h-screen sticky top-0 shrink-0 overflow-y-auto"
       style={{ backgroundColor: BRAND_COLOR }}
     >
-      <div className="px-6 py-6 border-b border-white/10">
-        <span className="text-white text-xl font-bold tracking-tight">DeuxOrders</span>
+      {/* Brand */}
+      <div className="px-5 py-6">
+        <img src="/logo.jpeg" alt="Deuxcerie" className="h-9 w-auto object-contain" />
+        <p className="text-white/40 text-xs mt-1.5 font-medium tracking-wide uppercase text-center">Gestão de pedidos</p>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {/* Nav */}
+      <nav className="flex-1 px-3 space-y-0.5">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -42,25 +45,30 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
                 active
-                  ? "bg-white/20 text-white"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
+                  ? "bg-white/15 text-white shadow-sm"
+                  : "text-white/60 hover:bg-white/8 hover:text-white/90"
               )}
             >
-              <Icon className="h-5 w-5 shrink-0" />
+              {active && (
+                <span className="absolute left-0 inset-y-2.5 w-[3px] bg-white rounded-r-full" />
+              )}
+              <Icon className={cn("h-[18px] w-[18px] shrink-0 transition-opacity", active ? "opacity-100" : "opacity-60 group-hover:opacity-90")} />
               {label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-white/10">
+      {/* Logout */}
+      <div className="px-3 py-5 mt-auto">
+        <div className="h-px bg-white/10 mb-4" />
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 hover:bg-white/8 hover:text-white/80 transition-all duration-150"
         >
-          <LogOut className="h-5 w-5 shrink-0" />
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
           Sair
         </button>
       </div>
