@@ -32,7 +32,7 @@ const securityHeaders = [
     // The Sonner toast and Recharts libraries work without unsafe-inline.
     value: [
       "default-src 'self'",
-      "script-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'", // Tailwind injects inline styles at runtime
       "img-src 'self' https: data:",       // Allow product images from CDN
       "font-src 'self'",
