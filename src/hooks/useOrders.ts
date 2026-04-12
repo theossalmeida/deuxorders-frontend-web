@@ -25,7 +25,10 @@ export function useOrder(id: string) {
   const token = useToken();
   return useQuery({
     queryKey: ["orders", id],
-    queryFn: () => createOrdersApi(token!).getById(id),
+    queryFn: async () => {
+      const order = await createOrdersApi(token!).getById(id);
+      return { ...order, references: order.references ?? [] };
+    },
     enabled: !!token && !!id,
   });
 }
