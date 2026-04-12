@@ -27,7 +27,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-60 min-h-screen shrink-0"
+      className="hidden md:flex flex-col w-60 h-screen sticky top-0 shrink-0 overflow-y-auto"
       style={{ backgroundColor: BRAND_COLOR }}
     >
       <div className="px-6 py-6 border-b border-white/10">

@@ -58,7 +58,9 @@ function SheetContent({
         )}
         {...props}
       >
-        {children}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          {children}
+        </div>
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
@@ -84,7 +86,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-0.5 p-4", className)}
+      className={cn("flex flex-col gap-0.5 px-6 pt-6 pb-2 shrink-0", className)}
       {...props}
     />
   )

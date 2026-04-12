@@ -99,7 +99,7 @@ export default function ClientsPage() {
               <SheetHeader>
                 <SheetTitle>Novo Cliente</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
+              <div className="mt-4">
                 <ClientForm onSubmit={handleCreate} isLoading={createClient.isPending} />
               </div>
             </SheetContent>
@@ -157,7 +157,7 @@ export default function ClientsPage() {
                   <SheetHeader>
                     <SheetTitle>Editar Cliente</SheetTitle>
                   </SheetHeader>
-                  <div className="mt-6">
+                  <div className="mt-4">
                     <ClientForm
                       client={client}
                       onSubmit={handleUpdate}

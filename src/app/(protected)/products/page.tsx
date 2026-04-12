@@ -126,7 +126,7 @@ export default function ProductsPage() {
               <SheetHeader>
                 <SheetTitle>Novo Produto</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">
+              <div className="mt-4">
                 <ProductForm onSubmit={handleCreate} isLoading={createProduct.isPending} />
               </div>
             </SheetContent>
@@ -210,7 +210,7 @@ export default function ProductsPage() {
                         <SheetHeader>
                           <SheetTitle>Editar Produto</SheetTitle>
                         </SheetHeader>
-                        <div className="mt-6">
+                        <div className="mt-4">
                           <ProductForm
                             product={product}
                             onSubmit={handleUpdate}
