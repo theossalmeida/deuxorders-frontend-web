@@ -39,11 +39,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const upstream = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+  } catch (err) {
+    console.error("[login] backend fetch failed:", err);
+    return NextResponse.json(
+      { message: "Serviço temporariamente indisponível." },
+      { status: 503 }
+    );
+  }
 
   if (!upstream.ok) {
     const text = await upstream.text();
@@ -54,7 +63,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ message }, { status: upstream.status });
   }
 
-  const data: { token: string } = await upstream.json();
+  let data: { token: string };
+  try {
+    data = await upstream.json();
+  } catch {
+    return NextResponse.json({ message: "Resposta inválida do servidor." }, { status: 502 });
+  }
 
   await setSessionToken(data.token);
 
