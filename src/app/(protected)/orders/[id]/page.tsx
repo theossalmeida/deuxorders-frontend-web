@@ -67,7 +67,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     );
   }
 
-  const canEdit = order.status === "Received";
+  const canEdit = true;
   const totalCents = order.items.reduce(
     (s, i) => s + (i.itemCanceled ? 0 : i.paidUnitPrice * i.quantity),
     0
