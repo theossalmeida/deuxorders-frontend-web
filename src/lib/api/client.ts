@@ -10,6 +10,15 @@ export class ApiError extends Error {
   }
 }
 
+export type ItemsResponse<T> = {
+  items?: T[];
+};
+
+export function unwrapItemsResponse<T>(data: T[] | ItemsResponse<T>): T[] {
+  if (Array.isArray(data)) return data;
+  return Array.isArray(data.items) ? data.items : [];
+}
+
 async function request<T>(
   path: string,
   token: string,

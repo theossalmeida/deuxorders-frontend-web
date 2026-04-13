@@ -1,4 +1,4 @@
-import { createApiClient } from "./client";
+import { createApiClient, ItemsResponse, unwrapItemsResponse } from "./client";
 import { Product } from "@/types/products";
 
 export function createProductsApi(token: string) {
@@ -11,7 +11,9 @@ export function createProductsApi(token: string) {
       if (params?.status !== undefined)
         search.set("status", String(params.status));
       const qs = search.toString();
-      return api.get<Product[]>(`/products/all${qs ? `?${qs}` : ""}`);
+      return api
+        .get<Product[] | ItemsResponse<Product>>(`/products/all${qs ? `?${qs}` : ""}`)
+        .then(unwrapItemsResponse);
     },
 
     getById: (id: string) => api.get<Product>(`/products/${id}`),
