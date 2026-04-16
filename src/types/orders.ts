@@ -33,6 +33,8 @@ export interface Order {
   items: OrderItem[];
   /** null or "pickup" = Retirada; any other string = address for Entrega */
   delivery: string | null;
+  paidAt: string | null;
+  paidByUserName: string | null;
 }
 
 export interface PaginatedOrders {

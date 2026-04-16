@@ -5,14 +5,21 @@ export function createClientsApi(token: string) {
   const api = createApiClient(token);
 
   return {
-    getAll: (params?: { search?: string; status?: boolean }) => {
-      const search = new URLSearchParams();
-      if (params?.search) search.set("search", params.search);
+    getAll: (params?: { search?: string; status?: boolean; size?: number }) => {
+      const searchParams = new URLSearchParams();
+      
+      const pageSize = params?.size || 100;
+      searchParams.set("size", String(pageSize));
+
+      if (params?.search) searchParams.set("search", params.search);
       if (params?.status !== undefined)
-        search.set("status", String(params.status));
-      const qs = search.toString();
+        searchParams.set("status", String(params.status));
+
+      const qs = searchParams.toString();
+      
+      // 3. A interpolação agora usa apenas a query string construída
       return api
-        .get<Client[] | ItemsResponse<Client>>(`/clients/all${qs ? `?${qs}` : ""}`)
+        .get<Client[] | ItemsResponse<Client>>(`/clients/all?${qs}`)
         .then(unwrapItemsResponse);
     },
 

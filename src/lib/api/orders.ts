@@ -15,17 +15,20 @@ export function createOrdersApi(token: string) {
   const api = createApiClient(token);
 
   return {
-    getAll: (params?: {
-      page?: number;
-      size?: number;
-      status?: OrderStatus;
-    }) => {
+    getAll: (params?: { page?: number; size?: number; status?: OrderStatus }) => {
       const search = new URLSearchParams();
+      
+      // Define o valor vindo do parâmetro OU 100 como padrão
+      const pageSize = params?.size || 100;
+      search.set("size", String(pageSize));
+
       if (params?.page) search.set("page", String(params.page));
-      if (params?.size) search.set("size", String(params.size));
       if (params?.status) search.set("status", params.status);
+
       const qs = search.toString();
-      return api.get<PaginatedOrders>(`/orders/all${qs ? `?${qs}` : ""}`);
+      
+      // Agora a URL fica limpa e correta
+      return api.get<PaginatedOrders>(`/orders/all?${qs}`);
     },
 
     getById: (id: string) => api.get<Order>(`/orders/${id}`),
@@ -49,6 +52,12 @@ export function createOrdersApi(token: string) {
     ) => api.patch<void>(`/orders/${orderId}/items/${productId}/quantity`, { increment }),
 
     delete: (id: string) => api.delete<void>(`/orders/${id}`),
+
+    markAsPaid: (id: string) =>
+      api.patch<Order>(`/orders/${id}/pay`),
+
+    unmarkAsPaid: (id: string, reason: string) =>
+      api.patch<Order>(`/orders/${id}/unpay`, { reason }),
 
     getPresignedUrl: (req: PresignedUrlRequest) =>
       api.post<PresignedUrlResponse>("/orders/references/presigned-url", req),

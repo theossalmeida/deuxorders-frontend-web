@@ -32,6 +32,11 @@ export function OrderCard({ order }: Props) {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <OrderStatusBadge status={order.status} />
+          {order.paidAt && (
+            <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+              Pago
+            </span>
+          )}
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Package className="h-3 w-3" />
             {formatDateTime(order.deliveryDate)}
