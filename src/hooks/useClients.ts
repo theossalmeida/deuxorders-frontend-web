@@ -6,10 +6,11 @@ import { createClientsApi } from "@/lib/api/clients";
 import { useToken } from "./useToken";
 import { CreateClientInput, UpdateClientInput } from "@/types/clients";
 
-export function useClients(params?: { search?: string; status?: boolean }) {
+export function useClients(params?: { search?: string; status?: boolean; size?: number }) {
   const token = useToken();
+  
   return useQuery({
-    queryKey: ["clients", params],
+    queryKey: ["clients", params, token], 
     queryFn: () => createClientsApi(token!).getAll(params),
     enabled: !!token,
   });

@@ -32,11 +32,11 @@ const securityHeaders = [
     // The Sonner toast and Recharts libraries work without unsafe-inline.
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'", // Tailwind injects inline styles at runtime
       "img-src 'self' https: data:",       // Allow product images from CDN
       "font-src 'self'",
-      "connect-src 'self' https://api-orders.deuxcerie.com.br", // API + presigned upload targets
+      "connect-src 'self' https://api-orders.deuxcerie.com.br http://localhost:5047", // API + presigned upload targets
       "frame-ancestors 'none'",            // Redundant with X-Frame-Options but belt-and-suspenders
       "base-uri 'self'",
       "form-action 'self'",
