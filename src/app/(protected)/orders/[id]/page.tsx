@@ -10,7 +10,10 @@ import {
   useOrdersDropdownData,
   useCancelOrderItem,
   useDeleteReference,
+  useMarkOrderAsPaid,
+  useUnmarkOrderAsPaid,
 } from "@/hooks/useOrders";
+import { getRoleFromToken } from "@/lib/auth/session";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
 import { useToken } from "@/hooks/useToken";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
@@ -213,6 +216,10 @@ function EditOrderForm({
   const deleteOrder = useDeleteOrder();
   const cancelItem = useCancelOrderItem(id);
   const deleteRef = useDeleteReference(id);
+  const markAsPaid = useMarkOrderAsPaid(id);
+  const unmarkAsPaid = useUnmarkOrderAsPaid(id);
+  const isAdmin = getRoleFromToken(token) === "Administrator";
+  const [unpayReason, setUnpayReason] = useState("");
 
   // ── form state initialised from the loaded order ──
   const [status, setStatus] = useState<OrderStatus>(order.status);
@@ -511,6 +518,58 @@ function EditOrderForm({
       >
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar alterações"}
       </Button>
+
+      {/* Pay / Unpay (admin only) */}
+      {isAdmin && order.status !== "Canceled" && (
+        <div className="flex flex-col gap-2 pt-4 border-t">
+          {!order.paidAt ? (
+            <Button
+              variant="default"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={() => markAsPaid.mutate()}
+              disabled={markAsPaid.isPending || order.totalPaid <= 0}
+            >
+              Marcar como pago
+            </Button>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Pago em {formatDateTime(order.paidAt)} por {order.paidByUserName}
+              </p>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                    Estornar pagamento
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Estornar pagamento</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Informe o motivo do estorno (mínimo 5 caracteres).
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <Textarea
+                    value={unpayReason}
+                    onChange={(e) => setUnpayReason(e.target.value)}
+                    placeholder="Motivo do estorno..."
+                    className="mt-2"
+                  />
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => unmarkAsPaid.mutate(unpayReason)}
+                      disabled={unpayReason.length < 5 || unmarkAsPaid.isPending}
+                    >
+                      Confirmar estorno
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
