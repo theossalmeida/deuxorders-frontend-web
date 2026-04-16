@@ -50,6 +50,12 @@ export function createOrdersApi(token: string) {
 
     delete: (id: string) => api.delete<void>(`/orders/${id}`),
 
+    markAsPaid: (id: string) =>
+      api.patch<Order>(`/orders/${id}/pay`),
+
+    unmarkAsPaid: (id: string, reason: string) =>
+      api.patch<Order>(`/orders/${id}/unpay`, { reason }),
+
     getPresignedUrl: (req: PresignedUrlRequest) =>
       api.post<PresignedUrlResponse>("/orders/references/presigned-url", req),
 

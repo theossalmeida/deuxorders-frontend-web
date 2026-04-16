@@ -170,3 +170,33 @@ export function useDeleteOrder() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+export function useMarkOrderAsPaid(id: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => createOrdersApi(token!).markAsPaid(id),
+    onSuccess: (updated: Order) => {
+      qc.setQueryData(["orders", id], updated);
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["cash"] });
+      toast.success("Pedido marcado como pago.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUnmarkOrderAsPaid(id: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reason: string) => createOrdersApi(token!).unmarkAsPaid(id, reason),
+    onSuccess: (updated: Order) => {
+      qc.setQueryData(["orders", id], updated);
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["cash"] });
+      toast.success("Pagamento estornado.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
