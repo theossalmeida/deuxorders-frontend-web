@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 export function MobileHeader() {
@@ -19,13 +20,22 @@ export function MobileHeader() {
       style={{ backgroundColor: "#581629" }}
     >
       <img src="/logo.jpeg" alt="Deuxcerie" className="h-7 w-auto object-contain" />
-      <button
-        onClick={handleLogout}
-        className="text-white/70 hover:text-white p-1 transition-colors"
-        aria-label="Sair"
-      >
-        <LogOut className="h-5 w-5" />
-      </button>
+      <div className="flex items-center gap-1">
+        <Link
+          href="/cash/dashboard"
+          className="text-white/70 hover:text-white p-1 transition-colors"
+          aria-label="Caixa"
+        >
+          <Wallet className="h-5 w-5" />
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="text-white/70 hover:text-white p-1 transition-colors"
+          aria-label="Sair"
+        >
+          <LogOut className="h-5 w-5" />
+        </button>
+      </div>
     </header>
   );
 }
