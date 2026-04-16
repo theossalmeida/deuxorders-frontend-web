@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useToken } from "@/hooks/useToken";
 import { useCashEntries } from "@/hooks/useCashFlow";
-import { getRoleFromToken } from "@/lib/auth/role";
 import { CashFlowFilters } from "@/components/cash/CashFlowFilters";
 import { CashFlowTable } from "@/components/cash/CashFlowTable";
 import { CashFlowCard } from "@/components/cash/CashFlowCard";
@@ -13,8 +11,6 @@ import { SlidersHorizontal, Plus, Loader2 } from "lucide-react";
 import type { CashFlowFilters as Filters } from "@/types/cash";
 
 export default function CashListPage() {
-  const token = useToken();
-  const isAdmin = getRoleFromToken(token) === "Administrator";
   const [filters, setFilters] = useState<Filters>({ page: 1, size: 50 });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -37,14 +33,12 @@ export default function CashListPage() {
             <SlidersHorizontal className="h-4 w-4 mr-1.5" />
             Filtros
           </Button>
-          {isAdmin && (
-            <Button size="sm" asChild style={{ backgroundColor: "#581629" }}>
-              <Link href="/cash/new">
-                <Plus className="h-4 w-4 mr-1.5" />
-                Novo lançamento
-              </Link>
-            </Button>
-          )}
+          <Button size="sm" asChild style={{ backgroundColor: "#581629" }}>
+            <Link href="/cash/new">
+              <Plus className="h-4 w-4 mr-1.5" />
+              Novo lançamento
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -53,7 +47,6 @@ export default function CashListPage() {
         <CashFlowFilters
           filters={filters}
           onChange={setFilters}
-          isAdmin={isAdmin}
         />
       )}
 
@@ -67,7 +60,7 @@ export default function CashListPage() {
       ) : (
         <>
           <div className="hidden md:block">
-            <CashFlowTable entries={data.items} isAdmin={isAdmin} />
+            <CashFlowTable entries={data.items} />
           </div>
           <div className="md:hidden">
             <CashFlowCard entries={data.items} />

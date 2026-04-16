@@ -13,7 +13,6 @@ import {
   useMarkOrderAsPaid,
   useUnmarkOrderAsPaid,
 } from "@/hooks/useOrders";
-import { getRoleFromToken } from "@/lib/auth/role";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
 import { useToken } from "@/hooks/useToken";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
@@ -218,7 +217,6 @@ function EditOrderForm({
   const deleteRef = useDeleteReference(id);
   const markAsPaid = useMarkOrderAsPaid(id);
   const unmarkAsPaid = useUnmarkOrderAsPaid(id);
-  const isAdmin = getRoleFromToken(token) === "Administrator";
   const [unpayReason, setUnpayReason] = useState("");
 
   // ── form state initialised from the loaded order ──
@@ -527,8 +525,8 @@ function EditOrderForm({
         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar alterações"}
       </Button>
 
-      {/* Pay / Unpay (admin only) */}
-      {isAdmin && order.status !== "Canceled" && (
+      {/* Pay / Unpay */}
+      {order.status !== "Canceled" && (
         <div className="flex flex-col gap-2 pt-4 border-t">
           {!order.paidAt ? (
             <Button

@@ -33,10 +33,9 @@ import type { CashFlowEntry } from "@/types/cash";
 
 interface Props {
   entries: CashFlowEntry[];
-  isAdmin: boolean;
 }
 
-export function CashFlowTable({ entries, isAdmin }: Props) {
+export function CashFlowTable({ entries }: Props) {
   const deleteMutation = useDeleteCashEntry();
   const [deleteReason, setDeleteReason] = useState("");
   const [targetId, setTargetId] = useState<string | null>(null);
@@ -93,7 +92,7 @@ export function CashFlowTable({ entries, isAdmin }: Props) {
             <TableHead className="text-right">Valor</TableHead>
             <TableHead>Origem</TableHead>
             <TableHead>Autor</TableHead>
-            {isAdmin && <TableHead>Ações</TableHead>}
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -124,37 +123,35 @@ export function CashFlowTable({ entries, isAdmin }: Props) {
                 </TableCell>
                 <TableCell><CashSourceBadge source={entry.source} /></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{entry.authorUserName}</TableCell>
-                {isAdmin && (
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {isManual && !isDeleted && (
-                        <>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                            <Link href={`/cash/${entry.id}`}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-red-500 hover:text-red-700"
-                            onClick={() => setTargetId(entry.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </>
-                      )}
-                      {!isManual && entry.sourceId && (
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
-                          <Link href={`/orders/${entry.sourceId}`}>
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            Ver pedido
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    {isManual && !isDeleted && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                          <Link href={`/cash/${entry.id}`}>
+                            <Pencil className="h-3.5 w-3.5" />
                           </Link>
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-red-500 hover:text-red-700"
+                          onClick={() => setTargetId(entry.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                    {!isManual && entry.sourceId && (
+                      <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                        <Link href={`/orders/${entry.sourceId}`}>
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Ver pedido
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             );
           })}

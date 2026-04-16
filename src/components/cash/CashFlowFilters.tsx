@@ -18,10 +18,9 @@ import {
 interface Props {
   filters: CashFlowFilters;
   onChange: (f: CashFlowFilters) => void;
-  isAdmin: boolean;
 }
 
-export function CashFlowFilters({ filters, onChange, isAdmin }: Props) {
+export function CashFlowFilters({ filters, onChange }: Props) {
   const set = (partial: Partial<CashFlowFilters>) =>
     onChange({ ...filters, ...partial, page: 1 });
 
@@ -75,16 +74,14 @@ export function CashFlowFilters({ filters, onChange, isAdmin }: Props) {
         </Select>
       </div>
 
-      {isAdmin && (
-        <div className="flex items-center gap-2 self-end pb-1">
-          <Switch
-            id="includeDeleted"
-            checked={filters.includeDeleted ?? false}
-            onCheckedChange={(v) => set({ includeDeleted: v })}
-          />
-          <Label htmlFor="includeDeleted">Mostrar excluídos</Label>
-        </div>
-      )}
+      <div className="flex items-center gap-2 self-end pb-1">
+        <Switch
+          id="includeDeleted"
+          checked={filters.includeDeleted ?? false}
+          onCheckedChange={(v) => set({ includeDeleted: v })}
+        />
+        <Label htmlFor="includeDeleted">Mostrar excluídos</Label>
+      </div>
 
       <div className="self-end">
         <Button variant="outline" size="sm" onClick={() => onChange({ page: 1, size: 50 })}>
