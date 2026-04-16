@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -234,6 +234,14 @@ function EditOrderForm({
   const [newItems, setNewItems] = useState<OrderItemInput[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const previewUrls = useMemo(
+    () => newImages.map((f) => URL.createObjectURL(f)),
+    [newImages]
+  );
+  useEffect(() => {
+    return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [previewUrls]);
 
   function updateItem(productId: string, patch: Partial<EditableItem>) {
     setExistingItems((prev) =>
@@ -477,10 +485,10 @@ function EditOrderForm({
               </button>
             </div>
           ))}
-          {newImages.map((file, i) => (
+          {newImages.map((_, i) => (
             <div key={`new-${i}`} className="relative w-20 h-20">
               <img
-                src={URL.createObjectURL(file)}
+                src={previewUrls[i]}
                 alt="ref"
                 className="w-20 h-20 object-cover rounded-lg border opacity-60"
               />
@@ -537,11 +545,13 @@ function EditOrderForm({
                 Pago em {formatDateTime(order.paidAt)} por {order.paidByUserName}
               </p>
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
-                    Estornar pagamento
-                  </Button>
-                </AlertDialogTrigger>
+                <AlertDialogTrigger
+                  render={
+                    <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                      Estornar pagamento
+                    </Button>
+                  }
+                />
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Estornar pagamento</AlertDialogTitle>

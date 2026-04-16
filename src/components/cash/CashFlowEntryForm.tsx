@@ -70,7 +70,7 @@ export function CashFlowEntryForm({ defaultValues, onSubmit, isPending, submitLa
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Tipo</Label>
-          <Select onValueChange={(v) => setValue("type", v as CashFlowType)} defaultValue={defaultValues?.type}>
+          <Select onValueChange={(v) => setValue("type", v as CashFlowType, { shouldValidate: true })} defaultValue={defaultValues?.type}>
             <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
             <SelectContent>
               {(Object.keys(CASH_TYPE_LABEL) as CashFlowType[]).map((t) => (
@@ -83,7 +83,7 @@ export function CashFlowEntryForm({ defaultValues, onSubmit, isPending, submitLa
 
         <div>
           <Label>Categoria</Label>
-          <Select onValueChange={(v) => setValue("category", v as CashFlowCategory)} defaultValue={defaultValues?.category}>
+          <Select onValueChange={(v) => setValue("category", v as CashFlowCategory, { shouldValidate: true })} defaultValue={defaultValues?.category}>
             <SelectTrigger><SelectValue placeholder="Categoria" /></SelectTrigger>
             <SelectContent>
               {(Object.keys(CASH_CATEGORY_LABEL) as CashFlowCategory[]).map((c) => (

@@ -33,16 +33,24 @@ export default function CashEntryDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { data: entry, isLoading } = useCashEntry(id);
+  const { data: entry, isLoading, isError } = useCashEntry(id);
   const update = useUpdateCashEntry(id);
   const deleteMutation = useDeleteCashEntry();
   const [deleteReason, setDeleteReason] = useState("");
 
-  if (isLoading || !entry) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
+    );
+  }
+
+  if (isError || !entry) {
+    return (
+      <p className="text-center py-16 text-sm text-muted-foreground">
+        Lançamento não encontrado.
+      </p>
     );
   }
 
@@ -102,12 +110,14 @@ export default function CashEntryDetailPage({
 
           <div className="pt-2 border-t">
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir lançamento
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir lançamento
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
