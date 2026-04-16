@@ -13,7 +13,7 @@ import {
   useMarkOrderAsPaid,
   useUnmarkOrderAsPaid,
 } from "@/hooks/useOrders";
-import { getRoleFromToken } from "@/lib/auth/session";
+import { getRoleFromToken } from "@/lib/auth/role";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
 import { useToken } from "@/hooks/useToken";
 import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
@@ -559,7 +559,7 @@ function EditOrderForm({
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => unmarkAsPaid.mutate(unpayReason)}
-                      disabled={unpayReason.length < 5 || unmarkAsPaid.isPending}
+                      disabled={unpayReason.trim().length < 5 || unmarkAsPaid.isPending}
                     >
                       Confirmar estorno
                     </AlertDialogAction>

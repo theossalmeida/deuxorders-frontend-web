@@ -28,7 +28,7 @@ const schema = z.object({
   counterparty: z.string().trim().min(1, "Obrigatório").max(200, "Máx 200 caracteres"),
   amountInput: z.string().refine((s) => {
     const cents = parseAmountToCents(s);
-    return cents > 0 && cents < 99_999_999_99;
+    return cents > 0 && cents <= 99_999_999;
   }, "Valor inválido"),
   notes: z.string().max(2000).optional(),
 });

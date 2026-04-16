@@ -1,15 +1,5 @@
 import { cookies } from "next/headers";
 
-export function getRoleFromToken(token: string | null): string | null {
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.role ?? null;
-  } catch {
-    return null;
-  }
-}
-
 const COOKIE_NAME = "auth_token";
 
 const COOKIE_OPTIONS = {

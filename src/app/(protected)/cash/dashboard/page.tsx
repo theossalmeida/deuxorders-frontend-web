@@ -1,32 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useToken } from "@/hooks/useToken";
 import { useCashSummary } from "@/hooks/useCashFlow";
 import { CashSummaryCards } from "@/components/cash/CashSummaryCards";
 import { CashByCategoryChart } from "@/components/cash/CashByCategoryChart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
-import { toISODate } from "@/lib/format";
 import type { CashFlowFilters } from "@/types/cash";
 
 function startOfDay(date: Date): string {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return toISODate(d);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T00:00:00`;
 }
 
 function endOfDay(date: Date): string {
-  const d = new Date(date);
-  d.setHours(23, 59, 59, 999);
-  return toISODate(d);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T23:59:59`;
 }
 
 type Preset = "today" | "7d" | "month" | "custom";
 
 export default function CashDashboardPage() {
-  useToken();
   const [preset, setPreset] = useState<Preset>("month");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
@@ -46,8 +45,8 @@ export default function CashDashboardPage() {
       return { from: startOfDay(from), to: endOfDay(now) };
     }
     return {
-      from: customFrom ? new Date(customFrom).toISOString() : undefined,
-      to: customTo ? endOfDay(new Date(customTo)) : undefined,
+      from: customFrom ? `${customFrom}T00:00:00` : undefined,
+      to: customTo ? `${customTo}T23:59:59` : undefined,
     };
   }
 

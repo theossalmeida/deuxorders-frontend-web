@@ -20,6 +20,7 @@ import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { CashFlowEntryForm } from "@/components/cash/CashFlowEntryForm";
 import { useCashEntry, useUpdateCashEntry, useDeleteCashEntry } from "@/hooks/useCashFlow";
 import { formatDateTime, formatDate } from "@/lib/format";
+import { CASH_CATEGORY_LABEL } from "@/types/cash";
 
 function centsToBrlString(cents: number): string {
   return (cents / 100).toFixed(2).replace(".", ",");
@@ -87,7 +88,7 @@ export default function CashEntryDetailPage({
         <>
           <CashFlowEntryForm
             defaultValues={{
-              billingDate: formatDate(entry.billingDate),
+              billingDate: entry.billingDate.slice(0, 10),
               type: entry.type,
               category: entry.category,
               counterparty: entry.counterparty,
@@ -130,7 +131,7 @@ export default function CashEntryDetailPage({
                         { onSuccess: () => router.push("/cash") }
                       )
                     }
-                    disabled={deleteReason.length < 5 || deleteMutation.isPending}
+                    disabled={deleteReason.trim().length < 5 || deleteMutation.isPending}
                   >
                     Excluir
                   </AlertDialogAction>
@@ -152,7 +153,7 @@ export default function CashEntryDetailPage({
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Categoria</p>
-              <p className="font-medium">{entry.category}</p>
+              <p className="font-medium">{CASH_CATEGORY_LABEL[entry.category]}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Contraparte</p>

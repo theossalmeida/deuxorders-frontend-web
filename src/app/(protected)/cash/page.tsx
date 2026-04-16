@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useToken } from "@/hooks/useToken";
 import { useCashEntries } from "@/hooks/useCashFlow";
-import { getRoleFromToken } from "@/lib/auth/session";
+import { getRoleFromToken } from "@/lib/auth/role";
 import { CashFlowFilters } from "@/components/cash/CashFlowFilters";
 import { CashFlowTable } from "@/components/cash/CashFlowTable";
 import { CashFlowCard } from "@/components/cash/CashFlowCard";
