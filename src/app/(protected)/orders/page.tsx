@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useOrders } from "@/hooks/useOrders";
 import { OrderCard } from "@/components/orders/OrderCard";
-import { OrderStatusBadge } from "@/components/orders/OrderStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,13 +23,11 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<OrderStatus | "all">("all");
   const [startDate, setStartDate] = useState<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 3);
-    return d.toISOString().slice(0, 10);
+    return new Date().toISOString().slice(0, 10);
   });
   const [endDate, setEndDate] = useState<string>(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 7);
+    d.setDate(d.getDate() + 6);
     return d.toISOString().slice(0, 10);
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -87,8 +84,10 @@ export default function OrdersPage() {
             <SlidersHorizontal className="h-4 w-4" />
           </Button>
 
-          <Button size="icon" style={{ backgroundColor: "#581629" }} render={<Link href="/orders/new" />}>
-            <Plus className="h-4 w-4" />
+          <Button size="icon" style={{ backgroundColor: "#581629" }}>
+            <Link href="/orders/new" className="flex items-center justify-center w-full h-full">
+              <Plus className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
 

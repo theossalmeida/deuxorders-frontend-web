@@ -58,7 +58,12 @@ export function Sidebar() {
             </p>
             <div className="space-y-0.5">
               {section.items.map(({ href, label, icon: Icon }) => {
-                const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+                const allHrefs = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
+                const active =
+                  pathname === href ||
+                  (href !== "/dashboard" &&
+                    pathname.startsWith(href + "/") &&
+                    !allHrefs.some((h) => h !== href && h.length > href.length && pathname.startsWith(h)));
                 return (
                   <Link
                     key={href}

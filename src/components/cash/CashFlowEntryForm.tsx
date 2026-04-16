@@ -71,7 +71,7 @@ export function CashFlowEntryForm({ defaultValues, onSubmit, isPending, submitLa
         <div>
           <Label>Tipo</Label>
           <Select onValueChange={(v) => setValue("type", v as CashFlowType, { shouldValidate: true })} defaultValue={defaultValues?.type}>
-            <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Tipo">{(v: string | null) => v ? CASH_TYPE_LABEL[v as CashFlowType] : null}</SelectValue></SelectTrigger>
             <SelectContent>
               {(Object.keys(CASH_TYPE_LABEL) as CashFlowType[]).map((t) => (
                 <SelectItem key={t} value={t}>{CASH_TYPE_LABEL[t]}</SelectItem>
@@ -84,7 +84,7 @@ export function CashFlowEntryForm({ defaultValues, onSubmit, isPending, submitLa
         <div>
           <Label>Categoria</Label>
           <Select onValueChange={(v) => setValue("category", v as CashFlowCategory, { shouldValidate: true })} defaultValue={defaultValues?.category}>
-            <SelectTrigger><SelectValue placeholder="Categoria" /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder="Categoria">{(v: string | null) => v ? CASH_CATEGORY_LABEL[v as CashFlowCategory] : null}</SelectValue></SelectTrigger>
             <SelectContent>
               {(Object.keys(CASH_CATEGORY_LABEL) as CashFlowCategory[]).map((c) => (
                 <SelectItem key={c} value={c}>{CASH_CATEGORY_LABEL[c]}</SelectItem>
