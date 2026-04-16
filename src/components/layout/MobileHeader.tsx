@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { LogOut, Wallet } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Wallet, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
 export function MobileHeader() {
   const router = useRouter();
+  const pathname = usePathname();
+  const isCash = pathname.startsWith("/cash");
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -22,11 +24,11 @@ export function MobileHeader() {
       <img src="/logo.jpeg" alt="Deuxcerie" className="h-7 w-auto object-contain" />
       <div className="flex items-center gap-1">
         <Link
-          href="/cash/dashboard"
+          href={isCash ? "/dashboard" : "/cash/dashboard"}
           className="text-white/70 hover:text-white p-1 transition-colors"
-          aria-label="Caixa"
+          aria-label={isCash ? "Pedidos" : "Caixa"}
         >
-          <Wallet className="h-5 w-5" />
+          {isCash ? <ShoppingCart className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
         </Link>
         <button
           onClick={handleLogout}
