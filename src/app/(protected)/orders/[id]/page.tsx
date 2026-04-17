@@ -49,6 +49,7 @@ import {
   Ban,
 } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/format";
+import { buildRefSrc } from "@/lib/image-ref";
 import {
   Order,
   OrderItem,
@@ -470,7 +471,7 @@ function EditOrderForm({
           {activeReferences.map((ref) => (
             <div key={ref} className="relative w-20 h-20">
               <img
-                src={ref.startsWith("http") ? ref : `${process.env.NEXT_PUBLIC_API_URL}/${ref}`}
+                src={buildRefSrc(ref)}
                 alt="ref"
                 className="w-20 h-20 object-cover rounded-lg border"
               />

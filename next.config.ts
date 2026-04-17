@@ -1,5 +1,13 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
+const connectSrc = [
+  "'self'",
+  "https://api-orders.deuxcerie.com.br",
+  ...(isProd ? [] : ["http://localhost:5047"]),
+].join(" ");
+
 const securityHeaders = [
   {
     key: "X-Content-Type-Options",
@@ -27,17 +35,14 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    // script-src 'self' allows same-origin scripts only.
-    // 'unsafe-inline' is NOT present — inline scripts are blocked.
-    // The Sonner toast and Recharts libraries work without unsafe-inline.
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self'",
       "style-src 'self' 'unsafe-inline'", // Tailwind injects inline styles at runtime
-      "img-src 'self' https: data:",       // Allow product images from CDN
+      "img-src 'self' https: data: blob:", // CDN + staged blob previews
       "font-src 'self'",
-      "connect-src 'self' https://api-orders.deuxcerie.com.br http://localhost:5047", // API + presigned upload targets
-      "frame-ancestors 'none'",            // Redundant with X-Frame-Options but belt-and-suspenders
+      `connect-src ${connectSrc}`,
+      "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
     ].join("; "),

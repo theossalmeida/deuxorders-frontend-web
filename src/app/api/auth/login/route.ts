@@ -56,11 +56,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 
   if (!upstream.ok) {
-    const text = await upstream.text();
+    // Drain the body so the connection can be released; never forward the bytes
+    // to the client — backend errors may contain stack traces, SQL fragments, etc.
+    await upstream.text().catch(() => "");
     const message =
       upstream.status === 401
         ? "Email ou senha incorretos."
-        : text || "Erro ao autenticar.";
+        : upstream.status === 429
+          ? "Muitas tentativas no backend."
+          : "Não foi possível autenticar no momento.";
     return NextResponse.json({ message }, { status: upstream.status });
   }
 
