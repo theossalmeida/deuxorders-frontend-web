@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
+const isDev = process.env.NODE_ENV !== "production";
 
 const connectSrc = [
   "'self'",
   "https://api-orders.deuxcerie.com.br",
-  ...(isProd ? [] : ["http://localhost:5047"]),
+  "https://*.r2.cloudflarestorage.com", // presigned upload PUTs
+  ...(isDev ? ["http://localhost:5047"] : []),
+].join(" ");
+
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  ...(isDev ? ["'unsafe-eval'"] : []),
 ].join(" ");
 
 const securityHeaders = [
@@ -19,7 +26,7 @@ const securityHeaders = [
   },
   {
     key: "X-XSS-Protection",
-    value: "0", // Modern browsers use CSP; this header is legacy and can introduce vulnerabilities
+    value: "0", 
   },
   {
     key: "Referrer-Policy",
@@ -37,14 +44,16 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self'",
-      "style-src 'self' 'unsafe-inline'", // Tailwind injects inline styles at runtime
-      "img-src 'self' https: data: blob:", // CDN + staged blob previews
+      `script-src ${scriptSrc}`,
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' https: data: blob:", 
       "font-src 'self'",
       `connect-src ${connectSrc}`,
+      "object-src 'none'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      "upgrade-insecure-requests",
     ].join("; "),
   },
 ];
