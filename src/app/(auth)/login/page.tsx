@@ -190,7 +190,7 @@ export default function LoginPage() {
       >
         <div>
           <div className="font-display text-2xl font-semibold">Deuxcerie</div>
-          <div className="mt-1 text-xs font-mono opacity-70">ATELIER ERP · v2.0</div>
+          <div className="mt-1 text-xs font-mono opacity-70">DeuxERP · v2.0</div>
         </div>
 
         <div className="relative z-10 max-w-md">
@@ -199,12 +199,12 @@ export default function LoginPage() {
             <span className="italic opacity-85">em um só lugar.</span>
           </div>
           <div className="mt-5 text-sm opacity-75 leading-relaxed">
-            Gerencie pedidos, caixa, clientes e produtos — com a paciência que seu ateliê merece.
+            Gerencie pedidos, caixa, clientes, produtos e estoque em um só lugar.
           </div>
         </div>
 
         <div className="text-[11px] font-mono opacity-50">
-          © 2026 Deuxcerie · São Paulo
+          © 2026 Deuxcerie · Rio de Janeiro
         </div>
 
         {/* Decorative rings */}
