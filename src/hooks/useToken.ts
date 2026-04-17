@@ -30,6 +30,7 @@ export function useToken(): string | null {
     },
     staleTime: 1000 * 60 * 5,
     retry: false,
+    refetchOnWindowFocus: false,
   });
 
   return data?.token ?? null;

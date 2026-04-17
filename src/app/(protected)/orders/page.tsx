@@ -32,26 +32,33 @@ export default function OrdersPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data, isLoading, isError, refetch } = useOrders({ size: PAGE_SIZE });
+  const { data, isLoading, isError, refetch } = useOrders({
+    size: PAGE_SIZE,
+    // Push status to the server so a non-"all" filter isn't limited to the
+    // first 100 rows the server chose to return.
+    status: status === "all" ? undefined : status,
+  });
 
+  // Date range and search still filter client-side — backend doesn't accept
+  // from/to/search yet. Add those params when the API supports them.
   const filtered = useMemo(() => {
     if (!data?.items) return [];
+    const q = search.toLowerCase();
     return data.items
       .filter((o) => {
         const matchSearch =
-          !search ||
-          o.clientName.toLowerCase().includes(search.toLowerCase()) ||
-          o.id.toLowerCase().includes(search.toLowerCase());
-        const matchStatus = status === "all" || o.status === status;
+          !q ||
+          o.clientName.toLowerCase().includes(q) ||
+          o.id.toLowerCase().includes(q);
         const deliveryDay = o.deliveryDate.slice(0, 10);
         const matchDate = deliveryDay >= startDate && deliveryDay <= endDate;
-        return matchSearch && matchStatus && matchDate;
+        return matchSearch && matchDate;
       })
       .sort(
         (a, b) =>
           new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime()
       );
-  }, [data, search, status, startDate, endDate]);
+  }, [data, search, startDate, endDate]);
 
   return (
     <div className="flex flex-col h-full">

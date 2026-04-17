@@ -11,6 +11,7 @@ export function useProducts(params?: { search?: string; status?: boolean }) {
     queryKey: ["products", params],
     queryFn: () => createProductsApi(token!).getAll(params),
     enabled: !!token,
+    staleTime: 1000 * 60 * 2,
   });
 }
 

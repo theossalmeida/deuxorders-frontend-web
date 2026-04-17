@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +49,14 @@ export default function NewOrderPage() {
 
   const clientId = watch("clientId") ?? "";
   const totalCents = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+
+  const previewUrls = useMemo(
+    () => images.map((f) => URL.createObjectURL(f)),
+    [images]
+  );
+  useEffect(() => {
+    return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [previewUrls]);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -170,10 +178,10 @@ export default function NewOrderPage() {
             Imagens de referência (máx. 3)
           </h2>
           <div className="flex flex-wrap gap-2">
-            {images.map((file, i) => (
+            {images.map((_, i) => (
               <div key={i} className="relative w-20 h-20">
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={previewUrls[i]}
                   alt="ref"
                   className="w-20 h-20 object-cover rounded-lg border"
                 />

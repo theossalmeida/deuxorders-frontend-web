@@ -27,6 +27,8 @@ const NAV_SECTIONS = [
 
 const BRAND_COLOR = "#581629";
 
+const ALL_HREFS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -58,12 +60,11 @@ export function Sidebar() {
             </p>
             <div className="space-y-0.5">
               {section.items.map(({ href, label, icon: Icon }) => {
-                const allHrefs = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
                 const active =
                   pathname === href ||
                   (href !== "/dashboard" &&
                     pathname.startsWith(href + "/") &&
-                    !allHrefs.some((h) => h !== href && h.length > href.length && pathname.startsWith(h)));
+                    !ALL_HREFS.some((h) => h !== href && h.length > href.length && pathname.startsWith(h)));
                 return (
                   <Link
                     key={href}

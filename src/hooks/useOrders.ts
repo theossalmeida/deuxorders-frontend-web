@@ -43,12 +43,14 @@ export function useOrdersDropdownData() {
     queryKey: ["clients-dropdown"],
     queryFn: () => api!.getClientsDropdown(),
     enabled: !!token,
+    staleTime: 1000 * 60 * 5,
   });
 
   const products = useQuery({
     queryKey: ["products-dropdown"],
     queryFn: () => api!.getProductsDropdown(),
     enabled: !!token,
+    staleTime: 1000 * 60 * 5,
   });
 
   return { clients, products };

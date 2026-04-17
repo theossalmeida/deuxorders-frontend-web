@@ -26,19 +26,17 @@ export function createDashboardApi(token: string) {
     getRevenueOverTime: (filters: DashboardFilters) =>
       api.get<RevenueOverTime>(`/dashboard/revenue-over-time${buildDashboardParams(filters)}`),
 
-    getTopProducts: (filters: DashboardFilters, limit = 10) =>
-      api.get<TopProduct[]>(
-        `/dashboard/top-products${buildDashboardParams({ ...filters })}${
-          buildDashboardParams(filters) ? "&" : "?"
-        }limit=${limit}`
-      ),
+    getTopProducts: (filters: DashboardFilters, limit = 10) => {
+      const base = buildDashboardParams(filters);
+      const sep = base ? "&" : "?";
+      return api.get<TopProduct[]>(`/dashboard/top-products${base}${sep}limit=${limit}`);
+    },
 
-    getTopClients: (filters: DashboardFilters, limit = 10) =>
-      api.get<TopClient[]>(
-        `/dashboard/top-clients${buildDashboardParams({ ...filters })}${
-          buildDashboardParams(filters) ? "&" : "?"
-        }limit=${limit}`
-      ),
+    getTopClients: (filters: DashboardFilters, limit = 10) => {
+      const base = buildDashboardParams(filters);
+      const sep = base ? "&" : "?";
+      return api.get<TopClient[]>(`/dashboard/top-clients${base}${sep}limit=${limit}`);
+    },
 
     exportOrders: async (
       filters: DashboardFilters,
