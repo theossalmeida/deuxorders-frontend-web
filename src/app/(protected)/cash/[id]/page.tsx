@@ -10,12 +10,10 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { DestructiveDialogHeader } from "@/components/ui/destructive-dialog-header";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { CashFlowEntryForm } from "@/components/cash/CashFlowEntryForm";
 import { useCashEntry, useUpdateCashEntry, useDeleteCashEntry } from "@/hooks/useCashFlow";
@@ -119,12 +117,10 @@ export default function CashEntryDetailPage({
                 }
               />
               <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Informe o motivo da exclusão (mínimo 5 caracteres).
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
+                <DestructiveDialogHeader
+                  title="Excluir lançamento?"
+                  description="Informe o motivo da exclusão (mínimo 5 caracteres)."
+                />
                 <Textarea
                   value={deleteReason}
                   onChange={(e) => setDeleteReason(e.target.value)}

@@ -139,8 +139,7 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
 
       <Button
         type="submit"
-        className="w-full"
-        style={{ backgroundColor: "#581629" }}
+        className="w-full bg-brand hover:bg-brand-hover text-brand-foreground"
         disabled={isLoading}
       >
         {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : product ? "Salvar alterações" : "Criar produto"}

@@ -7,8 +7,11 @@ import { CashFlowFilters } from "@/components/cash/CashFlowFilters";
 import { CashFlowTable } from "@/components/cash/CashFlowTable";
 import { CashFlowCard } from "@/components/cash/CashFlowCard";
 import { Button } from "@/components/ui/button";
-import { SlidersHorizontal, Plus, Loader2 } from "lucide-react";
+import { SlidersHorizontal, Plus, Receipt } from "lucide-react";
 import type { CashFlowFilters as Filters } from "@/types/cash";
+import { SkeletonList } from "@/components/ui/skeleton-list";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageShell } from "@/components/layout/PageShell";
 
 export default function CashListPage() {
   const [filters, setFilters] = useState<Filters>({ page: 1, size: 50 });
@@ -20,7 +23,7 @@ export default function CashListPage() {
   const currentPage = filters.page ?? 1;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-4">
+    <PageShell variant="list" className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold">Lançamentos</h1>
@@ -33,7 +36,7 @@ export default function CashListPage() {
             <SlidersHorizontal className="h-4 w-4 mr-1.5" />
             Filtros
           </Button>
-          <Button size="sm" asChild style={{ backgroundColor: "#581629" }}>
+          <Button size="sm" asChild className="bg-brand hover:bg-brand-hover text-brand-foreground">
             <Link href="/cash/new">
               <Plus className="h-4 w-4 mr-1.5" />
               Novo lançamento
@@ -52,11 +55,13 @@ export default function CashListPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <SkeletonList variant="rows" />
       ) : !data || data.items.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-12 text-center">Nenhum lançamento encontrado.</p>
+        <EmptyState
+          icon={Receipt}
+          title="Nenhum lançamento encontrado"
+          hint="Ajuste o período ou crie um novo lançamento."
+        />
       ) : (
         <>
           <div className="hidden md:block">
@@ -92,6 +97,6 @@ export default function CashListPage() {
           </Button>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

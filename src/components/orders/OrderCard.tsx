@@ -3,6 +3,7 @@ import { Order, OrderStatus } from "@/types/orders";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { ChevronRight, MapPin, Package } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const STATUS_BORDER: Record<OrderStatus, string> = {
   Received: "border-l-blue-400",
@@ -23,7 +24,11 @@ export function OrderCard({ order }: Props) {
   return (
     <Link
       href={`/orders/${order.id}`}
-      className={`flex items-center gap-4 rounded-2xl bg-white border-l-4 ${STATUS_BORDER[order.status]} shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-150 px-4 py-3.5`}
+      className={cn(
+        "flex items-center gap-4 rounded-2xl bg-white border-l-4 shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-150 px-4 py-3.5",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2",
+        STATUS_BORDER[order.status],
+      )}
     >
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-center gap-2">

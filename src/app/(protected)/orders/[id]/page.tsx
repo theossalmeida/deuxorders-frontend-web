@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -34,12 +35,10 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { DestructiveDialogHeader } from "@/components/ui/destructive-dialog-header";
 import {
   ArrowLeft,
   Trash2,
@@ -50,6 +49,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { buildRefSrc } from "@/lib/image-ref";
+import { PageShell } from "@/components/layout/PageShell";
 import {
   Order,
   OrderItem,
@@ -323,7 +323,7 @@ function EditOrderForm({
   const activeReferences = order.references; // mutated in real-time via deleteRef → React Query
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+    <PageShell variant="form" className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -346,10 +346,10 @@ function EditOrderForm({
             <Trash2 className="h-5 w-5" />
           </AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Excluir pedido?</AlertDialogTitle>
-              <AlertDialogDescription>Esta ação não pode ser desfeita.</AlertDialogDescription>
-            </AlertDialogHeader>
+            <DestructiveDialogHeader
+              title="Excluir pedido?"
+              description="Esta ação não pode ser desfeita."
+            />
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
               <AlertDialogAction
@@ -468,12 +468,17 @@ function EditOrderForm({
           Imagens de referência
         </h2>
         <div className="flex flex-wrap gap-2">
-          {activeReferences.map((ref) => (
+          {activeReferences.map((ref) => {
+            const src = buildRefSrc(ref);
+            return (
             <div key={ref} className="relative w-20 h-20">
-              <img
-                src={buildRefSrc(ref)}
-                alt="ref"
+              <Image
+                src={src}
+                alt="Referência"
+                width={80}
+                height={80}
                 className="w-20 h-20 object-cover rounded-lg border"
+                unoptimized={src.startsWith("http://")}
               />
               <button
                 type="button"
@@ -483,7 +488,8 @@ function EditOrderForm({
                 <X className="h-3 w-3" />
               </button>
             </div>
-          ))}
+            );
+          })}
           {newImages.map((_, i) => (
             <div key={`new-${i}`} className="relative w-20 h-20">
               <img
@@ -518,8 +524,7 @@ function EditOrderForm({
 
       {/* Save */}
       <Button
-        className="w-full"
-        style={{ backgroundColor: "#581629" }}
+        className="w-full bg-brand hover:bg-brand-hover text-brand-foreground"
         onClick={handleSave}
         disabled={isSaving}
       >
@@ -552,12 +557,10 @@ function EditOrderForm({
                   }
                 />
                 <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Estornar pagamento</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Informe o motivo do estorno (mínimo 5 caracteres).
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
+                  <DestructiveDialogHeader
+                    title="Estornar pagamento"
+                    description="Informe o motivo do estorno (mínimo 5 caracteres)."
+                  />
                   <Textarea
                     value={unpayReason}
                     onChange={(e) => setUnpayReason(e.target.value)}
@@ -579,7 +582,7 @@ function EditOrderForm({
           )}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
 

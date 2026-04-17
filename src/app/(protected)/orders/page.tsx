@@ -13,9 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Plus, Search, SlidersHorizontal, X, Package } from "lucide-react";
 import { ALL_ORDER_STATUSES, ORDER_STATUS_LABEL, OrderStatus } from "@/types/orders";
 import { cn } from "@/lib/utils";
+import { SkeletonList } from "@/components/ui/skeleton-list";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const PAGE_SIZE = 100;
 
@@ -91,7 +93,7 @@ export default function OrdersPage() {
             <SlidersHorizontal className="h-4 w-4" />
           </Button>
 
-          <Button size="icon" style={{ backgroundColor: "#581629" }}>
+          <Button size="icon" className="bg-brand hover:bg-brand-hover text-brand-foreground">
             <Link href="/orders/new" className="flex items-center justify-center w-full h-full">
               <Plus className="h-4 w-4" />
             </Link>
@@ -138,11 +140,7 @@ export default function OrdersPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {isLoading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        {isLoading && <SkeletonList variant="orders" />}
 
         {isError && (
           <div className="text-center py-16 space-y-2">
@@ -154,9 +152,23 @@ export default function OrdersPage() {
         )}
 
         {!isLoading && !isError && filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            Nenhum pedido encontrado.
-          </div>
+          <EmptyState
+            icon={Package}
+            title="Nenhum pedido neste período"
+            hint="Tente ampliar o intervalo de datas ou remover filtros."
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearch("");
+                  setStatus("all");
+                }}
+              >
+                Limpar filtros
+              </Button>
+            }
+          />
         )}
 
         {filtered.map((order) => (

@@ -26,16 +26,16 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Search, Pencil, Trash2, X } from "lucide-react";
+import { DestructiveDialogHeader } from "@/components/ui/destructive-dialog-header";
+import { Plus, Search, Pencil, Trash2, X, Package } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { Product } from "@/types/products";
 import { Badge } from "@/components/ui/badge";
+import { SkeletonList } from "@/components/ui/skeleton-list";
+import { EmptyState } from "@/components/ui/empty-state";
 
 function buildProductFormData(
   data: {
@@ -119,7 +119,7 @@ export default function ProductsPage() {
           </div>
 
           <Sheet open={isCreating} onOpenChange={setIsCreating}>
-            <SheetTrigger render={<Button size="icon" style={{ backgroundColor: "#581629" }} />}>
+            <SheetTrigger render={<Button size="icon" className="bg-brand hover:bg-brand-hover text-brand-foreground" />}>
               <Plus className="h-4 w-4" />
             </SheetTrigger>
             <SheetContent>
@@ -135,16 +135,21 @@ export default function ProductsPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {isLoading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        {isLoading && <SkeletonList variant="products" />}
 
         {!isLoading && filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            Nenhum produto encontrado.
-          </div>
+          <EmptyState
+            icon={Package}
+            title="Nenhum produto encontrado"
+            hint={search ? "Tente limpar a busca." : "Crie o primeiro produto pelo botão +."}
+            action={
+              search ? (
+                <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                  Limpar busca
+                </Button>
+              ) : undefined
+            }
+          />
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -225,12 +230,10 @@ export default function ProductsPage() {
                         <Trash2 className="h-3.5 w-3.5" />
                       </AlertDialogTrigger>
                       <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir produto?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Não é possível excluir produtos com pedidos existentes.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
+                        <DestructiveDialogHeader
+                          title="Excluir produto?"
+                          description="Não é possível excluir produtos com pedidos existentes."
+                        />
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancelar</AlertDialogCancel>
                           <AlertDialogAction

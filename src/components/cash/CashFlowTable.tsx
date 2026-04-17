@@ -17,11 +17,9 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { DestructiveDialogHeader } from "@/components/ui/destructive-dialog-header";
 import { cn } from "@/lib/utils";
 import { Pencil, Trash2, ExternalLink } from "lucide-react";
 import { CashTypeBadge } from "./CashTypeBadge";
@@ -50,12 +48,10 @@ export function CashFlowTable({ entries }: Props) {
         }}
       >
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir lançamento?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Informe o motivo da exclusão (mínimo 5 caracteres).
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+          <DestructiveDialogHeader
+            title="Excluir lançamento?"
+            description="Informe o motivo da exclusão (mínimo 5 caracteres)."
+          />
           <Textarea
             value={deleteReason}
             onChange={(e) => setDeleteReason(e.target.value)}
@@ -118,7 +114,15 @@ export function CashFlowTable({ entries }: Props) {
                 <TableCell className={isDeleted ? "line-through" : undefined}>
                   {entry.counterparty}
                 </TableCell>
-                <TableCell className={cn("text-right font-medium", isDeleted && "line-through")}>
+                <TableCell
+                  className={cn(
+                    "text-right font-semibold tabular-nums",
+                    entry.type === "Inflow" && "text-emerald-700",
+                    entry.type === "Outflow" && "text-red-600",
+                    isDeleted && "line-through opacity-60",
+                  )}
+                >
+                  {entry.type === "Outflow" ? "\u2212" : ""}
                   {formatCurrency(entry.amountCents)}
                 </TableCell>
                 <TableCell><CashSourceBadge source={entry.source} /></TableCell>

@@ -161,7 +161,7 @@ function LoginForm() {
 
       <Button
         type="submit"
-        className="w-full bg-white text-[#581629] hover:bg-white/90 font-bold"
+        className="w-full bg-white text-brand hover:bg-white/90 font-bold"
         disabled={isDisabled}
       >
         {isSubmitting ? (
@@ -176,10 +176,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ backgroundColor: "#581629" }}
-    >
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-brand">
       {/* Subtle dot grid */}
       <div
         className="absolute inset-0 opacity-[0.04]"

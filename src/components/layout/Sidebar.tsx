@@ -25,8 +25,6 @@ const NAV_SECTIONS = [
   },
 ];
 
-const BRAND_COLOR = "#581629";
-
 const ALL_HREFS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
 
 export function Sidebar() {
@@ -41,8 +39,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-64 h-screen sticky top-0 shrink-0 overflow-y-auto"
-      style={{ backgroundColor: BRAND_COLOR }}
+      className="hidden md:flex flex-col w-64 h-screen sticky top-0 shrink-0 overflow-y-auto bg-brand"
     >
       {/* Brand */}
       <div className="px-5 py-6">

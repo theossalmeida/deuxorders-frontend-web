@@ -23,10 +23,7 @@ export function BottomNav() {
   const items = isCash ? CASH_NAV : ORDERS_NAV;
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t border-white/10 px-2 py-1 safe-area-pb"
-      style={{ backgroundColor: "#581629" }}
-    >
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t border-white/10 px-2 py-1 safe-area-pb bg-brand">
       {items.map(({ href, label, icon: Icon }) => {
         const active = isCash
           ? pathname === href || (href === "/cash" && pathname.startsWith("/cash/") && !pathname.startsWith("/cash/dashboard"))
@@ -39,7 +36,7 @@ export function BottomNav() {
           >
             <span
               className={cn(
-                "flex items-center justify-center w-10 h-6 rounded-full transition-all duration-200",
+                "flex items-center justify-center w-10 h-6 rounded-full transition-colors duration-200",
                 active ? "bg-white/20" : ""
               )}
             >

@@ -25,14 +25,14 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Search, Pencil, Trash2, Phone, X } from "lucide-react";
+import { DestructiveDialogHeader } from "@/components/ui/destructive-dialog-header";
+import { Plus, Search, Pencil, Trash2, Phone, X, Users } from "lucide-react";
 import { Client } from "@/types/clients";
+import { SkeletonList } from "@/components/ui/skeleton-list";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function ClientsPage() {
   const [search, setSearch] = useState("");
@@ -92,7 +92,7 @@ export default function ClientsPage() {
           </div>
 
           <Sheet open={isCreating} onOpenChange={setIsCreating}>
-            <SheetTrigger render={<Button size="icon" style={{ backgroundColor: "#581629" }} />}>
+            <SheetTrigger render={<Button size="icon" className="bg-brand hover:bg-brand-hover text-brand-foreground" />}>
               <Plus className="h-4 w-4" />
             </SheetTrigger>
             <SheetContent>
@@ -108,16 +108,21 @@ export default function ClientsPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {isLoading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
+        {isLoading && <SkeletonList variant="clients" />}
 
         {!isLoading && filtered.length === 0 && (
-          <div className="text-center py-16 text-muted-foreground">
-            Nenhum cliente encontrado.
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Nenhum cliente encontrado"
+            hint={search ? "Tente limpar a busca." : "Crie o primeiro cliente pelo botão +."}
+            action={
+              search ? (
+                <Button variant="outline" size="sm" onClick={() => setSearch("")}>
+                  Limpar busca
+                </Button>
+              ) : undefined
+            }
+          />
         )}
 
         {filtered.map((client) => (
@@ -125,8 +130,7 @@ export default function ClientsPage() {
             key={client.id}
             className="flex items-center gap-3 rounded-xl border bg-white px-4 py-3 shadow-sm"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white font-bold text-sm"
-              style={{ backgroundColor: "#581629" }}>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground font-bold text-sm">
               {client.name.charAt(0).toUpperCase()}
             </div>
 
@@ -172,12 +176,10 @@ export default function ClientsPage() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Clientes com pedidos existentes não podem ser excluídos.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
+                  <DestructiveDialogHeader
+                    title="Excluir cliente?"
+                    description="Clientes com pedidos existentes não podem ser excluídos."
+                  />
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction

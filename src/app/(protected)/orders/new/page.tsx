@@ -21,6 +21,7 @@ import { OrderItemForm } from "@/components/orders/OrderItemForm";
 import { formatCurrency } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 import { OrderItemInput } from "@/types/orders";
+import { PageShell } from "@/components/layout/PageShell";
 
 const schema = z.object({
   clientId: z.string().min(1, "Selecione um cliente"),
@@ -85,7 +86,7 @@ export default function NewOrderPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <PageShell variant="form">
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="h-5 w-5" />
@@ -228,8 +229,7 @@ export default function NewOrderPage() {
           </Button>
           <Button
             type="submit"
-            className="flex-1"
-            style={{ backgroundColor: "#581629" }}
+            className="flex-1 bg-brand hover:bg-brand-hover text-brand-foreground"
             disabled={isSubmitting || createOrder.isPending}
           >
             {isSubmitting || createOrder.isPending ? (
@@ -240,6 +240,6 @@ export default function NewOrderPage() {
           </Button>
         </div>
       </form>
-    </div>
+    </PageShell>
   );
 }

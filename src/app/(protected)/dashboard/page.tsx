@@ -21,6 +21,8 @@ import { Loader2, Download } from "lucide-react";
 import { ALL_ORDER_STATUSES, ORDER_STATUS_LABEL, OrderStatus } from "@/types/orders";
 import { formatCurrency } from "@/lib/format";
 import { toast } from "sonner";
+import { PresetPicker } from "@/components/ui/preset-picker";
+import { PageShell } from "@/components/layout/PageShell";
 
 type Preset = "today" | "week" | "month" | "custom";
 
@@ -89,7 +91,7 @@ export default function DashboardPage() {
     summary.isLoading || revenue.isLoading || topProducts.isLoading || topClients.isLoading;
 
   return (
-    <div className="px-4 py-6 space-y-6 max-w-4xl mx-auto">
+    <PageShell variant="dashboard" className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -122,20 +124,16 @@ export default function DashboardPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
-        <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border">
-          {(["today", "week", "month", "custom"] as Preset[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPreset(p)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150 ${
-                preset === p ? "text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-              style={preset === p ? { backgroundColor: "#581629" } : undefined}
-            >
-              {p === "today" ? "Hoje" : p === "week" ? "7 dias" : p === "month" ? "Mês" : "Período"}
-            </button>
-          ))}
-        </div>
+        <PresetPicker<Preset>
+          options={[
+            { value: "today", label: "Hoje" },
+            { value: "week", label: "7 dias" },
+            { value: "month", label: "Mês" },
+            { value: "custom", label: "Período" },
+          ]}
+          value={preset}
+          onChange={setPreset}
+        />
 
         {preset === "custom" && (
           <>
@@ -158,8 +156,14 @@ export default function DashboardPage() {
       </div>
 
       {isLoading && (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse" />
+            ))}
+          </div>
+          <div className="h-64 rounded-2xl bg-zinc-100 animate-pulse" />
+          <div className="h-64 rounded-2xl bg-zinc-100 animate-pulse" />
         </div>
       )}
 
@@ -191,8 +195,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-muted-foreground w-5 text-center">{i + 1}</span>
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-white text-sm font-bold shrink-0 shadow-sm"
-                    style={{ backgroundColor: "#581629" }}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-brand-foreground text-sm font-bold shrink-0 shadow-sm"
                   >
                     {client.clientName.charAt(0).toUpperCase()}
                   </div>
@@ -209,6 +212,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useCashSummary } from "@/hooks/useCashFlow";
 import { CashSummaryCards } from "@/components/cash/CashSummaryCards";
 import { CashByCategoryChart } from "@/components/cash/CashByCategoryChart";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
 import type { CashFlowFilters } from "@/types/cash";
+import { PresetPicker } from "@/components/ui/preset-picker";
+import { PageShell } from "@/components/layout/PageShell";
 
 function startOfDay(date: Date): string {
   const y = date.getFullYear();
@@ -54,22 +54,21 @@ export default function CashDashboardPage() {
   const { data: summary, isLoading } = useCashSummary(filters);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <PageShell variant="dashboard" className="space-y-6">
       {/* Header */}
       <div className="space-y-3">
         <h1 className="text-xl font-bold">Caixa</h1>
         <div className="flex flex-wrap items-center gap-2">
-          {(["today", "7d", "month", "custom"] as Preset[]).map((p) => (
-            <Button
-              key={p}
-              variant={preset === p ? "default" : "outline"}
-              size="sm"
-              onClick={() => setPreset(p)}
-              style={preset === p ? { backgroundColor: "#581629" } : undefined}
-            >
-              {p === "today" ? "Hoje" : p === "7d" ? "7 dias" : p === "month" ? "Mês" : "Período"}
-            </Button>
-          ))}
+          <PresetPicker<Preset>
+            options={[
+              { value: "today", label: "Hoje" },
+              { value: "7d", label: "7 dias" },
+              { value: "month", label: "Mês" },
+              { value: "custom", label: "Período" },
+            ]}
+            value={preset}
+            onChange={setPreset}
+          />
           {preset === "custom" && (
             <div className="flex items-center gap-2">
               <Input
@@ -92,8 +91,13 @@ export default function CashDashboardPage() {
 
       {/* Summary cards */}
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse" />
+            ))}
+          </div>
+          <div className="h-64 rounded-2xl bg-zinc-100 animate-pulse" />
         </div>
       ) : summary ? (
         <>
@@ -107,6 +111,6 @@ export default function CashDashboardPage() {
           </div>
         </>
       ) : null}
-    </div>
+    </PageShell>
   );
 }

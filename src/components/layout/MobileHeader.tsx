@@ -17,10 +17,7 @@ export function MobileHeader() {
   }
 
   return (
-    <header
-      className="flex md:hidden items-center justify-between px-4 py-3 border-b border-white/10"
-      style={{ backgroundColor: "#581629" }}
-    >
+    <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-white/10 bg-brand">
       <img src="/logo.jpeg" alt="Deuxcerie" className="h-7 w-auto object-contain" />
       <div className="flex items-center gap-1">
         <Link

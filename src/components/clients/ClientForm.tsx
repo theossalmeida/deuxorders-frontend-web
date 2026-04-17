@@ -48,8 +48,7 @@ export function ClientForm({ client, onSubmit, isLoading }: Props) {
 
       <Button
         type="submit"
-        className="w-full"
-        style={{ backgroundColor: "#581629" }}
+        className="w-full bg-brand hover:bg-brand-hover text-brand-foreground"
         disabled={isLoading}
       >
         {isLoading ? (
