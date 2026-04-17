@@ -1,24 +1,14 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "list" | "dashboard" | "form";
-
-const WIDTHS: Record<Variant, string> = {
-  list: "max-w-6xl",
-  dashboard: "max-w-5xl",
-  form: "max-w-2xl",
+type Props = {
+  children: React.ReactNode;
+  variant?: "dashboard" | "list" | "form";
+  className?: string;
 };
 
-export function PageShell({
-  variant,
-  className,
-  children,
-}: {
-  variant: Variant;
-  className?: string;
-  children: React.ReactNode;
-}) {
+export function PageShell({ children, className }: Props) {
   return (
-    <div className={cn("mx-auto w-full px-4 py-6", WIDTHS[variant], className)}>
+    <div className={cn("px-4 md:px-7 py-4 md:py-6", className)}>
       {children}
     </div>
   );

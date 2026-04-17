@@ -1,13 +1,12 @@
 "use client";
 
-import { Suspense } from "react";
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +20,7 @@ type FormData = z.infer<typeof schema>;
 
 /**
  * UX-only friction — does NOT provide security.
- * The real rate limit is enforced server-side by checkLoginRateLimit().
- * Refreshing the page or calling the API directly bypasses this entirely.
+ * Real rate limit is enforced server-side by checkLoginRateLimit().
  */
 const CLIENT_BACKOFF_THRESHOLD = 3;
 const BASE_COOLDOWN_MS = 5000;
@@ -46,6 +44,7 @@ function LoginForm() {
   const [attempts, setAttempts] = useState(0);
   const [cooldownUntil, setCooldownUntil] = useState(0);
   const [remaining, setRemaining] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -71,10 +70,12 @@ function LoginForm() {
   }, [cooldownUntil]);
 
   const isCoolingDown = remaining > 0;
+  const isDisabled = isSubmitting || isCoolingDown;
 
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (isCoolingDown) return;
+      setError(null);
 
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -98,7 +99,7 @@ function LoginForm() {
       }
 
       const body = await res.json().catch(() => ({ message: "Erro desconhecido." }));
-      toast.error(body.message ?? "Erro ao autenticar.");
+      setError(body.message ?? "Erro ao autenticar.");
 
       if (newAttempts >= CLIENT_BACKOFF_THRESHOLD) {
         const delay = Math.min(BASE_COOLDOWN_MS * 2 ** (newAttempts - CLIENT_BACKOFF_THRESHOLD), 60000);
@@ -108,33 +109,35 @@ function LoginForm() {
     [attempts, isCoolingDown, from, router]
   );
 
-  // Disable the button whenever cooling down OR submitting — not just when attempts exceed
-  // a threshold. isCoolingDown already covers the backoff window from both client-side
-  // exponential backoff and 429 responses from the server.
-  const isDisabled = isSubmitting || isCoolingDown;
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
       <div className="space-y-1.5">
-        <Label htmlFor="email" className="text-white/90">
-          Email
+        <Label
+          htmlFor="email"
+          className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+        >
+          E-mail
         </Label>
         <Input
           id="email"
           type="email"
           autoComplete="email"
           autoCapitalize="none"
-          placeholder="seu@email.com"
+          placeholder="voce@deuxcerie.com.br"
           disabled={isDisabled}
+          className="h-11 bg-card"
           {...register("email")}
         />
         {errors.email && (
-          <p className="text-xs text-red-300">{errors.email.message}</p>
+          <p className="text-xs text-destructive">{errors.email.message}</p>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="password" className="text-white/90">
+        <Label
+          htmlFor="password"
+          className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+        >
           Senha
         </Label>
         <Input
@@ -143,31 +146,34 @@ function LoginForm() {
           autoComplete="current-password"
           placeholder="••••••••"
           disabled={isDisabled}
+          className="h-11 bg-card"
           {...register("password")}
         />
         {errors.password && (
-          <p className="text-xs text-red-300">{errors.password.message}</p>
+          <p className="text-xs text-destructive">{errors.password.message}</p>
         )}
       </div>
 
-      {isCoolingDown && (
-        <div className="flex items-center gap-2 rounded-md border border-red-400/30 bg-red-500/20 px-3 py-2">
-          <AlertTriangle className="h-4 w-4 text-red-300 shrink-0" />
-          <p className="text-xs text-red-200">
-            Aguarde <span className="font-bold">{remaining}s</span> antes de tentar novamente.
+      {(error || isCoolingDown) && (
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5">
+          <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-px" aria-hidden />
+          <p className="text-xs text-destructive">
+            {isCoolingDown
+              ? `Aguarde ${remaining}s antes de tentar novamente.`
+              : error}
           </p>
         </div>
       )}
 
       <Button
         type="submit"
-        className="w-full bg-white text-brand hover:bg-white/90 font-bold"
         disabled={isDisabled}
+        className="h-11 w-full gap-2 text-sm font-semibold"
       >
         {isSubmitting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 size={14} className="animate-spin" aria-hidden />
         ) : (
-          "Entrar"
+          <>Entrar <ArrowRight size={14} aria-hidden /></>
         )}
       </Button>
     </form>
@@ -176,25 +182,64 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-brand">
-      {/* Subtle dot grid */}
+    <div className="min-h-screen md:grid md:grid-cols-2 bg-background">
+      {/* Brand canvas — desktop only */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}
-      />
-      {/* Glow orbs */}
-      <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full opacity-10 bg-white" />
-      <div className="absolute -bottom-56 -left-32 w-[500px] h-[500px] rounded-full opacity-5 bg-white" />
-
-      <div className="relative w-full max-w-sm px-6">
-        {/* Logo lockup */}
-        <div className="flex flex-col items-center mb-10">
-          <img src="/logo.jpeg" alt="Deuxcerie" className="h-12 w-auto object-contain mb-2" />
-          <span className="text-white/50 text-sm tracking-wide">Gestão de pedidos</span>
+        className="relative hidden md:flex flex-col justify-between p-10 text-white overflow-hidden"
+        style={{ background: "linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%)" }}
+      >
+        <div>
+          <div className="font-display text-2xl font-semibold">Deuxcerie</div>
+          <div className="mt-1 text-xs font-mono opacity-70">ATELIER ERP · v2.0</div>
         </div>
 
-        {/* Form card */}
-        <div className="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 shadow-2xl p-6">
+        <div className="relative z-10 max-w-md">
+          <div className="font-display text-5xl leading-[1.05] tracking-tight">
+            Todos os pedidos,<br />
+            <span className="italic opacity-85">em um só lugar.</span>
+          </div>
+          <div className="mt-5 text-sm opacity-75 leading-relaxed">
+            Gerencie pedidos, caixa, clientes e produtos — com a paciência que seu ateliê merece.
+          </div>
+        </div>
+
+        <div className="text-[11px] font-mono opacity-50">
+          © 2026 Deuxcerie · São Paulo
+        </div>
+
+        {/* Decorative rings */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-32 top-1/3 h-[420px] w-[420px] rounded-full border border-white/10"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 top-1/4 h-[260px] w-[260px] rounded-full border border-white/10"
+        />
+      </div>
+
+      {/* Form side */}
+      <div className="flex items-center justify-center px-6 py-16 md:px-16">
+        <div className="w-full max-w-sm">
+          {/* Mobile headline */}
+          <div className="md:hidden mb-10">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Deuxcerie
+            </div>
+            <div className="mt-2 font-display text-[44px] leading-[1.02] tracking-tight">
+              Bem-vindo<br />
+              <span className="italic text-brand">de volta.</span>
+            </div>
+          </div>
+
+          {/* Desktop headline */}
+          <div className="hidden md:block mb-8">
+            <div className="text-sm font-semibold tracking-tight">Entre na sua conta</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Acesse o painel do Atelier ERP
+            </div>
+          </div>
+
           <Suspense fallback={<div className="h-48" />}>
             <LoginForm />
           </Suspense>

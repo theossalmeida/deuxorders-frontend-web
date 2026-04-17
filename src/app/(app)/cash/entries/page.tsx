@@ -37,7 +37,7 @@ export default function CashListPage() {
             Filtros
           </Button>
           <Button size="sm" asChild className="bg-brand hover:bg-brand-hover text-brand-foreground">
-            <Link href="/cash/new">
+            <Link href="/cash/entries/new">
               <Plus className="h-4 w-4 mr-1.5" />
               Novo lançamento
             </Link>

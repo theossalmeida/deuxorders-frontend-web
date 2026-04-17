@@ -47,3 +47,5 @@ AGENTS.md
 rate_limiter_backend.md
 FRONTEND_ADJUSTMENTS.md
 CODE_REVIEW.md
+
+*.md
