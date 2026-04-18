@@ -5,6 +5,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const connectSrc = [
   "'self'",
   "https://deux-erp.deuxcerie.com.br",
+  "https://deuxerp-api.fly.dev",
   "https://*.r2.cloudflarestorage.com", // presigned upload PUTs
   ...(isDev ? ["http://localhost:5047"] : []),
 ].join(" ");
