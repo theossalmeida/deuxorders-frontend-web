@@ -13,8 +13,11 @@ import { useProducts } from "@/hooks/useProducts";
 export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
+  const [showInactive, setShowInactive] = useState(false);
 
-  const { data: products = [], isLoading } = useProducts({ status: true });
+  const { data: products = [], isLoading } = useProducts(
+    showInactive ? undefined : { status: true },
+  );
 
   const categories = useMemo(
     () =>
@@ -37,7 +40,7 @@ export default function ProductsPage() {
       <div className="hidden md:block">
         <AppHeader
           title="Produtos"
-          subtitle={`${products.length} produtos no catálogo`}
+          subtitle={`${filtered.length} produto${filtered.length !== 1 ? "s" : ""}`}
           actions={
             <Button size="sm" className="gap-1.5">
               <Plus size={14} /> Novo produto
@@ -61,6 +64,8 @@ export default function ProductsPage() {
           category={category}
           onCategoryChange={setCategory}
           categories={categories}
+          showInactive={showInactive}
+          onShowInactiveChange={setShowInactive}
         />
         {isLoading ? <SkeletonList variant="products" count={8} /> : <ProductsGrid products={filtered} />}
       </div>

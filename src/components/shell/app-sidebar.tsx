@@ -27,7 +27,7 @@ export function AppSidebar({ badges, user }: Props) {
     <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-border bg-background-2">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-5">
-        <Image src="/logo.jpeg" alt="Deuxcerie" width={32} height={32} className="rounded-lg object-cover" />
+        <Image src="/apple-icon.png" alt="Deuxcerie" width={32} height={32} className="rounded-lg object-cover" />
         <div>
           <div className="text-sm font-semibold tracking-tight">Deuxcerie</div>
           <div className="text-[10px] text-muted-foreground font-mono">ERP · v2.0</div>
