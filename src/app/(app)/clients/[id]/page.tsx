@@ -2,20 +2,28 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientKpiBand } from "@/components/features/clients/detail/client-kpi-band";
 import { ClientContactCard } from "@/components/features/clients/detail/client-contact-card";
 import { ClientNotesCard } from "@/components/features/clients/detail/client-notes-card";
 import { ClientOrdersHistory } from "@/components/features/clients/detail/client-orders-history";
-import { useClient } from "@/hooks/useClients";
+import { useClient, useToggleClientStatus, useDeleteClient } from "@/hooks/useClients";
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const { data: client, isLoading } = useClient(id);
+  const { mutate: toggleStatus, isPending: togglingStatus } = useToggleClientStatus();
+  const { mutate: deleteClient, isPending: deleting } = useDeleteClient();
+
+  function handleDelete() {
+    if (!confirm("Excluir este cliente? Esta ação não pode ser desfeita.")) return;
+    deleteClient(id, { onSuccess: () => router.push("/clients") });
+  }
 
   if (isLoading) {
     return (
@@ -50,8 +58,22 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           subtitle={`${client.mobile} · ${client.status ? "cliente ativo" : "cliente inativo"}`}
           actions={
             <>
-              <Button variant="outline" size="sm">
-                Editar
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Switch
+                  checked={client.status}
+                  disabled={togglingStatus}
+                  onCheckedChange={(v) => toggleStatus({ id: client.id, active: v })}
+                />
+                {client.status ? "Ativo" : "Inativo"}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-destructive hover:text-destructive"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                <Trash2 size={14} /> Excluir
               </Button>
               <Button size="sm" className="gap-1.5" onClick={() => router.push("/orders/new")}>
                 <Plus size={14} /> Novo pedido
@@ -67,6 +89,22 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           <ArrowLeft size={18} />
         </button>
         <span className="font-semibold">{client.name}</span>
+        <div className="ml-auto flex items-center gap-2">
+          <Switch
+            checked={client.status}
+            disabled={togglingStatus}
+            onCheckedChange={(v) => toggleStatus({ id: client.id, active: v })}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            <Trash2 size={16} />
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4 px-4 pt-4 pb-8 md:px-7 md:pt-5">

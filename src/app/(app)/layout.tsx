@@ -11,9 +11,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const user = getUserFromToken(token);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <AppSidebar user={user} />
-      <main className="flex min-w-0 flex-1 flex-col pb-24 md:pb-0">
+      <main className="flex min-w-0 flex-1 flex-col overflow-y-auto pb-24 md:pb-0">
         {children}
       </main>
       <MobileBottomNav />

@@ -5,6 +5,15 @@ import { toast } from "sonner";
 import { createProductsApi } from "@/lib/api/products";
 import { useToken } from "./useToken";
 
+export function useProduct(id: string) {
+  const token = useToken();
+  return useQuery({
+    queryKey: ["products", id],
+    queryFn: () => createProductsApi(token!).getById(id),
+    enabled: !!token && !!id,
+  });
+}
+
 export function useProducts(params?: { search?: string; status?: boolean }) {
   const token = useToken();
   return useQuery({
