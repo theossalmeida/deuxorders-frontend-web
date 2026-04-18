@@ -4,7 +4,7 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const connectSrc = [
   "'self'",
-  "https://api-orders.deuxcerie.com.br",
+  "https://deux-api.deuxcerie.com.br",
   "https://*.r2.cloudflarestorage.com", // presigned upload PUTs
   ...(isDev ? ["http://localhost:5047"] : []),
 ].join(" ");
