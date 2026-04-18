@@ -195,11 +195,11 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-md">
           <div className="font-display text-5xl leading-[1.05] tracking-tight">
-            Todos os pedidos,<br />
+            Tudo para sua gestão,<br />
             <span className="italic opacity-85">em um só lugar.</span>
           </div>
           <div className="mt-5 text-sm opacity-75 leading-relaxed">
-            Gerencie pedidos, caixa, clientes, produtos e estoque em um só lugar.
+            Tenha total controle dos pedidos, caixa, clientes, produtos e estoque.
           </div>
         </div>
 
@@ -236,7 +236,7 @@ export default function LoginPage() {
           <div className="hidden md:block mb-8">
             <div className="text-sm font-semibold tracking-tight">Entre na sua conta</div>
             <div className="mt-1 text-xs text-muted-foreground">
-              Acesse o painel do Atelier ERP
+              Acesse o painel do DeuxERP
             </div>
           </div>
 

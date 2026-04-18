@@ -49,3 +49,5 @@ FRONTEND_ADJUSTMENTS.md
 CODE_REVIEW.md
 
 *.md
+
+/handoff
