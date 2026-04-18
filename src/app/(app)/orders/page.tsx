@@ -17,8 +17,15 @@ export default function OrdersPage() {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  });
+  const [dateTo, setDateTo] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 6);
+    return d.toISOString().slice(0, 10);
+  });
 
   const { data, isLoading } = useOrders({ size: 200 });
   const orders: Order[] = data?.items ?? [];
@@ -48,12 +55,14 @@ export default function OrdersPage() {
     [orders, status, search, dateFrom, dateTo],
   );
 
-  const hasFilters = status !== "all" || search !== "" || !!dateFrom || !!dateTo;
+  const hasFilters = status !== "all" || search !== "";
   const clearFilters = () => {
     setStatus("all");
     setSearch("");
-    setDateFrom("");
-    setDateTo("");
+    const today = new Date().toISOString().slice(0, 10);
+    const plus6 = new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10);
+    setDateFrom(today);
+    setDateTo(plus6);
   };
 
   return (
