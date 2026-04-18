@@ -42,7 +42,7 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
     defaultValues: product
       ? {
           Name: product.name,
-          Price: String(product.price / 100),
+          Price: String(product.priceCents / 100),
           Description: product.description ?? "",
           Category: product.category ?? "",
           Size: product.size ?? "",

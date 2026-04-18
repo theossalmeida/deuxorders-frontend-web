@@ -1,19 +1,19 @@
 import { OrderStatus } from "./orders";
 
 export interface DashboardSummary {
-  totalRevenue: number;
-  totalValue: number;
-  totalDiscount: number;
+  totalRevenueCents: number;
+  totalValueCents: number;
+  totalDiscountCents: number;
   totalOrders: number;
   pendingOrders: number;
   completedOrders: number;
   canceledOrders: number;
-  averageRevenuePerOrder: number;
+  averageRevenuePerOrderCents: number;
 }
 
 export interface RevenueDataPoint {
   date: string;
-  revenue: number;
+  revenueCents: number;
   orderCount: number;
 }
 
@@ -24,7 +24,7 @@ export interface RevenueOverTime {
 export interface TopProduct {
   productId: string;
   productName: string;
-  totalRevenue: number;
+  totalRevenueCents: number;
   totalQuantitySold: number;
   orderCount: number;
 }
@@ -32,7 +32,7 @@ export interface TopProduct {
 export interface TopClient {
   clientId: string;
   clientName: string;
-  totalRevenue: number;
+  totalRevenueCents: number;
   orderCount: number;
 }
 

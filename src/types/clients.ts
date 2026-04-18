@@ -1,8 +1,29 @@
+import type { OrderStatus } from "./orders";
+
 export interface Client {
   id: string;
   name: string;
   mobile: string;
-  isActive: boolean;
+  status: boolean;
+}
+
+export interface ClientStats {
+  totalOrders: number;
+  totalSpentCents: number;
+  lastOrderDate: string | null;
+}
+
+export interface ClientOrder {
+  id: string;
+  deliveryDate: string;
+  status: OrderStatus;
+  totalPaidCents: number;
+  totalValueCents: number;
+}
+
+export interface ClientDetail extends Client {
+  stats: ClientStats;
+  orders: ClientOrder[];
 }
 
 export interface ClientDropdownItem {

@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   name: string;
-  price: number;
+  priceCents: number;
   status: boolean;
   image: string | null;
   description: string | null;
@@ -12,5 +12,5 @@ export interface Product {
 export interface ProductDropdownItem {
   id: string;
   name: string;
-  price: number;
+  priceCents: number;
 }
