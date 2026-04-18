@@ -6,10 +6,34 @@ import { toast } from "sonner";
 import { createCashApi } from "@/lib/api/cash";
 import { useToken } from "./useToken";
 import type {
+  CashFlowEntry,
   CashFlowFilters,
   CreateCashFlowEntryInput,
   UpdateCashFlowEntryInput,
 } from "@/types/cash";
+
+export type CashChartPoint = { d: string; in: number; out: number };
+
+function formatChartDay(iso: string): string {
+  const [, m, day] = iso.split("-");
+  const months = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  return `${parseInt(day)} ${months[parseInt(m) - 1]}`;
+}
+
+function buildChartData(entries: CashFlowEntry[]): CashChartPoint[] {
+  const map = new Map<string, { in: number; out: number }>();
+  for (const e of entries) {
+    if (e.deletedAt) continue;
+    const day = e.billingDate.slice(0, 10);
+    const acc = map.get(day) ?? { in: 0, out: 0 };
+    if (e.type === "Inflow") acc.in += e.amountCents;
+    else acc.out += e.amountCents;
+    map.set(day, acc);
+  }
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([day, v]) => ({ d: formatChartDay(day), in: v.in / 100, out: v.out / 100 }));
+}
 
 export function useCashEntries(filters: CashFlowFilters) {
   const token = useToken();
@@ -34,6 +58,18 @@ export function useCashSummary(filters: Omit<CashFlowFilters, "page" | "size" | 
   return useQuery({
     queryKey: ["cash", "summary", filters],
     queryFn: () => createCashApi(token!).summary(filters),
+    enabled: !!token,
+  });
+}
+
+export function useCashFlowChart(filters: Pick<CashFlowFilters, "from" | "to">) {
+  const token = useToken();
+  return useQuery({
+    queryKey: ["cash", "chart", filters],
+    queryFn: async () => {
+      const result = await createCashApi(token!).list({ ...filters, size: 500 });
+      return buildChartData(result.items);
+    },
     enabled: !!token,
   });
 }

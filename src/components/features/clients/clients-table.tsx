@@ -31,7 +31,7 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
               <div className="font-mono text-xs text-foreground-soft">{c.mobile}</div>
               <div className="font-mono text-xs">—</div>
               <div className="text-xs">
-                {c.isActive ? (
+                {c.status ? (
                   <span className="inline-flex items-center gap-1 text-ok">
                     <span className="h-1.5 w-1.5 rounded-full bg-ok" />
                     Ativo

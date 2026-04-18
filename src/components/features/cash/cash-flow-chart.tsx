@@ -2,18 +2,16 @@
 
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, CartesianGrid } from "recharts";
 import { formatBRL } from "@/lib/format";
+import type { CashChartPoint } from "@/hooks/useCashFlow";
 
-type DataPoint = { d: string; in: number; out: number };
-
-const DEMO: DataPoint[] = [
-  { d: "1 abr", in: 1640, out: 820 },
-  { d: "5 abr", in: 2340, out: 1240 },
-  { d: "9 abr", in: 3120, out: 1820 },
-  { d: "13 abr", in: 2820, out: 940 },
-  { d: "17 abr", in: 4260, out: 2140 },
-];
-
-export function CashFlowChart({ data = DEMO }: { data?: DataPoint[] }) {
+export function CashFlowChart({ data }: { data: CashChartPoint[] }) {
+  if (data.length === 0) {
+    return (
+      <div className="flex h-[240px] items-center justify-center rounded-xl border border-border bg-card">
+        <span className="text-xs text-muted-foreground">Sem lançamentos no período</span>
+      </div>
+    );
+  }
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">

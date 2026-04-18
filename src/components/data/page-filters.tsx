@@ -14,30 +14,53 @@ const OPTIONS: { k: PeriodKey; label: string }[] = [
 type Props = {
   value: PeriodKey;
   onChange: (k: PeriodKey) => void;
+  customStart?: string;
+  customEnd?: string;
+  onCustomChange?: (start: string, end: string) => void;
   className?: string;
 };
 
-export function PageFilters({ value, onChange, className }: Props) {
+export function PageFilters({ value, onChange, customStart, customEnd, onCustomChange, className }: Props) {
   return (
-    <div className={cn("flex gap-1.5 overflow-x-auto pb-0.5", className)}>
-      {OPTIONS.map((o) => {
-        const active = value === o.k;
-        return (
-          <button
-            key={o.k}
-            type="button"
-            onClick={() => onChange(o.k)}
-            className={cn(
-              "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-              active
-                ? "bg-foreground text-background"
-                : "border border-border bg-card text-foreground-soft hover:bg-accent",
-            )}
-          >
-            {o.label}
-          </button>
-        );
-      })}
+    <div className={cn("flex flex-col gap-1.5", className)}>
+      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        {OPTIONS.map((o) => {
+          const active = value === o.k;
+          return (
+            <button
+              key={o.k}
+              type="button"
+              onClick={() => onChange(o.k)}
+              className={cn(
+                "whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                active
+                  ? "bg-foreground text-background"
+                  : "border border-border bg-card text-foreground-soft hover:bg-accent",
+              )}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {value === "custom" && (
+        <div className="flex items-center gap-1.5">
+          <input
+            type="date"
+            value={customStart ?? ""}
+            onChange={(e) => onCustomChange?.(e.target.value, customEnd ?? e.target.value)}
+            className="rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
+          />
+          <span className="text-xs text-muted-foreground">–</span>
+          <input
+            type="date"
+            value={customEnd ?? ""}
+            min={customStart}
+            onChange={(e) => onCustomChange?.(customStart ?? e.target.value, e.target.value)}
+            className="rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground"
+          />
+        </div>
+      )}
     </div>
   );
 }

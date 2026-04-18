@@ -24,12 +24,10 @@ export function DashboardKpis({ data, isLoading }: Props) {
       <KpiCard
         label="Receita"
         value={formatBRL((data?.totalRevenueCents ?? 0) / 100, { compact: true })}
-        delta={12.4}
       />
       <KpiCard
         label="Pedidos"
         value={String(data?.totalOrders ?? 0)}
-        delta={8}
       />
       <KpiCard
         label="Aguardando entrega"
@@ -39,7 +37,6 @@ export function DashboardKpis({ data, isLoading }: Props) {
       <KpiCard
         label="Ticket médio"
         value={formatBRL((data?.averageRevenuePerOrderCents ?? 0) / 100, { compact: true })}
-        delta={2.1}
       />
     </div>
   );

@@ -1,37 +1,16 @@
 import { cn } from "@/lib/utils";
-import { formatBRL, formatDate } from "@/lib/format";
-
-export type ClientStats = {
-  totalOrders: number;
-  totalSpent: number;
-  lastOrderDate: string | null;
-};
+import { formatCents, formatDate } from "@/lib/format";
+import type { ClientStats } from "@/types/clients";
 
 export function ClientKpiBand({ stats }: { stats?: ClientStats }) {
-  const avg =
-    stats && stats.totalOrders ? Math.round(stats.totalSpent / stats.totalOrders) : 0;
+  const avgCents =
+    stats && stats.totalOrders ? Math.round(stats.totalSpentCents / stats.totalOrders) : 0;
 
   const items = [
-    {
-      k: "Pedidos",
-      v: stats ? String(stats.totalOrders) : "—",
-      mono: true,
-    },
-    {
-      k: "Total gasto",
-      v: stats ? formatBRL(stats.totalSpent) : "—",
-      mono: true,
-      strong: true,
-    },
-    {
-      k: "Ticket médio",
-      v: stats && stats.totalOrders ? formatBRL(avg) : "—",
-      mono: true,
-    },
-    {
-      k: "Último pedido",
-      v: stats?.lastOrderDate ? formatDate(stats.lastOrderDate) : "—",
-    },
+    { k: "Pedidos", v: stats ? String(stats.totalOrders) : "—", mono: true },
+    { k: "Total gasto", v: stats ? formatCents(stats.totalSpentCents) : "—", mono: true, strong: true },
+    { k: "Ticket médio", v: stats && stats.totalOrders ? formatCents(avgCents) : "—", mono: true },
+    { k: "Último pedido", v: stats?.lastOrderDate ? formatDate(stats.lastOrderDate) : "—" },
   ];
 
   return (

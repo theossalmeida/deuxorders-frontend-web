@@ -13,15 +13,11 @@ export function PipelineSection({ summary, isLoading }: Props) {
     return <Skeleton className="h-[240px] rounded-xl" />;
   }
 
-  const data: { status: OrderStatus; count: number }[] = (
-    [
-      { status: "Received" as OrderStatus, count: summary?.pendingOrders ?? 0 },
-      { status: "Preparing" as OrderStatus, count: 0 },
-      { status: "WaitingPickupOrDelivery" as OrderStatus, count: 0 },
-      { status: "Completed" as OrderStatus, count: summary?.completedOrders ?? 0 },
-      { status: "Canceled" as OrderStatus, count: summary?.canceledOrders ?? 0 },
-    ] as const
-  ).filter((r) => r.count > 0);
+  const data: { status: OrderStatus; count: number }[] = [
+    { status: "Received" as OrderStatus, count: summary?.pendingOrders ?? 0 },
+    { status: "Completed" as OrderStatus, count: summary?.completedOrders ?? 0 },
+    { status: "Canceled" as OrderStatus, count: summary?.canceledOrders ?? 0 },
+  ].filter((r) => r.count > 0);
 
   return <PipelineList data={data} />;
 }

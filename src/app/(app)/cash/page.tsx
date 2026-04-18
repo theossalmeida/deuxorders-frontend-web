@@ -11,7 +11,7 @@ import { CashHeroBalance } from "@/components/features/cash/cash-hero-balance";
 import { CashFlowChart } from "@/components/features/cash/cash-flow-chart";
 import { CashCategorySection } from "@/components/features/cash/cash-category-section";
 import { CashEntriesList } from "@/components/features/cash/cash-entries-list";
-import { useCashSummary, useCashEntries } from "@/hooks/useCashFlow";
+import { useCashSummary, useCashEntries, useCashFlowChart } from "@/hooks/useCashFlow";
 
 export default function CashPage() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function CashPage() {
 
   const { data: summary } = useCashSummary({ from: startDate, to: endDate });
   const { data: entriesPage } = useCashEntries({ from: startDate, to: endDate, size: 10 });
+  const { data: chartData } = useCashFlowChart({ from: startDate, to: endDate });
 
   const monthLabel = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
@@ -63,7 +64,7 @@ export default function CashPage() {
             entriesCount={summary?.totalCount}
             periodLabel={monthLabel}
           />
-          <CashFlowChart />
+          <CashFlowChart data={chartData ?? []} />
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">

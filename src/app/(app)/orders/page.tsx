@@ -30,21 +30,11 @@ export default function OrdersPage() {
   const { data, isLoading } = useOrders({ size: 200 });
   const orders: Order[] = data?.items ?? [];
 
-  const counts = useMemo(
-    () =>
-      orders.reduce<Record<string, number>>((acc, o) => {
-        acc[o.status] = (acc[o.status] ?? 0) + 1;
-        return acc;
-      }, {}),
-    [orders],
-  );
-
-  const filtered = useMemo(
+  const dateSearchFiltered = useMemo(
     () =>
       orders.filter((o) => {
         const day = o.deliveryDate.slice(0, 10);
         return (
-          (status === "all" || o.status === status) &&
           (search === "" ||
             o.clientName.toLowerCase().includes(search.toLowerCase()) ||
             o.id.toLowerCase().includes(search.toLowerCase())) &&
@@ -52,7 +42,24 @@ export default function OrdersPage() {
           (!dateTo || day <= dateTo)
         );
       }),
-    [orders, status, search, dateFrom, dateTo],
+    [orders, search, dateFrom, dateTo],
+  );
+
+  const counts = useMemo(
+    () =>
+      dateSearchFiltered.reduce<Record<string, number>>((acc, o) => {
+        acc[o.status] = (acc[o.status] ?? 0) + 1;
+        return acc;
+      }, {}),
+    [dateSearchFiltered],
+  );
+
+  const filtered = useMemo(
+    () =>
+      status === "all"
+        ? dateSearchFiltered
+        : dateSearchFiltered.filter((o) => o.status === status),
+    [dateSearchFiltered, status],
   );
 
   const hasFilters = status !== "all" || search !== "";

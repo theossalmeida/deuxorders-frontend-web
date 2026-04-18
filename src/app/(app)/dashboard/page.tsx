@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Download, Plus, Calendar, ChevronDown } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { PageFilters, periodToRange, type PeriodKey } from "@/components/data/page-filters";
@@ -18,7 +18,13 @@ import { useDashboardAll } from "@/hooks/useDashboard";
 export default function DashboardPage() {
   const router = useRouter();
   const [period, setPeriod] = useState<PeriodKey>("7d");
-  const { startDate, endDate } = periodToRange(period);
+  const today = new Date().toISOString().slice(0, 10);
+  const [customRange, setCustomRange] = useState({ start: today, end: today });
+
+  const { startDate, endDate } =
+    period === "custom"
+      ? { startDate: customRange.start, endDate: customRange.end }
+      : periodToRange(period);
 
   const { summary, revenue, topProducts, topClients } = useDashboardAll({
     startDate,
@@ -32,15 +38,6 @@ export default function DashboardPage() {
 
   const isEmpty = !isLoading && !hasError && (summary.data?.totalOrders ?? 0) === 0;
 
-  const rangeLabel =
-    period === "today"
-      ? "Hoje"
-      : period === "7d"
-        ? `${startDate} – ${endDate}`
-        : period === "month"
-          ? "Este mês"
-          : `${startDate} – ${endDate}`;
-
   return (
     <>
       <div className="hidden md:block">
@@ -49,11 +46,13 @@ export default function DashboardPage() {
           subtitle="Visão geral do negócio"
           actions={
             <>
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground-soft">
-                <Calendar size={14} />
-                {rangeLabel}
-                <ChevronDown size={14} />
-              </div>
+              <PageFilters
+                value={period}
+                onChange={setPeriod}
+                customStart={customRange.start}
+                customEnd={customRange.end}
+                onCustomChange={(s, e) => setCustomRange({ start: s, end: e })}
+              />
               <Button variant="outline" size="sm" className="gap-1.5">
                 <Download size={14} /> Exportar
               </Button>
@@ -85,7 +84,13 @@ export default function DashboardPage() {
       />
 
       <div className="sticky top-[92px] z-10 bg-background px-4 pb-3 md:hidden">
-        <PageFilters value={period} onChange={setPeriod} />
+        <PageFilters
+          value={period}
+          onChange={setPeriod}
+          customStart={customRange.start}
+          customEnd={customRange.end}
+          onCustomChange={(s, e) => setCustomRange({ start: s, end: e })}
+        />
       </div>
 
       <div className="space-y-3 px-4 pt-4 md:space-y-4 md:px-7 md:pt-5">

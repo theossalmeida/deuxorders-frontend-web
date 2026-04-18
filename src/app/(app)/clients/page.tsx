@@ -21,7 +21,7 @@ export default function ClientsPage() {
     () =>
       clients.filter(
         (c) =>
-          (showInactive || c.isActive) &&
+          (showInactive || c.status) &&
           (search === "" ||
             c.name.toLowerCase().includes(search.toLowerCase()) ||
             c.mobile.includes(search)),

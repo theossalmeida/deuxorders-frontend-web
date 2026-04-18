@@ -18,7 +18,7 @@ export function KpiCard({ label, value, delta, footnote, icon, className }: Prop
         <div className="text-[11px] font-medium text-muted-foreground">{label}</div>
         {icon ? <div className="text-muted-foreground">{icon}</div> : null}
       </div>
-      <div className="mt-2 font-mono text-2xl font-semibold tracking-tight num-tabular">
+      <div className="mt-2 truncate font-mono text-lg font-semibold tracking-tight num-tabular md:text-2xl">
         {value}
       </div>
       <div className="mt-2 flex items-center gap-1.5">

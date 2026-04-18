@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format";
 import { toneFor } from "@/lib/category-tone";
+import { buildRefSrc } from "@/lib/image-ref";
 import type { Product } from "@/types/products";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -19,7 +20,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative aspect-square">
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          <img src={buildRefSrc(product.image)} alt={product.name} className="h-full w-full object-cover" />
         ) : (
           <div
             className="h-full w-full"

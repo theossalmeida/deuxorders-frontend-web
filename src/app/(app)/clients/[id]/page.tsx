@@ -10,13 +10,12 @@ import { ClientKpiBand } from "@/components/features/clients/detail/client-kpi-b
 import { ClientContactCard } from "@/components/features/clients/detail/client-contact-card";
 import { ClientNotesCard } from "@/components/features/clients/detail/client-notes-card";
 import { ClientOrdersHistory } from "@/components/features/clients/detail/client-orders-history";
-import { useClients } from "@/hooks/useClients";
+import { useClient } from "@/hooks/useClients";
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { data: clients = [], isLoading } = useClients({ size: 500 });
-  const client = clients.find((c) => c.id === id);
+  const { data: client, isLoading } = useClient(id);
 
   if (isLoading) {
     return (
@@ -48,7 +47,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
       <div className="hidden md:block">
         <AppHeader
           title={client.name}
-          subtitle={`${client.mobile} · cliente ativo`}
+          subtitle={`${client.mobile} · ${client.status ? "cliente ativo" : "cliente inativo"}`}
           actions={
             <>
               <Button variant="outline" size="sm">
@@ -71,12 +70,10 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
       </div>
 
       <div className="space-y-4 px-4 pt-4 pb-8 md:px-7 md:pt-5">
-        {/* KPI band — gaps B1: backend doesn't expose aggregate client stats yet */}
-        <ClientKpiBand />
+        <ClientKpiBand stats={client.stats} />
 
         <div className="grid gap-4 md:grid-cols-[1.6fr_1fr]">
-          {/* Left: orders history — gap B2: no per-client orders endpoint yet */}
-          <ClientOrdersHistory isGapPlaceholder />
+          <ClientOrdersHistory orders={client.orders} />
 
           {/* Right: contact + notes */}
           <div className="space-y-3">

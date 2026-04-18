@@ -27,7 +27,7 @@ export function ClientsMobileList({ clients }: { clients: Client[] }) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <div className="truncate text-sm font-medium">{c.name}</div>
-                      {!c.isActive ? (
+                      {!c.status ? (
                         <span className="rounded bg-muted px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
                           Inativo
                         </span>

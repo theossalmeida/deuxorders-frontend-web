@@ -46,7 +46,7 @@ export function createProductsApi(token: string) {
         search.set("status", String(params.status));
       const qs = search.toString();
       const raw = await api.get<ProductDto[] | ItemsResponse<ProductDto>>(
-        `/products/all${qs ? `?${qs}` : ""}`
+        `/products/all?size=100${qs ? `&${qs}` : ""}`
       );
       return unwrapItemsResponse(raw).map(mapProduct);
     },

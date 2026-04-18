@@ -14,7 +14,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
 
-  const { data: products = [], isLoading } = useProducts();
+  const { data: products = [], isLoading } = useProducts({ status: true });
 
   const categories = useMemo(
     () =>

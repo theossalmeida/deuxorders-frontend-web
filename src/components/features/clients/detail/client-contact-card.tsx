@@ -12,13 +12,13 @@ export function ClientContactCard({ client }: { client: Client }) {
           <div className="mt-1 flex items-center gap-1.5">
             <span
               className="h-1.5 w-1.5 rounded-full"
-              style={{ background: client.isActive ? "var(--ok)" : "var(--muted-foreground)" }}
+              style={{ background: client.status ? "var(--ok)" : "var(--muted-foreground)" }}
             />
             <span
               className="text-xs font-medium"
-              style={{ color: client.isActive ? "var(--ok)" : "var(--muted-foreground)" }}
+              style={{ color: client.status ? "var(--ok)" : "var(--muted-foreground)" }}
             >
-              {client.isActive ? "Cliente ativo" : "Cliente inativo"}
+              {client.status ? "Cliente ativo" : "Cliente inativo"}
             </span>
           </div>
         </div>
