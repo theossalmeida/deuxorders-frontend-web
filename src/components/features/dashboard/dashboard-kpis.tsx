@@ -23,7 +23,7 @@ export function DashboardKpis({ data, isLoading }: Props) {
     <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
       <KpiCard
         label="Receita"
-        value={formatBRL(data?.totalRevenue ?? 0, { compact: true })}
+        value={formatBRL((data?.totalRevenueCents ?? 0) / 100, { compact: true })}
         delta={12.4}
       />
       <KpiCard
@@ -38,7 +38,7 @@ export function DashboardKpis({ data, isLoading }: Props) {
       />
       <KpiCard
         label="Ticket médio"
-        value={formatBRL(data?.averageRevenuePerOrder ?? 0, { compact: true })}
+        value={formatBRL((data?.averageRevenuePerOrderCents ?? 0) / 100, { compact: true })}
         delta={2.1}
       />
     </div>

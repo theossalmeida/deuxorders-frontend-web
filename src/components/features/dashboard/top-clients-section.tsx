@@ -1,6 +1,6 @@
 import { RankedList } from "@/components/data/ranked-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatBRL } from "@/lib/format";
+import { formatCents } from "@/lib/format";
 import type { TopClient } from "@/types/dashboard";
 
 type Props = {
@@ -24,7 +24,7 @@ export function TopClientsSection({ data, isLoading }: Props) {
     <RankedList
       title="Melhores clientes"
       data={data ?? []}
-      getValue={(c) => c.totalRevenue}
+      getValue={(c) => c.totalRevenueCents}
       renderItem={(c) => (
         <>
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[11px] font-semibold text-brand">
@@ -36,7 +36,7 @@ export function TopClientsSection({ data, isLoading }: Props) {
               {c.orderCount} pedidos
             </div>
           </div>
-          <div className="font-mono text-xs font-semibold">{formatBRL(c.totalRevenue)}</div>
+          <div className="font-mono text-xs font-semibold">{formatCents(c.totalRevenueCents)}</div>
         </>
       )}
     />

@@ -27,10 +27,7 @@ export function useOrder(id: string) {
   const token = useToken();
   return useQuery({
     queryKey: ["orders", id],
-    queryFn: async () => {
-      const order = await createOrdersApi(token!).getById(id);
-      return { ...order, references: order.references ?? [] };
-    },
+    queryFn: () => createOrdersApi(token!).getById(id),
     enabled: !!token && !!id,
   });
 }
@@ -118,10 +115,6 @@ export function useDeleteReference(orderId: string) {
   });
 }
 
-function normalizeOrder(order: Order): Order {
-  return { ...order, references: order.references ?? [] };
-}
-
 export function useUpdateOrder(id: string) {
   const token = useToken();
   const qc = useQueryClient();
@@ -130,7 +123,7 @@ export function useUpdateOrder(id: string) {
     mutationFn: (input: UpdateOrderInput) =>
       createOrdersApi(token!).update(id, input),
     onSuccess: (updated: Order) => {
-      qc.setQueryData(["orders", id], normalizeOrder(updated));
+      qc.setQueryData(["orders", id], updated);
       qc.invalidateQueries({ queryKey: ["orders"] });
       toast.success("Pedido atualizado.");
     },
@@ -185,7 +178,7 @@ export function useMarkOrderAsPaid(id: string) {
   return useMutation({
     mutationFn: () => createOrdersApi(token!).markAsPaid(id),
     onSuccess: (updated: Order) => {
-      qc.setQueryData(["orders", id], normalizeOrder(updated));
+      qc.setQueryData(["orders", id], updated);
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["cash"] });
       toast.success("Pedido marcado como pago.");
@@ -200,7 +193,7 @@ export function useUnmarkOrderAsPaid(id: string) {
   return useMutation({
     mutationFn: (reason: string) => createOrdersApi(token!).unmarkAsPaid(id, reason),
     onSuccess: (updated: Order) => {
-      qc.setQueryData(["orders", id], normalizeOrder(updated));
+      qc.setQueryData(["orders", id], updated);
       qc.invalidateQueries({ queryKey: ["orders"] });
       qc.invalidateQueries({ queryKey: ["cash"] });
       toast.success("Pagamento estornado.");

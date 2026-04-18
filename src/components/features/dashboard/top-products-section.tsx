@@ -1,6 +1,6 @@
 import { RankedList } from "@/components/data/ranked-list";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatBRL } from "@/lib/format";
+import { formatCents } from "@/lib/format";
 import type { TopProduct } from "@/types/dashboard";
 
 type Props = {
@@ -24,7 +24,7 @@ export function TopProductsSection({ data, isLoading }: Props) {
     <RankedList
       title="Mais vendidos"
       data={data ?? []}
-      getValue={(p) => p.totalRevenue}
+      getValue={(p) => p.totalRevenueCents}
       renderItem={(p) => (
         <>
           <div className="min-w-0 flex-1">
@@ -33,7 +33,7 @@ export function TopProductsSection({ data, isLoading }: Props) {
               {p.totalQuantitySold}×
             </div>
           </div>
-          <div className="font-mono text-xs font-semibold">{formatBRL(p.totalRevenue)}</div>
+          <div className="font-mono text-xs font-semibold">{formatCents(p.totalRevenueCents)}</div>
         </>
       )}
     />

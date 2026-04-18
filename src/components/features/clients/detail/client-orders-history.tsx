@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { StatusChip } from "@/components/data/status-chip";
 import { EmptyState } from "@/components/data/empty-state";
-import { formatBRL, formatDate } from "@/lib/format";
+import { formatCents, formatDate } from "@/lib/format";
 import type { Order } from "@/types/orders";
 
 type Props = { orders?: Order[]; isGapPlaceholder?: boolean };
@@ -50,7 +50,7 @@ export function ClientOrdersHistory({ orders, isGapPlaceholder }: Props) {
                   <span className="text-xs text-muted-foreground">{formatDate(o.deliveryDate)}</span>
                   <StatusChip status={o.status} />
                   <span className="text-right font-mono text-xs font-semibold">
-                    {formatBRL(o.totalValue)}
+                    {formatCents(o.totalValueCents)}
                   </span>
                 </Link>
               </li>

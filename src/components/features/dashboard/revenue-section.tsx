@@ -21,7 +21,7 @@ export function RevenueSection({ data, isLoading }: Props) {
 
   const points: RevenuePoint[] = (data?.dataPoints ?? []).map((p) => ({
     date: p.date,
-    value: mode === "revenue" ? p.revenue : p.orderCount,
+    value: mode === "revenue" ? p.revenueCents / 100 : p.orderCount,
   }));
 
   const total = points.reduce((a, p) => a + p.value, 0);

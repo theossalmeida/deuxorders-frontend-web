@@ -14,11 +14,11 @@ export interface OrderItem {
   massa: string | null;
   sabor: string | null;
   quantity: number;
-  paidUnitPrice: number;
-  baseUnitPrice: number;
+  paidUnitPriceCents: number;
+  baseUnitPriceCents: number;
   itemCanceled: boolean;
-  totalPaid: number;
-  totalValue: number;
+  totalPaidCents: number;
+  totalValueCents: number;
 }
 
 export interface Order {
@@ -27,8 +27,8 @@ export interface Order {
   status: OrderStatus;
   clientId: string;
   clientName: string;
-  totalPaid: number;
-  totalValue: number;
+  totalPaidCents: number;
+  totalValueCents: number;
   references: string[];
   items: OrderItem[];
   /** null or "pickup" = Retirada; any other string = address for Entrega */
@@ -47,7 +47,7 @@ export interface PaginatedOrders {
 export interface OrderItemInput {
   productId: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   observation?: string;
   massa?: string;
   sabor?: string;
@@ -56,7 +56,7 @@ export interface OrderItemInput {
 export interface OrderItemUpdate {
   productId: string;
   quantity?: number;
-  paidUnitPrice?: number;
+  paidUnitPriceCents?: number;
   observation?: string;
   massa?: string;
   sabor?: string;

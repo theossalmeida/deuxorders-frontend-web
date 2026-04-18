@@ -2,14 +2,14 @@
 
 import { Minus, Plus, X } from "lucide-react";
 import { toneFor } from "@/lib/category-tone";
-import { formatBRL } from "@/lib/format";
+import { formatCents } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export type OrderItemDraft = {
   productId: string;
   name: string;
   category?: string;
-  unitPrice: number;
+  unitPriceCents: number;
   qty: number;
 };
 
@@ -54,7 +54,7 @@ export function ItemsBuilder({
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{it.name}</div>
               <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                {formatBRL(it.unitPrice)} · un
+                {formatCents(it.unitPriceCents)} · un
               </div>
             </div>
             <div className="flex items-center gap-1.5">
@@ -79,7 +79,7 @@ export function ItemsBuilder({
               </button>
             </div>
             <div className="min-w-[70px] text-right font-mono text-sm font-semibold">
-              {formatBRL(it.unitPrice * it.qty)}
+              {formatCents(it.unitPriceCents * it.qty)}
             </div>
             <button
               type="button"

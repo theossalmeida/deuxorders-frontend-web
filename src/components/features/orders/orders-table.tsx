@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Truck, ShoppingBag } from "lucide-react";
 import { StatusChip } from "@/components/data/status-chip";
 import { EmptyState } from "@/components/data/empty-state";
-import { formatBRL, formatDate, formatTime } from "@/lib/format";
+import { formatCents, formatDate, formatTime } from "@/lib/format";
 import type { Order } from "@/types/orders";
 
 type Props = { orders: Order[]; onClearFilters?: () => void; hasFilters?: boolean };
@@ -58,7 +58,7 @@ export function OrdersTable({ orders, onClearFilters, hasFilters }: Props) {
                 <span>
                   <StatusChip status={o.status} />
                 </span>
-                <span className="font-mono font-semibold">{formatBRL(o.totalValue)}</span>
+                <span className="font-mono font-semibold">{formatCents(o.totalValueCents)}</span>
                 <span className="flex justify-end text-muted-foreground">
                   <ChevronRight size={14} />
                 </span>

@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/data/status-chip";
 import { OrderStatusPipeline } from "@/components/features/orders/order-status-pipeline";
 import { OrderItemsTable } from "@/components/features/orders/order-items-table";
-import { formatBRL, formatDate, formatTime } from "@/lib/format";
+import { formatCents, formatDate, formatTime } from "@/lib/format";
 import { STATUS_META } from "@/lib/order-status";
 import { useOrder, useUpdateOrder, useCompleteOrder } from "@/hooks/useOrders";
 import { ORDER_STATUS_INT, type OrderStatus } from "@/types/orders";
@@ -110,7 +110,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   Total do pedido
                 </div>
                 <div className="mt-1 font-mono text-2xl font-semibold tracking-tight md:text-3xl">
-                  {formatBRL(order.totalValue)}
+                  {formatCents(order.totalValueCents)}
                 </div>
               </div>
               <StatusChip status={order.status} size="md" />

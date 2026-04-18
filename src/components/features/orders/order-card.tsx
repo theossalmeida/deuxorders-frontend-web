@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Truck, ShoppingBag } from "lucide-react";
 import { StatusChip } from "@/components/data/status-chip";
-import { formatBRL, formatTime } from "@/lib/format";
+import { formatCents, formatTime } from "@/lib/format";
 import type { Order } from "@/types/orders";
 
 export function OrderCard({ order }: { order: Order }) {
@@ -15,7 +15,7 @@ export function OrderCard({ order }: { order: Order }) {
             {order.id} · {formatTime(order.deliveryDate)}
           </div>
         </div>
-        <div className="font-mono text-sm font-semibold">{formatBRL(order.totalValue)}</div>
+        <div className="font-mono text-sm font-semibold">{formatCents(order.totalValueCents)}</div>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <StatusChip status={order.status} />

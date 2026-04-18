@@ -11,7 +11,7 @@ import { OrderWizardStepper, type WizardStep } from "@/components/features/order
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
-import { formatBRL } from "@/lib/format";
+import { formatCents } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 
 function defaultDatetime() {
@@ -36,7 +36,7 @@ export default function NewOrderPage() {
   const { clients, products } = useOrdersDropdownData();
   const createOrder = useCreateOrder();
 
-  const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
+  const subtotalCents = items.reduce((a, i) => a + i.unitPriceCents * i.qty, 0);
 
   const filteredClients = useMemo(
     () =>
@@ -56,14 +56,14 @@ export default function NewOrderPage() {
 
   const selectedClient = clients.data?.find((c) => c.id === clientId);
 
-  function addProduct(p: { id: string; name: string; price: number }) {
+  function addProduct(p: { id: string; name: string; priceCents: number }) {
     const existing = items.findIndex((i) => i.productId === p.id);
     if (existing >= 0) {
       const next = [...items];
       next[existing].qty += 1;
       setItems(next);
     } else {
-      setItems([...items, { productId: p.id, name: p.name, unitPrice: p.price, qty: 1 }]);
+      setItems([...items, { productId: p.id, name: p.name, unitPriceCents: p.priceCents, qty: 1 }]);
     }
     setShowProductPicker(false);
     setProductSearch("");
@@ -75,7 +75,7 @@ export default function NewOrderPage() {
       input: {
         clientId,
         deliveryDate: new Date(date).toISOString(),
-        items: items.map((i) => ({ productId: i.productId, quantity: i.qty, unitPrice: i.unitPrice })),
+        items: items.map((i) => ({ productId: i.productId, quantity: i.qty, unitPriceCents: i.unitPriceCents })),
         delivery: deliveryMode === "entrega" ? address || "Entrega" : "pickup",
       },
       imageFiles: [],
@@ -90,7 +90,7 @@ export default function NewOrderPage() {
       <div className="mt-3 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
-          <span className="font-mono font-semibold">{formatBRL(subtotal)}</span>
+          <span className="font-mono font-semibold">{formatCents(subtotalCents)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Entrega</span>
@@ -100,7 +100,7 @@ export default function NewOrderPage() {
         </div>
         <div className="flex justify-between border-t border-border pt-2">
           <span className="font-semibold">Total</span>
-          <span className="font-mono text-base font-semibold tracking-tight">{formatBRL(subtotal)}</span>
+          <span className="font-mono text-base font-semibold tracking-tight">{formatCents(subtotalCents)}</span>
         </div>
       </div>
       <div className="mt-4">
@@ -181,7 +181,7 @@ export default function NewOrderPage() {
                   className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent"
                 >
                   <span className="text-sm font-medium">{p.name}</span>
-                  <span className="font-mono text-sm font-semibold">{formatBRL(p.price)}</span>
+                  <span className="font-mono text-sm font-semibold">{formatCents(p.priceCents)}</span>
                 </button>
               </li>
             ))}

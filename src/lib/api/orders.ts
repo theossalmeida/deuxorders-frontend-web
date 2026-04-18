@@ -1,24 +1,182 @@
 import { createApiClient } from "./client";
 import {
   Order,
+  OrderItem,
   PaginatedOrders,
   CreateOrderInput,
+  OrderItemInput,
   UpdateOrderInput,
+  OrderItemUpdate,
   PresignedUrlRequest,
   PresignedUrlResponse,
   OrderStatus,
 } from "@/types/orders";
 import { ClientDropdownItem } from "@/types/clients";
 import { ProductDropdownItem } from "@/types/products";
+import { mapProductDropdown, type ProductDropdownDto } from "./products";
+
+interface OrderItemDto {
+  productId: string;
+  productName: string;
+  productSize: string | null;
+  observation: string | null;
+  massa: string | null;
+  sabor: string | null;
+  quantity: number;
+  paidUnitPrice: number;
+  baseUnitPrice: number;
+  itemCanceled: boolean;
+  totalPaid: number;
+  totalValue: number;
+}
+
+interface OrderDto {
+  id: string;
+  deliveryDate: string;
+  status: OrderStatus;
+  clientId: string;
+  clientName: string;
+  totalPaid: number;
+  totalValue: number;
+  references: string[] | null;
+  items: OrderItemDto[];
+  delivery: string | null;
+  paidAt: string | null;
+  paidByUserName: string | null;
+}
+
+interface PaginatedOrdersDto {
+  items: OrderDto[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
+interface CreateOrderItemWire {
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+  observation?: string;
+  massa?: string;
+  sabor?: string;
+}
+
+interface CreateOrderWire {
+  clientId: string;
+  deliveryDate: string;
+  items: CreateOrderItemWire[];
+  references?: string[];
+  delivery?: string;
+}
+
+interface UpdateOrderItemWire {
+  productId: string;
+  quantity?: number;
+  paidUnitPrice?: number;
+  observation?: string;
+  massa?: string;
+  sabor?: string;
+}
+
+interface UpdateOrderWire {
+  deliveryDate?: string;
+  status?: number;
+  items?: UpdateOrderItemWire[];
+  references?: string[];
+  delivery?: string | null;
+}
+
+function mapOrderItem(dto: OrderItemDto): OrderItem {
+  return {
+    productId: dto.productId,
+    productName: dto.productName,
+    productSize: dto.productSize,
+    observation: dto.observation,
+    massa: dto.massa,
+    sabor: dto.sabor,
+    quantity: dto.quantity,
+    paidUnitPriceCents: dto.paidUnitPrice,
+    baseUnitPriceCents: dto.baseUnitPrice,
+    itemCanceled: dto.itemCanceled,
+    totalPaidCents: dto.totalPaid,
+    totalValueCents: dto.totalValue,
+  };
+}
+
+export function mapOrder(dto: OrderDto): Order {
+  return {
+    id: dto.id,
+    deliveryDate: dto.deliveryDate,
+    status: dto.status,
+    clientId: dto.clientId,
+    clientName: dto.clientName,
+    totalPaidCents: dto.totalPaid,
+    totalValueCents: dto.totalValue,
+    references: dto.references ?? [],
+    items: dto.items.map(mapOrderItem),
+    delivery: dto.delivery,
+    paidAt: dto.paidAt,
+    paidByUserName: dto.paidByUserName,
+  };
+}
+
+function mapPaginatedOrders(dto: PaginatedOrdersDto): PaginatedOrders {
+  return {
+    items: dto.items.map(mapOrder),
+    totalCount: dto.totalCount,
+    pageNumber: dto.pageNumber,
+    pageSize: dto.pageSize,
+  };
+}
+
+function toCreateOrderItemWire(input: OrderItemInput): CreateOrderItemWire {
+  return {
+    productId: input.productId,
+    quantity: input.quantity,
+    unitPrice: input.unitPriceCents,
+    observation: input.observation,
+    massa: input.massa,
+    sabor: input.sabor,
+  };
+}
+
+function toCreateOrderWire(input: CreateOrderInput): CreateOrderWire {
+  return {
+    clientId: input.clientId,
+    deliveryDate: input.deliveryDate,
+    items: input.items.map(toCreateOrderItemWire),
+    references: input.references,
+    delivery: input.delivery,
+  };
+}
+
+function toUpdateOrderItemWire(input: OrderItemUpdate): UpdateOrderItemWire {
+  return {
+    productId: input.productId,
+    quantity: input.quantity,
+    paidUnitPrice: input.paidUnitPriceCents,
+    observation: input.observation,
+    massa: input.massa,
+    sabor: input.sabor,
+  };
+}
+
+function toUpdateOrderWire(input: UpdateOrderInput): UpdateOrderWire {
+  return {
+    deliveryDate: input.deliveryDate,
+    status: input.status,
+    items: input.items?.map(toUpdateOrderItemWire),
+    references: input.references,
+    delivery: input.delivery,
+  };
+}
 
 export function createOrdersApi(token: string) {
   const api = createApiClient(token);
 
   return {
-    getAll: (params?: { page?: number; size?: number; status?: OrderStatus }) => {
+    getAll: async (params?: { page?: number; size?: number; status?: OrderStatus }) => {
       const search = new URLSearchParams();
-      
-      // Define o valor vindo do parâmetro OU 100 como padrão
       const pageSize = params?.size || 100;
       search.set("size", String(pageSize));
 
@@ -26,17 +184,17 @@ export function createOrdersApi(token: string) {
       if (params?.status) search.set("status", params.status);
 
       const qs = search.toString();
-      
-      // Agora a URL fica limpa e correta
-      return api.get<PaginatedOrders>(`/orders/all?${qs}`);
+      const dto = await api.get<PaginatedOrdersDto>(`/orders/all?${qs}`);
+      return mapPaginatedOrders(dto);
     },
 
-    getById: (id: string) => api.get<Order>(`/orders/${id}`),
+    getById: async (id: string) => mapOrder(await api.get<OrderDto>(`/orders/${id}`)),
 
-    create: (input: CreateOrderInput) => api.post<Order>("/orders/new", input),
+    create: async (input: CreateOrderInput) =>
+      mapOrder(await api.post<OrderDto>("/orders/new", toCreateOrderWire(input))),
 
-    update: (id: string, input: UpdateOrderInput) =>
-      api.put<Order>(`/orders/${id}`, input),
+    update: async (id: string, input: UpdateOrderInput) =>
+      mapOrder(await api.put<OrderDto>(`/orders/${id}`, toUpdateOrderWire(input))),
 
     complete: (id: string) => api.patch<void>(`/orders/${id}/complete`),
 
@@ -53,23 +211,25 @@ export function createOrdersApi(token: string) {
 
     delete: (id: string) => api.delete<void>(`/orders/${id}`),
 
-    markAsPaid: (id: string) =>
-      api.patch<Order>(`/orders/${id}/pay`),
+    markAsPaid: async (id: string) =>
+      mapOrder(await api.patch<OrderDto>(`/orders/${id}/pay`)),
 
-    unmarkAsPaid: (id: string, reason: string) =>
-      api.patch<Order>(`/orders/${id}/unpay`, { reason }),
+    unmarkAsPaid: async (id: string, reason: string) =>
+      mapOrder(await api.patch<OrderDto>(`/orders/${id}/unpay`, { reason })),
 
     getPresignedUrl: (req: PresignedUrlRequest) =>
       api.post<PresignedUrlResponse>("/orders/references/presigned-url", req),
 
-    deleteReference: (orderId: string, objectKey: string) =>
-      api.delete<Order>(`/orders/${orderId}/references`, { objectKey }),
+    deleteReference: async (orderId: string, objectKey: string) =>
+      mapOrder(await api.delete<OrderDto>(`/orders/${orderId}/references`, { objectKey })),
 
     getClientsDropdown: () =>
       api.get<ClientDropdownItem[]>("/clients/dropdown?status=true"),
 
-    getProductsDropdown: () =>
-      api.get<ProductDropdownItem[]>("/products/dropdown?status=true"),
+    getProductsDropdown: async (): Promise<ProductDropdownItem[]> => {
+      const dtos = await api.get<ProductDropdownDto[]>("/products/dropdown?status=true");
+      return dtos.map(mapProductDropdown);
+    },
   };
 }
 

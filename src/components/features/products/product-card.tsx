@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatBRL } from "@/lib/format";
+import { formatCents } from "@/lib/format";
 import { toneFor } from "@/lib/category-tone";
 import type { Product } from "@/types/products";
 
@@ -52,7 +52,7 @@ export function ProductCard({ product }: { product: Product }) {
           {product.name}
         </div>
         <div className="mt-1.5 flex items-center justify-between">
-          <div className="font-mono text-[13px] font-semibold">{formatBRL(product.price)}</div>
+          <div className="font-mono text-[13px] font-semibold">{formatCents(product.priceCents)}</div>
           <ChevronRight
             size={14}
             className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
