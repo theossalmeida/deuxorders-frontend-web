@@ -17,6 +17,8 @@ export default function OrdersPage() {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const { data, isLoading } = useOrders({ size: 200 });
   const orders: Order[] = data?.items ?? [];
@@ -32,20 +34,26 @@ export default function OrdersPage() {
 
   const filtered = useMemo(
     () =>
-      orders.filter(
-        (o) =>
+      orders.filter((o) => {
+        const day = o.deliveryDate.slice(0, 10);
+        return (
           (status === "all" || o.status === status) &&
           (search === "" ||
             o.clientName.toLowerCase().includes(search.toLowerCase()) ||
-            o.id.toLowerCase().includes(search.toLowerCase())),
-      ),
-    [orders, status, search],
+            o.id.toLowerCase().includes(search.toLowerCase())) &&
+          (!dateFrom || day >= dateFrom) &&
+          (!dateTo || day <= dateTo)
+        );
+      }),
+    [orders, status, search, dateFrom, dateTo],
   );
 
-  const hasFilters = status !== "all" || search !== "";
+  const hasFilters = status !== "all" || search !== "" || !!dateFrom || !!dateTo;
   const clearFilters = () => {
     setStatus("all");
     setSearch("");
+    setDateFrom("");
+    setDateTo("");
   };
 
   return (
@@ -83,6 +91,10 @@ export default function OrdersPage() {
           status={status}
           onStatusChange={setStatus}
           counts={counts}
+          dateFrom={dateFrom}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo}
+          onDateToChange={setDateTo}
         />
 
         {isLoading ? (
