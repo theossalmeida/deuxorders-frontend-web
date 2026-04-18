@@ -1,116 +1,76 @@
 "use client";
 
 import { useState } from "react";
-import { useCashSummary } from "@/hooks/useCashFlow";
-import { CashSummaryCards } from "@/components/cash/CashSummaryCards";
-import { CashByCategoryChart } from "@/components/cash/CashByCategoryChart";
-import { Input } from "@/components/ui/input";
-import type { CashFlowFilters } from "@/types/cash";
-import { PresetPicker } from "@/components/ui/preset-picker";
-import { PageShell } from "@/components/layout/PageShell";
+import { useRouter } from "next/navigation";
+import { Plus, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AppHeader } from "@/components/shell/app-header";
+import { MobileTopBar } from "@/components/shell/mobile-top-bar";
+import { PageFilters, periodToRange, type PeriodKey } from "@/components/data/page-filters";
+import { CashHeroBalance } from "@/components/features/cash/cash-hero-balance";
+import { CashFlowChart } from "@/components/features/cash/cash-flow-chart";
+import { CashCategorySection } from "@/components/features/cash/cash-category-section";
+import { CashEntriesList } from "@/components/features/cash/cash-entries-list";
+import { useCashSummary, useCashEntries } from "@/hooks/useCashFlow";
 
-function startOfDay(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}T00:00:00`;
-}
+export default function CashPage() {
+  const router = useRouter();
+  const [period, setPeriod] = useState<PeriodKey>("month");
+  const { startDate, endDate } = periodToRange(period);
 
-function endOfDay(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}T23:59:59`;
-}
+  const { data: summary } = useCashSummary({ from: startDate, to: endDate });
+  const { data: entriesPage } = useCashEntries({ from: startDate, to: endDate, size: 10 });
 
-type Preset = "today" | "7d" | "month" | "custom";
-
-export default function CashDashboardPage() {
-  const [preset, setPreset] = useState<Preset>("month");
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
-
-  function buildFilters(): Omit<CashFlowFilters, "page" | "size" | "includeDeleted"> {
-    const now = new Date();
-    if (preset === "today") {
-      return { from: startOfDay(now), to: endOfDay(now) };
-    }
-    if (preset === "7d") {
-      const from = new Date(now);
-      from.setDate(from.getDate() - 6);
-      return { from: startOfDay(from), to: endOfDay(now) };
-    }
-    if (preset === "month") {
-      const from = new Date(now.getFullYear(), now.getMonth(), 1);
-      return { from: startOfDay(from), to: endOfDay(now) };
-    }
-    return {
-      from: customFrom ? `${customFrom}T00:00:00` : undefined,
-      to: customTo ? `${customTo}T23:59:59` : undefined,
-    };
-  }
-
-  const filters = buildFilters();
-  const { data: summary, isLoading } = useCashSummary(filters);
+  const monthLabel = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
   return (
-    <PageShell variant="dashboard" className="space-y-6">
-      {/* Header */}
-      <div className="space-y-3">
-        <h1 className="text-xl font-bold">Caixa</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <PresetPicker<Preset>
-            options={[
-              { value: "today", label: "Hoje" },
-              { value: "7d", label: "7 dias" },
-              { value: "month", label: "Mês" },
-              { value: "custom", label: "Período" },
-            ]}
-            value={preset}
-            onChange={setPreset}
-          />
-          {preset === "custom" && (
-            <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                className="h-8 text-sm w-36"
-                value={customFrom}
-                onChange={(e) => setCustomFrom(e.target.value)}
-              />
-              <span className="text-sm text-muted-foreground">até</span>
-              <Input
-                type="date"
-                className="h-8 text-sm w-36"
-                value={customTo}
-                onChange={(e) => setCustomTo(e.target.value)}
-              />
-            </div>
-          )}
-        </div>
+    <>
+      <div className="hidden md:block">
+        <AppHeader
+          title="Caixa"
+          subtitle={`Financeiro · ${monthLabel}`}
+          actions={
+            <>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Download size={14} /> Exportar
+              </Button>
+              <Button size="sm" className="gap-1.5" onClick={() => router.push("/cash/entries/new")}>
+                <Plus size={14} /> Novo lançamento
+              </Button>
+            </>
+          }
+        />
       </div>
 
-      {/* Summary cards */}
-      {isLoading ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse" />
-            ))}
-          </div>
-          <div className="h-64 rounded-2xl bg-zinc-100 animate-pulse" />
-        </div>
-      ) : summary ? (
-        <>
-          <CashSummaryCards summary={summary} />
+      <MobileTopBar
+        title="Caixa"
+        eyebrow="Financeiro"
+        right={
+          <Button size="icon" className="h-9 w-9" onClick={() => router.push("/cash/entries/new")}>
+            <Plus size={16} />
+          </Button>
+        }
+      />
 
-          <div className="rounded-2xl border bg-white p-4 shadow-sm space-y-3">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Saídas por categoria
-            </h2>
-            <CashByCategoryChart outflowByCategory={summary.outflowByCategory} />
-          </div>
-        </>
-      ) : null}
-    </PageShell>
+      <div className="space-y-3 px-4 pt-3 md:space-y-4 md:px-7 md:pt-5">
+        <PageFilters value={period} onChange={setPeriod} />
+
+        <div className="grid gap-3 md:grid-cols-[1.1fr_1fr]">
+          <CashHeroBalance
+            netCents={summary?.netBalanceCents}
+            inflowCents={summary?.totalInflowCents}
+            outflowCents={summary?.totalOutflowCents}
+            entriesCount={summary?.totalCount}
+            periodLabel={monthLabel}
+          />
+          <CashFlowChart />
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <CashCategorySection summary={summary} />
+          <CashEntriesList data={entriesPage?.items} />
+        </div>
+      </div>
+    </>
   );
 }
