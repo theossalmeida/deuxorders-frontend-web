@@ -1,180 +1,107 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import { useOrders } from "@/hooks/useOrders";
-import { OrderCard } from "@/components/orders/OrderCard";
+import { useRouter } from "next/navigation";
+import { Plus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Search, SlidersHorizontal, X, Package } from "lucide-react";
-import { ALL_ORDER_STATUSES, ORDER_STATUS_LABEL, OrderStatus } from "@/types/orders";
-import { cn } from "@/lib/utils";
+import { AppHeader } from "@/components/shell/app-header";
+import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { SkeletonList } from "@/components/ui/skeleton-list";
-import { EmptyState } from "@/components/ui/empty-state";
-
-const PAGE_SIZE = 100;
+import { OrdersToolbar } from "@/components/features/orders/orders-toolbar";
+import { OrdersTable } from "@/components/features/orders/orders-table";
+import { OrdersMobileList } from "@/components/features/orders/orders-mobile-list";
+import { useOrders } from "@/hooks/useOrders";
+import type { Order, OrderStatus } from "@/types/orders";
 
 export default function OrdersPage() {
-  const [search, setSearch] = useState("");
+  const router = useRouter();
   const [status, setStatus] = useState<OrderStatus | "all">("all");
-  const [startDate, setStartDate] = useState<string>(() => {
-    return new Date().toISOString().slice(0, 10);
-  });
-  const [endDate, setEndDate] = useState<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 6);
-    return d.toISOString().slice(0, 10);
-  });
-  const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const { data, isLoading, isError, refetch } = useOrders({
-    size: PAGE_SIZE,
-    // Push status to the server so a non-"all" filter isn't limited to the
-    // first 100 rows the server chose to return.
-    status: status === "all" ? undefined : status,
-  });
+  const { data, isLoading } = useOrders({ size: 200 });
+  const orders: Order[] = data?.items ?? [];
 
-  // Date range and search still filter client-side — backend doesn't accept
-  // from/to/search yet. Add those params when the API supports them.
-  const filtered = useMemo(() => {
-    if (!data?.items) return [];
-    const q = search.toLowerCase();
-    return data.items
-      .filter((o) => {
-        const matchSearch =
-          !q ||
-          o.clientName.toLowerCase().includes(q) ||
-          o.id.toLowerCase().includes(q);
-        const deliveryDay = o.deliveryDate.slice(0, 10);
-        const matchDate = deliveryDay >= startDate && deliveryDay <= endDate;
-        return matchSearch && matchDate;
-      })
-      .sort(
-        (a, b) =>
-          new Date(a.deliveryDate).getTime() - new Date(b.deliveryDate).getTime()
-      );
-  }, [data, search, startDate, endDate]);
+  const counts = useMemo(
+    () =>
+      orders.reduce<Record<string, number>>((acc, o) => {
+        acc[o.status] = (acc[o.status] ?? 0) + 1;
+        return acc;
+      }, {}),
+    [orders],
+  );
+
+  const filtered = useMemo(
+    () =>
+      orders.filter(
+        (o) =>
+          (status === "all" || o.status === status) &&
+          (search === "" ||
+            o.clientName.toLowerCase().includes(search.toLowerCase()) ||
+            o.id.toLowerCase().includes(search.toLowerCase())),
+      ),
+    [orders, status, search],
+  );
+
+  const hasFilters = status !== "all" || search !== "";
+  const clearFilters = () => {
+    setStatus("all");
+    setSearch("");
+  };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 bg-background border-b px-4 py-3 space-y-3">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por cliente ou ID..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8"
-            />
-            {search && (
-              <button
-                className="absolute right-2.5 top-2.5"
-                onClick={() => setSearch("")}
-              >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setShowFilters((v) => !v)}
-            className={cn(showFilters && "bg-muted")}
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-          </Button>
-
-          <Button size="icon" className="bg-brand hover:bg-brand-hover text-brand-foreground">
-            <Link href="/orders/new" className="flex items-center justify-center w-full h-full">
-              <Plus className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
-        {showFilters && (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus((v ?? "all") as OrderStatus | "all")}
-            >
-              <SelectTrigger className="w-full sm:w-52">
-                <SelectValue placeholder="Filtrar status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os status</SelectItem>
-                {ALL_ORDER_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {ORDER_STATUS_LABEL[s]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-2 flex-1">
-              <div className="flex-1">
-                <Input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-              <div className="flex-1">
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {isLoading && <SkeletonList variant="orders" />}
-
-        {isError && (
-          <div className="text-center py-16 space-y-2">
-            <p className="text-muted-foreground">Erro ao carregar pedidos.</p>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Tentar novamente
-            </Button>
-          </div>
-        )}
-
-        {!isLoading && !isError && filtered.length === 0 && (
-          <EmptyState
-            icon={Package}
-            title="Nenhum pedido neste período"
-            hint="Tente ampliar o intervalo de datas ou remover filtros."
-            action={
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearch("");
-                  setStatus("all");
-                }}
-              >
-                Limpar filtros
+    <>
+      <div className="hidden md:block">
+        <AppHeader
+          title="Pedidos"
+          subtitle={`${orders.length} pedidos`}
+          actions={
+            <>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Download size={14} /> Exportar
               </Button>
-            }
-          />
-        )}
-
-        {filtered.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+              <Button size="sm" className="gap-1.5" onClick={() => router.push("/orders/new")}>
+                <Plus size={14} /> Novo pedido
+              </Button>
+            </>
+          }
+        />
       </div>
-    </div>
+
+      <MobileTopBar
+        title="Pedidos"
+        right={
+          <Button size="sm" className="h-9 gap-1.5" onClick={() => router.push("/orders/new")}>
+            <Plus size={14} /> Novo
+          </Button>
+        }
+      />
+
+      <div className="space-y-3 px-4 pt-3 md:px-7 md:pt-5">
+        <OrdersToolbar
+          search={search}
+          onSearchChange={setSearch}
+          status={status}
+          onStatusChange={setStatus}
+          counts={counts}
+        />
+
+        {isLoading ? (
+          <SkeletonList variant="orders" count={6} />
+        ) : (
+          <>
+            <div className="hidden md:block">
+              <OrdersTable orders={filtered} onClearFilters={clearFilters} hasFilters={hasFilters} />
+            </div>
+            <div className="md:hidden">
+              <OrdersMobileList
+                orders={filtered}
+                onClearFilters={clearFilters}
+                hasFilters={hasFilters}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }

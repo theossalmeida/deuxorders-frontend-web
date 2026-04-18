@@ -1,245 +1,304 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Loader2, ArrowLeft, ImagePlus, X } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { OrderItemForm } from "@/components/orders/OrderItemForm";
-import { formatCurrency } from "@/lib/format";
+import { AppHeader } from "@/components/shell/app-header";
+import { MobileTopBar } from "@/components/shell/mobile-top-bar";
+import { OrderWizardStepper, type WizardStep } from "@/components/features/orders/new/order-wizard-stepper";
+import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
+import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
+import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
+import { formatBRL } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
-import { OrderItemInput } from "@/types/orders";
-import { PageShell } from "@/components/layout/PageShell";
 
-const schema = z.object({
-  clientId: z.string().min(1, "Selecione um cliente"),
-  deliveryDate: z.string().min(1, "Data de entrega obrigatória"),
-});
-
-type FormData = z.infer<typeof schema>;
+function defaultDatetime() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 16);
+}
 
 export default function NewOrderPage() {
   const router = useRouter();
+  const [step, setStep] = useState<WizardStep>("Cliente");
+  const [clientId, setClientId] = useState("");
+  const [clientSearch, setClientSearch] = useState("");
+  const [items, setItems] = useState<OrderItemDraft[]>([]);
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("retirada");
+  const [address, setAddress] = useState("");
+  const [date, setDate] = useState(defaultDatetime);
+  const [payment, setPayment] = useState<PaymentMethod>("pix");
+
   const { clients, products } = useOrdersDropdownData();
   const createOrder = useCreateOrder();
 
-  const [items, setItems] = useState<OrderItemInput[]>([]);
-  const [images, setImages] = useState<File[]>([]);
-  const [isDelivery, setIsDelivery] = useState(false);
-  const [address, setAddress] = useState("");
+  const subtotal = items.reduce((a, i) => a + i.unitPrice * i.qty, 0);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
-
-  const clientId = watch("clientId") ?? "";
-  const totalCents = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
-
-  const previewUrls = useMemo(
-    () => images.map((f) => URL.createObjectURL(f)),
-    [images]
+  const filteredClients = useMemo(
+    () =>
+      (clients.data ?? []).filter((c) =>
+        c.name.toLowerCase().includes(clientSearch.toLowerCase()),
+      ),
+    [clients.data, clientSearch],
   );
-  useEffect(() => {
-    return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
-  }, [previewUrls]);
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
-    setImages((prev) => [...prev, ...files].slice(0, 3));
-    e.target.value = "";
+  const filteredProducts = useMemo(
+    () =>
+      (products.data ?? []).filter((p) =>
+        p.name.toLowerCase().includes(productSearch.toLowerCase()),
+      ),
+    [products.data, productSearch],
+  );
+
+  const selectedClient = clients.data?.find((c) => c.id === clientId);
+
+  function addProduct(p: { id: string; name: string; price: number }) {
+    const existing = items.findIndex((i) => i.productId === p.id);
+    if (existing >= 0) {
+      const next = [...items];
+      next[existing].qty += 1;
+      setItems(next);
+    } else {
+      setItems([...items, { productId: p.id, name: p.name, unitPrice: p.price, qty: 1 }]);
+    }
+    setShowProductPicker(false);
+    setProductSearch("");
   }
 
-  async function onSubmit(data: FormData) {
-    if (items.length === 0) {
-      toast.error("Adicione ao menos um item ao pedido.");
-      return;
-    }
-    if (isDelivery && !address.trim()) {
-      toast.error("Informe o endereço de entrega.");
-      return;
-    }
-    await createOrder.mutateAsync({
+  function handleSubmit() {
+    if (!clientId || items.length === 0) return;
+    createOrder.mutate({
       input: {
-        clientId: data.clientId,
-        deliveryDate: new Date(data.deliveryDate).toISOString(),
-        items,
-        delivery: isDelivery ? address.trim() : undefined,
+        clientId,
+        deliveryDate: new Date(date).toISOString(),
+        items: items.map((i) => ({ productId: i.productId, quantity: i.qty, unitPrice: i.unitPrice })),
+        delivery: deliveryMode === "entrega" ? address || "Entrega" : "pickup",
       },
-      imageFiles: images,
+      imageFiles: [],
     });
   }
 
+  const summaryPanel = (
+    <div className="rounded-xl border border-border bg-card p-4 md:p-5">
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Resumo
+      </div>
+      <div className="mt-3 space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Subtotal</span>
+          <span className="font-mono font-semibold">{formatBRL(subtotal)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Entrega</span>
+          <span className="font-mono text-muted-foreground">
+            {deliveryMode === "entrega" ? "—" : "Retirada"}
+          </span>
+        </div>
+        <div className="flex justify-between border-t border-border pt-2">
+          <span className="font-semibold">Total</span>
+          <span className="font-mono text-base font-semibold tracking-tight">{formatBRL(subtotal)}</span>
+        </div>
+      </div>
+      <div className="mt-4">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Pagamento
+        </div>
+        <PaymentMethodPicker value={payment} onChange={setPayment} />
+      </div>
+      <div className="mt-4 text-[10px] text-muted-foreground">● Rascunho</div>
+      <Button
+        className="mt-3 w-full"
+        disabled={!clientId || items.length === 0 || createOrder.isPending}
+        onClick={handleSubmit}
+      >
+        {createOrder.isPending ? "Criando..." : "Criar pedido"}
+      </Button>
+    </div>
+  );
+
   return (
-    <PageShell variant="form">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-bold">Novo Pedido</h1>
+    <>
+      {/* Desktop */}
+      <div className="hidden md:block">
+        <AppHeader
+          title="Novo pedido"
+          subtitle="Preencha os dados abaixo"
+          actions={
+            <Button variant="outline" size="sm" onClick={() => router.back()}>
+              Cancelar
+            </Button>
+          }
+        />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4 rounded-xl border p-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Informações
-          </h2>
+      {/* Mobile top bar */}
+      <div className="sticky top-0 z-20 bg-background pt-14 md:hidden">
+        <div className="flex items-center justify-between px-4 pb-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
+          >
+            <ArrowLeft size={16} /> Cancelar
+          </button>
+          <span className="text-sm font-semibold">Novo pedido</span>
+          <div className="w-16" />
+        </div>
+        <OrderWizardStepper current={step} />
+      </div>
 
-          <div className="space-y-1">
-            <Label>Cliente</Label>
-            <Select
-              value={clientId}
-              onValueChange={(v) => setValue("clientId", v ?? "", { shouldValidate: true })}
-            >
-              <SelectTrigger>
-                <SelectValue>
-                  {clientId
-                    ? ((clients.data ?? []).find((c) => c.id === clientId)?.name ?? "Selecione um cliente")
-                    : "Selecione um cliente"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {(clients.data ?? []).map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.clientId && (
-              <p className="text-xs text-destructive">{errors.clientId.message}</p>
-            )}
+      {/* Product picker overlay */}
+      {showProductPicker && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-background">
+          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+            <button type="button" onClick={() => setShowProductPicker(false)}>
+              <ArrowLeft size={18} />
+            </button>
+            <span className="font-semibold">Escolher produto</span>
           </div>
-
-          <div className="space-y-1">
-            <Label>Data de entrega</Label>
-            <Input type="datetime-local" {...register("deliveryDate")} />
-            {errors.deliveryDate && (
-              <p className="text-xs text-destructive">{errors.deliveryDate.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-1">
-            <Label>Tipo de entrega</Label>
-            <Select
-              value={isDelivery ? "delivery" : "pickup"}
-              onValueChange={(v) => setIsDelivery((v ?? "pickup") === "delivery")}
-            >
-              <SelectTrigger>
-                <SelectValue>{isDelivery ? "Entrega" : "Retirada"}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pickup">Retirada</SelectItem>
-                <SelectItem value="delivery">Entrega</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {isDelivery && (
-            <div className="space-y-1">
-              <Label>Endereço de entrega</Label>
+          <div className="p-4">
+            <div className="relative">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Rua, número, complemento"
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                placeholder="Buscar produto"
+                className="pl-9"
+                autoFocus
               />
             </div>
-          )}
-        </div>
-
-        <div className="space-y-4 rounded-xl border p-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Itens do Pedido
-          </h2>
-          <OrderItemForm
-            products={products.data ?? []}
-            items={items}
-            onAdd={(item) => setItems((prev) => [...prev, item])}
-            onRemove={(i) => setItems((prev) => prev.filter((_, idx) => idx !== i))}
-          />
-        </div>
-
-        <div className="space-y-4 rounded-xl border p-4">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Imagens de referência (máx. 3)
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {images.map((_, i) => (
-              <div key={i} className="relative w-20 h-20">
-                <img
-                  src={previewUrls[i]}
-                  alt="ref"
-                  className="w-20 h-20 object-cover rounded-lg border"
-                />
+          </div>
+          <ul className="flex-1 divide-y divide-border overflow-y-auto">
+            {filteredProducts.map((p) => (
+              <li key={p.id}>
                 <button
                   type="button"
-                  onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="absolute -top-1.5 -right-1.5 bg-destructive text-white rounded-full p-0.5"
+                  onClick={() => addProduct(p)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent"
                 >
-                  <X className="h-3 w-3" />
+                  <span className="text-sm font-medium">{p.name}</span>
+                  <span className="font-mono text-sm font-semibold">{formatBRL(p.price)}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="px-4 pt-4 pb-28 md:grid md:grid-cols-[1fr_380px] md:gap-4 md:px-7 md:pb-6 md:pt-5">
+        <div className="space-y-4">
+          {/* Client section */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Cliente
+            </div>
+            {selectedClient ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand">
+                    {selectedClient.name[0]}
+                  </div>
+                  <span className="font-medium">{selectedClient.name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setClientId("")}
+                  className="text-xs text-brand hover:underline"
+                >
+                  Trocar
                 </button>
               </div>
-            ))}
-            {images.length < 3 && (
-              <label className="flex flex-col items-center justify-center w-20 h-20 rounded-lg border-2 border-dashed text-muted-foreground cursor-pointer hover:border-primary transition-colors">
-                <ImagePlus className="h-5 w-5" />
-                <span className="text-xs mt-1">Adicionar</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
+            ) : (
+              <div>
+                <div className="relative mb-3">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={clientSearch}
+                    onChange={(e) => setClientSearch(e.target.value)}
+                    placeholder="Buscar cliente"
+                    className="pl-9"
+                  />
+                </div>
+                <ul className="max-h-48 divide-y divide-border overflow-y-auto rounded-lg border border-border bg-card">
+                  {filteredClients.slice(0, 8).map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setClientId(c.id);
+                          setClientSearch("");
+                        }}
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-accent"
+                      >
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-soft text-[11px] font-semibold text-brand">
+                          {c.name[0]}
+                        </div>
+                        <span className="text-sm">{c.name}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
+
+          {/* Items section */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Itens
+            </div>
+            <ItemsBuilder
+              items={items}
+              onChange={setItems}
+              onAddClick={() => setShowProductPicker(true)}
+            />
+          </div>
+
+          {/* Delivery section */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Entrega
+            </div>
+            <DeliverySection
+              mode={deliveryMode}
+              onModeChange={setDeliveryMode}
+              address={address}
+              onAddressChange={setAddress}
+              date={date}
+              onDateChange={setDate}
+            />
+          </div>
+
+          {/* Summary on mobile */}
+          <div className="md:hidden">{summaryPanel}</div>
         </div>
 
-        {items.length > 0 && (
-          <div className="flex items-center justify-between rounded-xl border px-4 py-3 bg-muted/50">
-            <span className="font-semibold">Total do pedido</span>
-            <span className="text-lg font-bold">{formatCurrency(totalCents)}</span>
-          </div>
-        )}
+        {/* Desktop summary sidebar */}
+        <div className="hidden md:block">
+          <div className="sticky top-4">{summaryPanel}</div>
+        </div>
+      </div>
 
+      {/* Mobile sticky footer */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/90 px-4 py-3 backdrop-blur-sm md:hidden">
         <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => router.back()}
-          >
+          <Button variant="outline" className="flex-1" onClick={() => router.back()}>
             Cancelar
           </Button>
           <Button
-            type="submit"
-            className="flex-1 bg-brand hover:bg-brand-hover text-brand-foreground"
-            disabled={isSubmitting || createOrder.isPending}
+            className="flex-[2]"
+            disabled={!clientId || items.length === 0 || createOrder.isPending}
+            onClick={handleSubmit}
           >
-            {isSubmitting || createOrder.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Salvar Pedido"
-            )}
+            {createOrder.isPending ? "Criando..." : "Criar pedido"}
           </Button>
         </div>
-      </form>
-    </PageShell>
+      </div>
+    </>
   );
 }
