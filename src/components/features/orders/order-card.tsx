@@ -15,7 +15,7 @@ export function OrderCard({ order }: { order: Order }) {
             {order.id} · {formatTime(order.deliveryDate)}
           </div>
         </div>
-        <div className="font-mono text-sm font-semibold">{formatCents(order.totalValueCents)}</div>
+        <div className="font-mono text-sm font-semibold">{formatCents(order.totalPaidCents)}</div>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <StatusChip status={order.status} />

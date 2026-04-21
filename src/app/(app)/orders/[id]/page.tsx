@@ -117,7 +117,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   Total do pedido
                 </div>
                 <div className="mt-1 font-mono text-2xl font-semibold tracking-tight md:text-3xl">
-                  {formatCents(order.totalValueCents)}
+                  {formatCents(order.totalPaidCents)}
                 </div>
               </div>
               <StatusChip status={order.status} size="md" />

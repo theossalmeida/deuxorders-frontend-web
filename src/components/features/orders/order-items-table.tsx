@@ -5,7 +5,7 @@ import type { OrderItem } from "@/types/orders";
 export function OrderItemsTable({ items }: { items: OrderItem[] }) {
   const subtotalCents = items
     .filter((i) => !i.itemCanceled)
-    .reduce((a, i) => a + i.totalValueCents, 0);
+    .reduce((a, i) => a + i.totalPaidCents, 0);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -38,7 +38,7 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
             </div>
             <div className="text-center font-mono text-sm">{item.quantity}×</div>
             <div className="text-right font-mono text-sm font-semibold">
-              {formatCents(item.totalValueCents)}
+              {formatCents(item.totalPaidCents)}
             </div>
           </li>
         ))}

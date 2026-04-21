@@ -58,7 +58,7 @@ export function OrdersTable({ orders, onClearFilters, hasFilters }: Props) {
                 <span>
                   <StatusChip status={o.status} />
                 </span>
-                <span className="font-mono font-semibold">{formatCents(o.totalValueCents)}</span>
+                <span className="font-mono font-semibold">{formatCents(o.totalPaidCents)}</span>
                 <span className="flex justify-end text-muted-foreground">
                   <ChevronRight size={14} />
                 </span>

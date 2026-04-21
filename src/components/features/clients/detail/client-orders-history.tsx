@@ -39,7 +39,7 @@ export function ClientOrdersHistory({ orders }: { orders: ClientOrder[] }) {
                   <span className="text-center text-xs text-muted-foreground">{formatDate(o.deliveryDate)}</span>
                   <div className="flex justify-center"><StatusChip status={o.status} /></div>
                   <span className="text-center font-mono text-xs font-semibold">
-                    {formatCents(o.totalValueCents)}
+                    {formatCents(o.totalPaidCents)}
                   </span>
                 </Link>
               </li>
