@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { SkeletonList } from "@/components/ui/skeleton-list";
 import { ClientsToolbar } from "@/components/features/clients/clients-toolbar";
 import { ClientsTable } from "@/components/features/clients/clients-table";
 import { ClientsMobileList } from "@/components/features/clients/clients-mobile-list";
+import { NewClientSheet } from "@/components/features/clients/new-client-sheet";
 import { useClients } from "@/hooks/useClients";
 
 export default function ClientsPage() {
@@ -36,19 +35,13 @@ export default function ClientsPage() {
           title="Clientes"
           subtitle={`${clients.length} clientes`}
           actions={
-            <Button size="sm" className="gap-1.5">
-              <Plus size={14} /> Novo cliente
-            </Button>
+            <NewClientSheet />
           }
         />
       </div>
       <MobileTopBar
         title="Clientes"
-        right={
-          <Button size="icon" className="h-9 w-9">
-            <Plus size={16} />
-          </Button>
-        }
+        right={<NewClientSheet compact />}
       />
 
       <div className="space-y-3 px-4 pt-3 md:px-7 md:pt-5">

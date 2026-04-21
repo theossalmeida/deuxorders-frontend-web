@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { SkeletonList } from "@/components/ui/skeleton-list";
 import { ProductsToolbar } from "@/components/features/products/products-toolbar";
 import { ProductsGrid } from "@/components/features/products/products-grid";
+import { NewProductSheet } from "@/components/features/products/new-product-sheet";
 import { useProducts } from "@/hooks/useProducts";
 
 export default function ProductsPage() {
@@ -42,19 +41,13 @@ export default function ProductsPage() {
           title="Produtos"
           subtitle={`${filtered.length} produto${filtered.length !== 1 ? "s" : ""}`}
           actions={
-            <Button size="sm" className="gap-1.5">
-              <Plus size={14} /> Novo produto
-            </Button>
+            <NewProductSheet />
           }
         />
       </div>
       <MobileTopBar
         title="Produtos"
-        right={
-          <Button size="sm" className="h-9 gap-1.5">
-            <Plus size={14} /> Novo
-          </Button>
-        }
+        right={<NewProductSheet compact triggerLabel="Novo produto" />}
       />
 
       <div className="space-y-3 px-4 pt-3 md:px-7 md:pt-5">
