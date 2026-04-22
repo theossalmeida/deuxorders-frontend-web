@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
+import { createOrdersApi, uploadToPresignedUrl, OrderUpdateResult } from "@/lib/api/orders";
 import { useToken } from "./useToken";
 import {
   Order,
@@ -122,9 +122,11 @@ export function useUpdateOrder(id: string) {
   return useMutation({
     mutationFn: (input: UpdateOrderInput) =>
       createOrdersApi(token!).update(id, input),
-    onSuccess: (updated: Order) => {
-      qc.setQueryData(["orders", id], updated);
+    onSuccess: (result: OrderUpdateResult) => {
+      qc.setQueryData(["orders", id], result.order);
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["inventory"] });
+      result.warnings.forEach((w) => toast.warning(w));
       toast.success("Pedido atualizado.");
     },
     onError: (e: Error) => toast.error(e.message),

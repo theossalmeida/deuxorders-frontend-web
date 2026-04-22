@@ -1,5 +1,6 @@
 import { createApiClient, ItemsResponse, unwrapItemsResponse } from "./client";
 import { Product, ProductDropdownItem } from "@/types/products";
+import { ProductRecipe, SetRecipeInput } from "@/types/inventory";
 
 interface ProductDto {
   id: string;
@@ -10,6 +11,7 @@ interface ProductDto {
   description: string | null;
   category: string | null;
   size: string | null;
+  hasRecipe: boolean;
 }
 
 export interface ProductDropdownDto {
@@ -28,6 +30,7 @@ function mapProduct(dto: ProductDto): Product {
     description: dto.description,
     category: dto.category,
     size: dto.size,
+    hasRecipe: dto.hasRecipe ?? false,
   };
 }
 
@@ -66,5 +69,11 @@ export function createProductsApi(token: string) {
     deleteImage: (id: string) => api.delete<void>(`/products/${id}/image`),
 
     delete: (id: string) => api.delete<void>(`/products/${id}`),
+
+    getRecipe: (productId: string) =>
+      api.get<ProductRecipe>(`/products/${productId}/recipe`),
+
+    setRecipe: (productId: string, input: SetRecipeInput) =>
+      api.put<ProductRecipe>(`/products/${productId}/recipe`, input),
   };
 }

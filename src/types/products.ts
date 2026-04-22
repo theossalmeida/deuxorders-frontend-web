@@ -7,6 +7,7 @@ export interface Product {
   description: string | null;
   category: string | null;
   size: string | null;
+  hasRecipe: boolean;
 }
 
 export interface ProductDropdownItem {

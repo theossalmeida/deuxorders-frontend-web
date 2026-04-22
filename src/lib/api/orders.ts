@@ -11,6 +11,11 @@ import {
   PresignedUrlResponse,
   OrderStatus,
 } from "@/types/orders";
+
+export interface OrderUpdateResult {
+  order: Order;
+  warnings: string[];
+}
 import { ClientDropdownItem } from "@/types/clients";
 import { ProductDropdownItem } from "@/types/products";
 import { mapProductDropdown, type ProductDropdownDto } from "./products";
@@ -193,8 +198,16 @@ export function createOrdersApi(token: string) {
     create: async (input: CreateOrderInput) =>
       mapOrder(await api.post<OrderDto>("/orders/new", toCreateOrderWire(input))),
 
-    update: async (id: string, input: UpdateOrderInput) =>
-      mapOrder(await api.put<OrderDto>(`/orders/${id}`, toUpdateOrderWire(input))),
+    update: async (id: string, input: UpdateOrderInput): Promise<OrderUpdateResult> => {
+      const raw = await api.put<OrderDto | { response: OrderDto; warnings: string[] }>(
+        `/orders/${id}`,
+        toUpdateOrderWire(input)
+      );
+      if ("response" in raw && "warnings" in raw) {
+        return { order: mapOrder(raw.response), warnings: raw.warnings };
+      }
+      return { order: mapOrder(raw as OrderDto), warnings: [] };
+    },
 
     complete: (id: string) => api.patch<void>(`/orders/${id}/complete`),
 

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createProductsApi } from "@/lib/api/products";
 import { useToken } from "./useToken";
+import { SetRecipeInput } from "@/types/inventory";
 
 export function useProduct(id: string) {
   const token = useToken();
@@ -74,6 +75,29 @@ export function useDeleteProduct() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["products"] });
       toast.success("Produto excluído.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useProductRecipe(productId: string) {
+  const token = useToken();
+  return useQuery({
+    queryKey: ["products", productId, "recipe"],
+    queryFn: () => createProductsApi(token!).getRecipe(productId),
+    enabled: !!token && !!productId,
+  });
+}
+
+export function useSetProductRecipe(productId: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SetRecipeInput) => createProductsApi(token!).setRecipe(productId, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products", productId, "recipe"] });
+      qc.invalidateQueries({ queryKey: ["products", productId] });
+      toast.success("Receita salva.");
     },
     onError: (e: Error) => toast.error(e.message),
   });

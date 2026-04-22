@@ -89,3 +89,22 @@ export function formatPercentDelta(v: number): string {
 export function toISODate(date: Date): string {
   return date.toISOString();
 }
+
+import type { MeasureUnit } from "@/types/inventory";
+
+const QTY_KG_L = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 3,
+  maximumFractionDigits: 3,
+});
+
+export function formatQuantity(quantity: number, unit: MeasureUnit): string {
+  if (unit === "Kg") return `${QTY_KG_L.format(quantity / 1000)} kg`;
+  if (unit === "L") return `${QTY_KG_L.format(quantity / 1000)} L`;
+  return `${quantity} un`;
+}
+
+export function formatUnitCostDisplay(unitCost: number, unit: MeasureUnit): string {
+  if (unit === "Kg") return `${formatCents(unitCost * 1000)} / kg`;
+  if (unit === "L") return `${formatCents(unitCost * 1000)} / L`;
+  return `${formatCents(unitCost)} / un`;
+}
