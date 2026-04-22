@@ -47,6 +47,19 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
+export type MobileGroupTab = {
+  groupLabel: string;
+  tabLabel: string;
+  tabIcon: LucideIcon;
+};
+
+export const MOBILE_GROUP_TABS: MobileGroupTab[] = [
+  { groupLabel: "Vendas",      tabLabel: "Pedidos", tabIcon: ShoppingCart },
+  { groupLabel: "Estoque",     tabLabel: "Estoque", tabIcon: Warehouse },
+  { groupLabel: "Financeiro",  tabLabel: "Caixa",   tabIcon: Wallet },
+];
+
+/** @deprecated — use MOBILE_GROUP_TABS */
 export const MOBILE_NAV = NAV_GROUPS
   .flatMap((g) => g.items)
   .filter((i) => i.inMobile);

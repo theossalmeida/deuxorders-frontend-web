@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Truck, ShoppingBag, Pencil } from "lucide-react";
+import { ArrowLeft, Truck, ShoppingBag, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,7 +12,7 @@ import { OrderStatusPipeline } from "@/components/features/orders/order-status-p
 import { OrderItemsTable } from "@/components/features/orders/order-items-table";
 import { formatCents, formatDate, formatTime } from "@/lib/format";
 import { STATUS_META } from "@/lib/order-status";
-import { useOrder, useUpdateOrder, useCompleteOrder } from "@/hooks/useOrders";
+import { useOrder, useUpdateOrder, useCompleteOrder, useDeleteOrder } from "@/hooks/useOrders";
 import { ORDER_STATUS_INT, type OrderStatus } from "@/types/orders";
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
@@ -26,6 +26,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const { data: order, isLoading } = useOrder(id);
   const updateOrder = useUpdateOrder(id);
   const completeOrder = useCompleteOrder();
+  const deleteOrder = useDeleteOrder();
+
+  function handleDelete() {
+    if (!confirm("Excluir este pedido? Esta ação não pode ser desfeita.")) return;
+    deleteOrder.mutate(id);
+  }
 
   function handleAdvanceStatus() {
     if (!order) return;
@@ -67,6 +73,15 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <Button variant="outline" size="sm" onClick={() => router.back()}>
                 Voltar
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-destructive hover:text-destructive"
+                onClick={handleDelete}
+                disabled={deleteOrder.isPending}
+              >
+                <Trash2 size={14} /> Excluir
+              </Button>
               <Button variant="outline" size="sm" asChild nativeButton={false}>
                 <Link href={`/orders/${id}/edit`}>
                   <Pencil size={14} />
@@ -101,9 +116,19 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <div className="font-mono text-[11px] text-muted-foreground">{order.id}</div>
           <div className="text-sm font-semibold">{order.clientName}</div>
         </div>
-        <Link href={`/orders/${id}/edit`} className="text-muted-foreground">
-          <Pencil size={18} />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleteOrder.isPending}
+            className="text-destructive disabled:opacity-50"
+          >
+            <Trash2 size={18} />
+          </button>
+          <Link href={`/orders/${id}/edit`} className="text-muted-foreground">
+            <Pencil size={18} />
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 px-4 pt-4 pb-28 md:grid-cols-[1.3fr_1fr] md:px-7 md:pb-6 md:pt-5">
