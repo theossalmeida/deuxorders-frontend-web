@@ -5,6 +5,7 @@ import {
   Users,
   Wallet,
   Receipt,
+  Warehouse,
   type LucideIcon,
 } from "lucide-react";
 
@@ -29,6 +30,12 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/orders",    label: "Pedidos",  icon: ShoppingCart, badgeKey: "pendingOrders", inMobile: true },
       { href: "/products",  label: "Produtos", icon: Package },
       { href: "/clients",   label: "Clientes", icon: Users,        inMobile: true },
+    ],
+  },
+  {
+    label: "Estoque",
+    items: [
+      { href: "/inventory", label: "Materiais", icon: Warehouse },
     ],
   },
   {
