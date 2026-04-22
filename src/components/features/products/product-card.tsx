@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format";
 import { toneFor } from "@/lib/category-tone";
@@ -38,8 +39,13 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="line-clamp-2 min-h-[2.5em] text-[12px] font-medium leading-snug pr-6">
             {product.name}
           </div>
-          <div className="mt-1.5 font-mono text-[13px] font-semibold">
-            {formatCents(product.priceCents)}
+          <div className="mt-1.5 flex items-center justify-between">
+            <div className="font-mono text-[13px] font-semibold">
+              {formatCents(product.priceCents)}
+            </div>
+            {product.hasRecipe ? (
+              <BookOpen size={12} className="text-muted-foreground/60" aria-label="Possui receita" />
+            ) : null}
           </div>
         </div>
       </Link>

@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGallery } from "@/components/features/products/detail/product-gallery";
 import { toneFor } from "@/lib/category-tone";
 import { useProduct, useToggleProductStatus, useDeleteProduct } from "@/hooks/useProducts";
+import { ProductRecipeCard } from "@/components/features/products/detail/product-recipe-card";
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -181,6 +182,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
           </div>
+
+          <ProductRecipeCard product={product} />
         </div>
       </div>
     </>
