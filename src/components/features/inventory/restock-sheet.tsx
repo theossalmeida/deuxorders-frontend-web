@@ -18,6 +18,7 @@ import {
 import { useRestockMaterial } from "@/hooks/useInventory";
 import { formatCents } from "@/lib/format";
 import type { InventoryMaterial } from "@/types/inventory";
+import { MEASURE_UNIT_SHORT } from "@/types/inventory";
 
 const schema = z.object({
   quantity: z.number({ error: "Quantidade obrigatória" }).positive("Deve ser maior que 0"),
@@ -26,7 +27,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-const UNIT_LABELS: Record<string, string> = { Kg: "kg", L: "L", Unit: "un" };
 
 type Props = {
   material: InventoryMaterial;
@@ -49,7 +49,7 @@ export function RestockSheet({ material }: Props) {
   const qtyInput = watch("quantity") ?? 0;
   const costInput = watch("totalCost") ?? 0;
 
-  const addedQty = material.measureUnit === "Unit" ? qtyInput : Math.round(qtyInput * 1000);
+  const addedQty = Math.round(qtyInput);
   const addedCost = Math.round(costInput * 100);
   const currentQty = material.quantity;
   const currentUnitCost = material.unitCost;
@@ -60,15 +60,13 @@ export function RestockSheet({ material }: Props) {
       : addedQty > 0 ? addedCost / addedQty : 0;
 
   async function onSubmit(values: FormValues) {
-    const rawQty = material.measureUnit === "Unit" ? values.quantity : Math.round(values.quantity * 1000);
     const rawCost = Math.round(values.totalCost * 100);
-    await mutateAsync({ quantity: rawQty, totalCost: rawCost });
+    await mutateAsync({ quantity: Math.round(values.quantity), totalCost: rawCost });
     reset();
     setOpen(false);
   }
 
-  const unitLabel = UNIT_LABELS[material.measureUnit] ?? material.measureUnit;
-  const step = material.measureUnit === "Unit" ? "1" : "0.001";
+  const unitLabel = MEASURE_UNIT_SHORT[material.measureUnit];
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -89,7 +87,7 @@ export function RestockSheet({ material }: Props) {
             </Label>
             <Input
               type="number"
-              step={step}
+              step="1"
               min="0"
               placeholder="0"
               {...register("quantity", { valueAsNumber: true })}
@@ -118,9 +116,7 @@ export function RestockSheet({ material }: Props) {
                 <div className="flex justify-between">
                   <span>Custo unit. estimado</span>
                   <span className="font-mono font-medium text-foreground">
-                    {material.measureUnit === "Unit"
-                      ? `${formatCents(Math.round(newUnitCost))} / un`
-                      : `${formatCents(Math.round(newUnitCost * 1000))} / ${unitLabel}`}
+                    {formatCents(Math.round(newUnitCost))} / {unitLabel}
                   </span>
                 </div>
               </div>

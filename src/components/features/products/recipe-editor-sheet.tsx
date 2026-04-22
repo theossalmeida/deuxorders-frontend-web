@@ -47,9 +47,7 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
       setItems(
         currentItems.map((i) => ({
           materialId: i.materialId,
-          quantity: i.measureUnit === "Unit"
-            ? String(i.quantity)
-            : String(i.quantity / 1000),
+          quantity: String(i.quantity),
         }))
       );
     }
@@ -84,12 +82,10 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
     const error = validate();
     if (error) { alert(error); return; }
 
-    const wireItems = items.map((item) => {
-      const mat = dropdown.find((d) => d.id === item.materialId);
-      const qty = parseFloat(item.quantity);
-      const rawQty = mat?.measureUnit === "Unit" ? qty : Math.round(qty * 1000);
-      return { materialId: item.materialId, quantity: rawQty };
-    });
+    const wireItems = items.map((item) => ({
+      materialId: item.materialId,
+      quantity: Math.round(parseFloat(item.quantity)),
+    }));
 
     await mutateAsync({ items: wireItems });
     onOpenChange(false);
@@ -154,7 +150,7 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
                     )}
                     <Input
                       type="number"
-                      step={mat?.measureUnit === "Unit" ? "1" : "0.001"}
+                      step="1"
                       min="0"
                       value={item.quantity}
                       onChange={(e) => updateItem(index, "quantity", e.target.value)}

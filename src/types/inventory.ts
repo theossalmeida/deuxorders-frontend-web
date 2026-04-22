@@ -1,4 +1,4 @@
-export type MeasureUnit = "Kg" | "L" | "Unit";
+export type MeasureUnit = "g" | "mL" | "u";
 
 export interface InventoryMaterial {
   id: string;
@@ -51,19 +51,13 @@ export interface SetRecipeInput {
 }
 
 export const MEASURE_UNIT_LABEL: Record<MeasureUnit, string> = {
-  Kg: "Quilograma (kg)",
-  L: "Litro (L)",
-  Unit: "Unidade (un)",
+  g:  "Gramas (g)",
+  mL: "Mililitros (mL)",
+  u:  "Unidade (u)",
 };
 
 export const MEASURE_UNIT_SHORT: Record<MeasureUnit, string> = {
-  Kg: "kg",
-  L: "L",
-  Unit: "un",
-};
-
-export const MEASURE_UNIT_SMALLEST: Record<MeasureUnit, string> = {
-  Kg: "g",
-  L: "mL",
-  Unit: "un",
+  g:  "g",
+  mL: "mL",
+  u:  "u",
 };

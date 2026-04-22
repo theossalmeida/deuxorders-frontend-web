@@ -27,18 +27,12 @@ import { MEASURE_UNIT_LABEL, type MeasureUnit } from "@/types/inventory";
 
 const schema = z.object({
   name: z.string().min(1, "Nome obrigatório").max(200),
-  measureUnit: z.enum(["Kg", "L", "Unit"]),
-  quantity: z.number({ error: "Quantidade obrigatória" }).positive("Quantidade deve ser maior que 0"),
+  measureUnit: z.enum(["g", "mL", "u"]),
+  quantity: z.number({ error: "Quantidade obrigatória" }).int("Deve ser um número inteiro").positive("Quantidade deve ser maior que 0"),
   totalCost: z.number({ error: "Custo obrigatório" }).positive("Custo total deve ser maior que 0"),
 });
 
 type FormValues = z.infer<typeof schema>;
-
-const UNIT_LABELS: Record<MeasureUnit, string> = {
-  Kg: "kg",
-  L: "L",
-  Unit: "un",
-};
 
 type Props = {
   compact?: boolean;
@@ -57,15 +51,14 @@ export function NewMaterialSheet({ compact = false }: Props) {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { measureUnit: "Kg" },
+    defaultValues: { measureUnit: "g" },
   });
 
   const measureUnit = watch("measureUnit");
 
   async function onSubmit(values: FormValues) {
-    const rawQty = measureUnit === "Unit" ? values.quantity : Math.round(values.quantity * 1000);
     const rawCost = Math.round(values.totalCost * 100);
-    await mutateAsync({ name: values.name, measureUnit: values.measureUnit, quantity: rawQty, totalCost: rawCost });
+    await mutateAsync({ name: values.name, measureUnit: values.measureUnit, quantity: values.quantity, totalCost: rawCost });
     reset();
     setOpen(false);
   }
@@ -118,11 +111,11 @@ export function NewMaterialSheet({ compact = false }: Props) {
 
           <div className="space-y-1.5">
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Quantidade ({UNIT_LABELS[measureUnit]})
+              Quantidade ({measureUnit})
             </Label>
             <Input
               type="number"
-              step={measureUnit === "Unit" ? "1" : "0.001"}
+              step="1"
               min="0"
               placeholder="0"
               {...register("quantity", { valueAsNumber: true })}

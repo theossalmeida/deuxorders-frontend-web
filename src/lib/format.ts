@@ -91,20 +91,12 @@ export function toISODate(date: Date): string {
 }
 
 import type { MeasureUnit } from "@/types/inventory";
-
-const QTY_KG_L = new Intl.NumberFormat("pt-BR", {
-  minimumFractionDigits: 3,
-  maximumFractionDigits: 3,
-});
+import { MEASURE_UNIT_SHORT } from "@/types/inventory";
 
 export function formatQuantity(quantity: number, unit: MeasureUnit): string {
-  if (unit === "Kg") return `${QTY_KG_L.format(quantity / 1000)} kg`;
-  if (unit === "L") return `${QTY_KG_L.format(quantity / 1000)} L`;
-  return `${quantity} un`;
+  return `${quantity} ${MEASURE_UNIT_SHORT[unit]}`;
 }
 
 export function formatUnitCostDisplay(unitCost: number, unit: MeasureUnit): string {
-  if (unit === "Kg") return `${formatCents(unitCost * 1000)} / kg`;
-  if (unit === "L") return `${formatCents(unitCost * 1000)} / L`;
-  return `${formatCents(unitCost)} / un`;
+  return `${formatCents(unitCost)} / ${MEASURE_UNIT_SHORT[unit]}`;
 }
