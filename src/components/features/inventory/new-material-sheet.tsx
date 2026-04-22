@@ -101,7 +101,7 @@ export function NewMaterialSheet({ compact = false }: Props) {
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Unidade de medida</Label>
             <Select
               value={measureUnit}
-              onValueChange={(v) => setValue("measureUnit", v as MeasureUnit)}
+              onValueChange={(v) => v !== null && setValue("measureUnit", v as MeasureUnit)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione">

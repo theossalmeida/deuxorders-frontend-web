@@ -175,7 +175,7 @@ export default function MaterialDetailPage({ params }: { params: Promise<{ id: s
                 <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Unidade de medida</Label>
                 <Select
                   value={resolvedUnit}
-                  onValueChange={(v) => setMeasureUnit(v as MeasureUnit)}
+                  onValueChange={(v) => v !== null && setMeasureUnit(v as MeasureUnit)}
                 >
                   <SelectTrigger>
                     <SelectValue>

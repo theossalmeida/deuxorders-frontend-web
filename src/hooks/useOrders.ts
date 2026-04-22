@@ -140,6 +140,7 @@ export function useCompleteOrder() {
     mutationFn: (id: string) => createOrdersApi(token!).complete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["inventory"] });
       toast.success("Pedido concluído.");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -153,6 +154,7 @@ export function useCancelOrder() {
     mutationFn: (id: string) => createOrdersApi(token!).cancel(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
+      qc.invalidateQueries({ queryKey: ["inventory"] });
       toast.success("Pedido cancelado.");
     },
     onError: (e: Error) => toast.error(e.message),
