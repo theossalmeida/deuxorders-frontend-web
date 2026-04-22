@@ -8,6 +8,12 @@ import {
   MeasureUnit,
 } from "@/types/inventory";
 
+const MEASURE_UNIT_INT: Record<MeasureUnit, number> = {
+  ML: 1,
+  G:  2,
+  U:  3,
+};
+
 interface InventoryMaterialDto {
   id: string;
   name: string;
@@ -53,10 +59,16 @@ export function createInventoryApi(token: string) {
       mapMaterial(await api.get<InventoryMaterialDto>(`/inventory/${id}`)),
 
     create: async (input: CreateMaterialInput) =>
-      mapMaterial(await api.post<InventoryMaterialDto>("/inventory/new", input)),
+      mapMaterial(await api.post<InventoryMaterialDto>("/inventory/new", {
+        ...input,
+        measureUnit: MEASURE_UNIT_INT[input.measureUnit],
+      })),
 
     update: async (id: string, input: UpdateMaterialInput) =>
-      mapMaterial(await api.put<InventoryMaterialDto>(`/inventory/${id}`, input)),
+      mapMaterial(await api.put<InventoryMaterialDto>(`/inventory/${id}`, {
+        ...input,
+        measureUnit: MEASURE_UNIT_INT[input.measureUnit],
+      })),
 
     restock: async (id: string, input: RestockInput) =>
       mapMaterial(await api.post<InventoryMaterialDto>(`/inventory/${id}/restock`, input)),
