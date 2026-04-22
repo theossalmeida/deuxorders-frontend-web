@@ -26,22 +26,22 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Vendas",
     items: [
-      { href: "/dashboard", label: "Painel",   icon: LayoutGrid,   inMobile: true },
+      { href: "/dashboard", label: "Painel",   icon: LayoutGrid },
       { href: "/orders",    label: "Pedidos",  icon: ShoppingCart, badgeKey: "pendingOrders", inMobile: true },
       { href: "/products",  label: "Produtos", icon: Package },
-      { href: "/clients",   label: "Clientes", icon: Users,        inMobile: true },
+      { href: "/clients",   label: "Clientes", icon: Users },
     ],
   },
   {
     label: "Estoque",
     items: [
-      { href: "/inventory", label: "Materiais", icon: Warehouse },
+      { href: "/inventory", label: "Estoque", icon: Warehouse, inMobile: true },
     ],
   },
   {
     label: "Financeiro",
     items: [
-      { href: "/cash",         label: "Caixa",       icon: Wallet,  inMobile: true },
+      { href: "/cash",         label: "Caixa",       icon: Wallet, inMobile: true },
       { href: "/cash/entries", label: "Lançamentos", icon: Receipt },
     ],
   },
