@@ -23,11 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateMaterial } from "@/hooks/useInventory";
-import { MEASURE_UNIT_LABEL, type MeasureUnit } from "@/types/inventory";
+import { MEASURE_UNIT_LABEL, MEASURE_UNIT_SHORT, type MeasureUnit } from "@/types/inventory";
 
 const schema = z.object({
   name: z.string().min(1, "Nome obrigatório").max(200),
-  measureUnit: z.enum(["g", "mL", "u"]),
+  measureUnit: z.enum(["G", "ML", "U"]),
   quantity: z.number({ error: "Quantidade obrigatória" }).int("Deve ser um número inteiro").positive("Quantidade deve ser maior que 0"),
   totalCost: z.number({ error: "Custo obrigatório" }).positive("Custo total deve ser maior que 0"),
 });
@@ -51,7 +51,7 @@ export function NewMaterialSheet({ compact = false }: Props) {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { measureUnit: "g" },
+    defaultValues: { measureUnit: "G" },
   });
 
   const measureUnit = watch("measureUnit");
@@ -111,7 +111,7 @@ export function NewMaterialSheet({ compact = false }: Props) {
 
           <div className="space-y-1.5">
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Quantidade ({measureUnit})
+              Quantidade ({MEASURE_UNIT_SHORT[measureUnit]})
             </Label>
             <Input
               type="number"

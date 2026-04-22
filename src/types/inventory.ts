@@ -1,4 +1,4 @@
-export type MeasureUnit = "g" | "mL" | "u";
+export type MeasureUnit = "ML" | "G" | "U";
 
 export interface InventoryMaterial {
   id: string;
@@ -51,13 +51,13 @@ export interface SetRecipeInput {
 }
 
 export const MEASURE_UNIT_LABEL: Record<MeasureUnit, string> = {
-  g:  "Gramas (g)",
-  mL: "Mililitros (mL)",
-  u:  "Unidade (u)",
+  G:  "Gramas (g)",
+  ML: "Mililitros (mL)",
+  U:  "Unidade (u)",
 };
 
 export const MEASURE_UNIT_SHORT: Record<MeasureUnit, string> = {
-  g:  "g",
-  mL: "mL",
-  u:  "u",
+  G:  "g",
+  ML: "mL",
+  U:  "u",
 };
