@@ -14,15 +14,32 @@ const MEASURE_UNIT_INT: Record<MeasureUnit, number> = {
   U:  3,
 };
 
+const MEASURE_UNIT_FROM_INT: Record<number, MeasureUnit> = {
+  1: "ML",
+  2: "G",
+  3: "U",
+};
+
+function normalizeMeasureUnit(value: MeasureUnit | number): MeasureUnit {
+  if (typeof value === "number") return MEASURE_UNIT_FROM_INT[value] ?? "U";
+  return value;
+}
+
 interface InventoryMaterialDto {
   id: string;
   name: string;
   quantity: number;
   unitCost: number;
-  measureUnit: MeasureUnit;
+  measureUnit: MeasureUnit | number;
   status: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+interface InventoryDropdownDto {
+  id: string;
+  name: string;
+  measureUnit: MeasureUnit | number;
 }
 
 function mapMaterial(dto: InventoryMaterialDto): InventoryMaterial {
@@ -31,7 +48,7 @@ function mapMaterial(dto: InventoryMaterialDto): InventoryMaterial {
     name: dto.name,
     quantity: dto.quantity,
     unitCost: dto.unitCost,
-    measureUnit: dto.measureUnit,
+    measureUnit: normalizeMeasureUnit(dto.measureUnit),
     status: dto.status,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
@@ -79,7 +96,8 @@ export function createInventoryApi(token: string) {
 
     getDropdown: async (status?: boolean): Promise<InventoryDropdownItem[]> => {
       const qs = status !== undefined ? `?status=${status}` : "";
-      return api.get<InventoryDropdownItem[]>(`/inventory/dropdown${qs}`);
+      const dtos = await api.get<InventoryDropdownDto[]>(`/inventory/dropdown${qs}`);
+      return dtos.map((d) => ({ ...d, measureUnit: normalizeMeasureUnit(d.measureUnit) }));
     },
   };
 }

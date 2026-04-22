@@ -1,6 +1,11 @@
 import { createApiClient, ItemsResponse, unwrapItemsResponse } from "./client";
 import { Product, ProductDropdownItem } from "@/types/products";
-import { ProductRecipe, SetRecipeInput } from "@/types/inventory";
+import { ProductRecipe, SetRecipeInput, MeasureUnit } from "@/types/inventory";
+
+const MEASURE_UNIT_FROM_INT: Record<number, MeasureUnit> = { 1: "ML", 2: "G", 3: "U" };
+function normalizeMeasureUnit(v: MeasureUnit | number): MeasureUnit {
+  return typeof v === "number" ? (MEASURE_UNIT_FROM_INT[v] ?? "U") : v;
+}
 
 interface ProductDto {
   id: string;
@@ -70,8 +75,16 @@ export function createProductsApi(token: string) {
 
     delete: (id: string) => api.delete<void>(`/products/${id}`),
 
-    getRecipe: (productId: string) =>
-      api.get<ProductRecipe>(`/products/${productId}/recipe`),
+    getRecipe: async (productId: string): Promise<ProductRecipe> => {
+      const raw = await api.get<ProductRecipe>(`/products/${productId}/recipe`);
+      return {
+        ...raw,
+        items: raw.items.map((item) => ({
+          ...item,
+          measureUnit: normalizeMeasureUnit(item.measureUnit as MeasureUnit | number),
+        })),
+      };
+    },
 
     setRecipe: (productId: string, input: SetRecipeInput) =>
       api.put<ProductRecipe>(`/products/${productId}/recipe`, input),
