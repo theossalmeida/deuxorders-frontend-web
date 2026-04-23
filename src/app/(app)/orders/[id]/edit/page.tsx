@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { formatCents } from "@/lib/format";
 import { STATUS_META } from "@/lib/order-status";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
-import { useOrder, useUpdateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
+import { useOrder, useUpdateOrder, useDeleteReference, useOrdersDropdownData } from "@/hooks/useOrders";
 import { useToken } from "@/hooks/useToken";
 import {
   ORDER_STATUS_INT,
@@ -33,6 +33,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
   const token = useToken();
   const { data: order, isLoading } = useOrder(id);
   const updateOrder = useUpdateOrder(id);
+  const deleteReference = useDeleteReference(id);
   const { products } = useOrdersDropdownData();
 
   // Local form state — initialized from order data
@@ -43,9 +44,16 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
   const [date, setDate] = useState<string | null>(null);
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState("");
-  const [keptReferences, setKeptReferences] = useState<string[] | null>(null);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+
+  const productCategoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of products.data ?? []) {
+      if (p.category) map.set(p.id, p.category);
+    }
+    return map;
+  }, [products.data]);
 
   // Derive current values (form state or order defaults)
   const currentStatus = status ?? order?.status ?? "Pending";
@@ -61,6 +69,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
         observation: i.observation ?? undefined,
         massa: i.massa ?? undefined,
         sabor: i.sabor ?? undefined,
+        category: productCategoryMap.get(i.productId),
       })) ??
       []);
   const currentDeliveryMode: DeliveryMode =
@@ -71,7 +80,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     (order?.delivery && order.delivery !== "pickup" ? order.delivery : "");
   const currentDate =
     date ?? (order?.deliveryDate ? order.deliveryDate.slice(0, 16) : "");
-  const currentReferences = keptReferences ?? (order?.references ?? []);
+  const currentReferences = order?.references ?? [];
 
   const subtotalCents = currentItems.reduce(
     (a, i) => a + i.unitPriceCents * i.qty,
@@ -125,8 +134,6 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
         uploadedKeys.push(objectKey);
       }
 
-      const allReferences = [...currentReferences, ...uploadedKeys];
-
       updateOrder.mutate(
         {
           status: ORDER_STATUS_INT[currentStatus],
@@ -143,7 +150,9 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             massa: i.massa,
             sabor: i.sabor,
           })),
-          references: allReferences.length ? allReferences : undefined,
+          references: uploadedKeys.length
+            ? [...currentReferences, ...uploadedKeys]
+            : undefined,
         },
         { onSuccess: () => router.push(`/orders/${id}`) },
       );
@@ -327,9 +336,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             </div>
             <EditReferenceManager
               existingKeys={currentReferences}
-              onRemoveExisting={(key) =>
-                setKeptReferences(currentReferences.filter((k) => k !== key))
-              }
+              onRemoveExisting={(key) => deleteReference.mutate(key)}
               newFiles={newImageFiles}
               onNewFilesChange={setNewImageFiles}
             />
