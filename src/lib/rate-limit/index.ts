@@ -23,16 +23,6 @@ const ipLimiter = new RateLimiterMemory({
 });
 
 /**
- * Rate limiter for the token read endpoint to limit how fast a script can
- * drain the session token (relevant in post-XSS scenarios).
- */
-const tokenLimiter = new RateLimiterMemory({
-  points: 60,
-  duration: 60,
-  blockDuration: 30,
-});
-
-/**
  * Reads the trusted IP set by the proxy middleware.
  * The proxy overwrites this header from req.ip (Vercel Edge), so a client
  * cannot spoof it via a user-supplied X-Forwarded-For value.
@@ -67,22 +57,6 @@ export async function checkLoginRateLimit(
     const rejection = rej as { msBeforeNext?: number };
     const retryAfterSeconds = Math.ceil(
       (rejection?.msBeforeNext ?? 60000) / 1000
-    );
-    return { allowed: false, retryAfterSeconds };
-  }
-}
-
-export async function checkTokenRateLimit(
-  req: NextRequest
-): Promise<RateLimitResult> {
-  const ip = extractIp(req);
-  try {
-    await tokenLimiter.consume(ip);
-    return { allowed: true, retryAfterSeconds: 0 };
-  } catch (rej: unknown) {
-    const rejection = rej as { msBeforeNext?: number };
-    const retryAfterSeconds = Math.ceil(
-      (rejection?.msBeforeNext ?? 30000) / 1000
     );
     return { allowed: false, retryAfterSeconds };
   }

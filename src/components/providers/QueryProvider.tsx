@@ -1,9 +1,27 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
+type AuthSessionContextValue = {
+  token: string | null;
+};
+
+const AuthSessionContext = createContext<AuthSessionContextValue>({
+  token: null,
+});
+
+export function useSessionToken() {
+  return useContext(AuthSessionContext).token;
+}
+
+export function QueryProvider({
+  children,
+  sessionToken,
+}: {
+  children: React.ReactNode;
+  sessionToken: string | null;
+}) {
   const [client] = useState(
     () =>
       new QueryClient({
@@ -26,5 +44,9 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       })
   );
 
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <AuthSessionContext.Provider value={{ token: sessionToken }}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </AuthSessionContext.Provider>
+  );
 }
