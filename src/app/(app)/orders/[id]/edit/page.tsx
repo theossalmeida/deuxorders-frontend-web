@@ -14,10 +14,14 @@ import {
 } from "@/components/ui/select";
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
+import { EditReferenceManager } from "@/components/features/orders/edit-reference-manager";
 import { Input } from "@/components/ui/input";
 import { formatCents } from "@/lib/format";
+import { extractReferenceObjectKey } from "@/lib/image-ref";
 import { STATUS_META } from "@/lib/order-status";
-import { useOrder, useUpdateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
+import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
+import { useOrder, useUpdateOrder, useDeleteReference, useOrdersDropdownData } from "@/hooks/useOrders";
+import { useToken } from "@/hooks/useToken";
 import {
   ORDER_STATUS_INT,
   ALL_ORDER_STATUSES,
@@ -27,8 +31,10 @@ import {
 export default function EditOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const token = useToken();
   const { data: order, isLoading } = useOrder(id);
   const updateOrder = useUpdateOrder(id);
+  const deleteReference = useDeleteReference(id);
   const { products } = useOrdersDropdownData();
 
   // Local form state — initialized from order data
@@ -39,6 +45,16 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
   const [date, setDate] = useState<string | null>(null);
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const productCategoryMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of products.data ?? []) {
+      if (p.category) map.set(p.id, p.category);
+    }
+    return map;
+  }, [products.data]);
 
   // Derive current values (form state or order defaults)
   const currentStatus = status ?? order?.status ?? "Pending";
@@ -51,6 +67,10 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
         name: i.productName,
         unitPriceCents: i.paidUnitPriceCents,
         qty: i.quantity,
+        observation: i.observation ?? undefined,
+        massa: i.massa ?? undefined,
+        sabor: i.sabor ?? undefined,
+        category: productCategoryMap.get(i.productId),
       })) ??
       []);
   const currentDeliveryMode: DeliveryMode =
@@ -61,6 +81,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     (order?.delivery && order.delivery !== "pickup" ? order.delivery : "");
   const currentDate =
     date ?? (order?.deliveryDate ? order.deliveryDate.slice(0, 16) : "");
+  const currentReferences = order?.references ?? [];
 
   const subtotalCents = currentItems.reduce(
     (a, i) => a + i.unitPriceCents * i.qty,
@@ -75,7 +96,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     [products.data, productSearch],
   );
 
-  function addProduct(p: { id: string; name: string; priceCents: number }) {
+  function addProduct(p: { id: string; name: string; priceCents: number; category: string | null }) {
     const base = currentItems;
     const existing = base.findIndex((i) => i.productId === p.id);
     if (existing >= 0) {
@@ -85,32 +106,58 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     } else {
       setItems([
         ...base,
-        { productId: p.id, name: p.name, unitPriceCents: p.priceCents, qty: 1 },
+        {
+          productId: p.id,
+          name: p.name,
+          unitPriceCents: p.priceCents,
+          category: p.category ?? undefined,
+          qty: 1,
+        },
       ]);
     }
     setShowProductPicker(false);
     setProductSearch("");
   }
 
-  function handleSave() {
-    if (!order) return;
+  async function handleSave() {
+    if (!order || !token) return;
+    setIsSaving(true);
 
-    updateOrder.mutate(
-      {
-        status: ORDER_STATUS_INT[currentStatus],
-        deliveryDate: new Date(currentDate).toISOString(),
-        delivery:
-          currentDeliveryMode === "entrega"
-            ? currentAddress || "Entrega"
-            : "pickup",
-        items: currentItems.map((i) => ({
-          productId: i.productId,
-          quantity: i.qty,
-          paidUnitPriceCents: i.unitPriceCents,
-        })),
-      },
-      { onSuccess: () => router.push(`/orders/${id}`) },
-    );
+    try {
+      const api = createOrdersApi(token);
+      const uploadedKeys: string[] = [];
+      for (const file of newImageFiles) {
+        const { uploadUrl, objectKey } = await api.getPresignedUrl({
+          fileName: file.name,
+          contentType: file.type,
+        });
+        await uploadToPresignedUrl(uploadUrl, file, file.type);
+        uploadedKeys.push(objectKey);
+      }
+
+      updateOrder.mutate(
+        {
+          status: ORDER_STATUS_INT[currentStatus],
+          deliveryDate: new Date(currentDate).toISOString(),
+          delivery:
+            currentDeliveryMode === "entrega"
+              ? currentAddress || "Entrega"
+              : "pickup",
+          items: currentItems.map((i) => ({
+            productId: i.productId,
+            quantity: i.qty,
+            paidUnitPriceCents: i.unitPriceCents,
+            observation: i.observation,
+            massa: i.massa,
+            sabor: i.sabor,
+          })),
+          references: uploadedKeys.length ? uploadedKeys : undefined,
+        },
+        { onSuccess: () => router.push(`/orders/${id}`) },
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   if (isLoading || !order) {
@@ -142,9 +189,9 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
               <Button
                 size="sm"
                 onClick={handleSave}
-                disabled={updateOrder.isPending}
+                disabled={isSaving || updateOrder.isPending}
               >
-                {updateOrder.isPending ? "Salvando..." : "Salvar"}
+                {isSaving || updateOrder.isPending ? "Salvando..." : "Salvar"}
               </Button>
             </>
           }
@@ -281,12 +328,27 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             />
           </div>
 
+          {/* References section */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Referências
+            </div>
+            <EditReferenceManager
+              existingKeys={currentReferences}
+              onRemoveExisting={(key) =>
+                deleteReference.mutate(extractReferenceObjectKey(key))
+              }
+              newFiles={newImageFiles}
+              onNewFilesChange={setNewImageFiles}
+            />
+          </div>
+
           {/* Summary on mobile */}
           <div className="md:hidden">
             <SummaryCard
               subtotalCents={subtotalCents}
               deliveryMode={currentDeliveryMode}
-              isPending={updateOrder.isPending}
+              isPending={isSaving || updateOrder.isPending}
               onSave={handleSave}
             />
           </div>
@@ -298,7 +360,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             <SummaryCard
               subtotalCents={subtotalCents}
               deliveryMode={currentDeliveryMode}
-              isPending={updateOrder.isPending}
+              isPending={isSaving || updateOrder.isPending}
               onSave={handleSave}
             />
           </div>
@@ -317,10 +379,10 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
           </Button>
           <Button
             className="flex-[2]"
-            disabled={updateOrder.isPending}
+            disabled={isSaving || updateOrder.isPending}
             onClick={handleSave}
           >
-            {updateOrder.isPending ? "Salvando..." : "Salvar alterações"}
+            {isSaving || updateOrder.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
         </div>
       </div>

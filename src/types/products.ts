@@ -14,4 +14,5 @@ export interface ProductDropdownItem {
   id: string;
   name: string;
   priceCents: number;
+  category: string | null;
 }

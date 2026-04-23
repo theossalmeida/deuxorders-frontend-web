@@ -108,8 +108,10 @@ export function useDeleteReference(orderId: string) {
   return useMutation({
     mutationFn: (objectKey: string) =>
       createOrdersApi(token!).deleteReference(orderId, objectKey),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      qc.setQueryData(["orders", orderId], updated);
       qc.invalidateQueries({ queryKey: ["orders", orderId] });
+      toast.success("Referência removida.");
     },
     onError: (e: Error) => toast.error(e.message),
   });

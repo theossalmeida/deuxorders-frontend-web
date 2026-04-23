@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Truck, ShoppingBag, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Truck, ShoppingBag, Pencil, Trash2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +13,7 @@ import { OrderItemsTable } from "@/components/features/orders/order-items-table"
 import { formatCents, formatDate, formatTime } from "@/lib/format";
 import { STATUS_META } from "@/lib/order-status";
 import { useOrder, useUpdateOrder, useCompleteOrder, useDeleteOrder } from "@/hooks/useOrders";
+import { buildRefSrc } from "@/lib/image-ref";
 import { ORDER_STATUS_INT, type OrderStatus } from "@/types/orders";
 
 const NEXT_STATUS: Partial<Record<OrderStatus, OrderStatus>> = {
@@ -210,6 +211,33 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
           </div>
+
+          {/* References card */}
+          {order.references.length > 0 && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <ImageIcon size={12} />
+                Referências
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {order.references.map((key) => (
+                  <a
+                    key={key}
+                    href={buildRefSrc(key)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block h-20 w-20 overflow-hidden rounded-lg border border-border transition hover:ring-2 hover:ring-brand"
+                  >
+                    <img
+                      src={buildRefSrc(key)}
+                      alt="Referência"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Client card */}
           <div className="rounded-xl border border-border bg-card p-4">
