@@ -18,7 +18,7 @@ export interface OrderUpdateResult {
 }
 import { ClientDropdownItem } from "@/types/clients";
 import { ProductDropdownItem } from "@/types/products";
-import { mapProductDropdown, type ProductDropdownDto } from "./products";
+import { ItemsResponse, unwrapItemsResponse } from "./client";
 
 interface OrderItemDto {
   productId: string;
@@ -234,14 +234,26 @@ export function createOrdersApi(token: string) {
       api.post<PresignedUrlResponse>("/orders/references/presigned-url", req),
 
     deleteReference: async (orderId: string, objectKey: string) =>
-      mapOrder(await api.delete<OrderDto>(`/orders/${orderId}/references`, { objectKey })),
+      mapOrder(
+        await api.delete<OrderDto>(
+          `/orders/${orderId}/references?objectKey=${encodeURIComponent(objectKey)}`,
+        ),
+      ),
 
     getClientsDropdown: () =>
       api.get<ClientDropdownItem[]>("/clients/dropdown?status=true"),
 
     getProductsDropdown: async (): Promise<ProductDropdownItem[]> => {
-      const dtos = await api.get<ProductDropdownDto[]>("/products/dropdown?status=true");
-      return dtos.map(mapProductDropdown);
+      const raw = await api.get<
+        { id: string; name: string; price: number; category: string | null }[]
+        | ItemsResponse<{ id: string; name: string; price: number; category: string | null }>
+      >("/products/all?status=true&size=200");
+      return unwrapItemsResponse(raw).map((p) => ({
+        id: p.id,
+        name: p.name,
+        priceCents: p.price,
+        category: p.category,
+      }));
     },
   };
 }
