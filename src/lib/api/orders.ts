@@ -235,9 +235,7 @@ export function createOrdersApi(token: string) {
 
     deleteReference: async (orderId: string, objectKey: string) =>
       mapOrder(
-        await api.delete<OrderDto>(
-          `/orders/${orderId}/references?objectKey=${encodeURIComponent(objectKey)}`,
-        ),
+        await api.delete<OrderDto>(`/orders/${orderId}/references`, { objectKey }),
       ),
 
     getClientsDropdown: () =>

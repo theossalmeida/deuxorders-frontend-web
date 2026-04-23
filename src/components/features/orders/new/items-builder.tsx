@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Minus, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toneFor } from "@/lib/category-tone";
 import { formatCents } from "@/lib/format";
+import { isCakeCategory } from "@/lib/product-categories";
 import { cn } from "@/lib/utils";
 
 export type OrderItemDraft = {
@@ -17,9 +18,6 @@ export type OrderItemDraft = {
   massa?: string;
   sabor?: string;
 };
-
-const isBolo = (category?: string) =>
-  category?.toLowerCase() === "bolos";
 
 export function ItemsBuilder({
   items,
@@ -62,7 +60,7 @@ export function ItemsBuilder({
       {items.map((it, i) => {
         const tone = toneFor(it.category);
         const expanded = expandedIdx === i;
-        const isCake = isBolo(it.category);
+        const isCake = isCakeCategory(it.category) || !!it.massa || !!it.sabor;
         const hasDetails = !!it.observation || !!it.massa || !!it.sabor;
 
         return (

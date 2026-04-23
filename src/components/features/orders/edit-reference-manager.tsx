@@ -50,7 +50,7 @@ export function EditReferenceManager({
             <button
               type="button"
               onClick={() => onRemoveExisting(key)}
-              className="absolute top-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-destructive opacity-0 transition group-hover:opacity-100"
+              className="absolute top-0.5 right-0.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-destructive opacity-100 transition md:opacity-0 md:group-hover:opacity-100"
               aria-label="Remover referência"
             >
               <X size={12} />
@@ -71,7 +71,7 @@ export function EditReferenceManager({
             <button
               type="button"
               onClick={() => removeNewFile(i)}
-              className="absolute top-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-destructive opacity-0 transition group-hover:opacity-100"
+              className="absolute top-0.5 right-0.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-destructive opacity-100 transition md:opacity-0 md:group-hover:opacity-100"
               aria-label="Remover imagem"
             >
               <X size={12} />
