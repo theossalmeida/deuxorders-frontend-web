@@ -67,7 +67,7 @@ export function useCashFlowChart(filters: Pick<CashFlowFilters, "from" | "to">) 
   return useQuery({
     queryKey: ["cash", "chart", filters],
     queryFn: async () => {
-      const result = await createCashApi(token!).list({ ...filters, size: 500 });
+      const result = await createCashApi(token!).list(filters);
       return buildChartData(result.items);
     },
     enabled: !!token,

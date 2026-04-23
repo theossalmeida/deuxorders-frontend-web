@@ -12,12 +12,18 @@ import {
   OrderStatus,
 } from "@/types/orders";
 
-export function useOrders(params?: { page?: number; size?: number; status?: OrderStatus }) {
+export function useOrders(params?: {
+  page?: number;
+  size?: number;
+  status?: OrderStatus;
+  from?: string;
+  to?: string;
+  search?: string;
+}) {
   const token = useToken();
-  
+
   return useQuery({
-    queryKey: ["orders", params, token], 
-    // O params agora pode conter o 'size'
+    queryKey: ["orders", params],
     queryFn: () => createOrdersApi(token!).getAll(params),
     enabled: !!token,
   });

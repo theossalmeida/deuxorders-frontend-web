@@ -14,18 +14,20 @@ export default function ClientsPage() {
   const [search, setSearch] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
-  const { data: clients = [], isLoading } = useClients({ size: 500 });
+  const { data: clients = [], isLoading } = useClients({
+    search: search || undefined,
+    status: showInactive ? undefined : true,
+  });
 
   const filtered = useMemo(
     () =>
       clients.filter(
         (c) =>
-          (showInactive || c.status) &&
-          (search === "" ||
-            c.name.toLowerCase().includes(search.toLowerCase()) ||
-            c.mobile.includes(search)),
+          search === "" ||
+          c.name.toLowerCase().includes(search.toLowerCase()) ||
+          c.mobile.includes(search),
       ),
-    [clients, search, showInactive],
+    [clients, search],
   );
 
   return (

@@ -86,6 +86,21 @@ export function formatPercentDelta(v: number): string {
   return `${sign}${v.toFixed(1).replace(".", ",")}%`;
 }
 
+/** Format a Date as a local YYYY-MM-DD string (no UTC shift). */
+export function localISODate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/** Format a Date as a local YYYY-MM-DDTHH:mm string for datetime-local inputs. */
+export function localISODatetime(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${localISODate(date)}T${hh}:${mm}`;
+}
+
 export function toISODate(date: Date): string {
   return date.toISOString();
 }

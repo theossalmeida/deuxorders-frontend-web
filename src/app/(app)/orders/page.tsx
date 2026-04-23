@@ -11,65 +11,56 @@ import { OrdersToolbar } from "@/components/features/orders/orders-toolbar";
 import { OrdersTable } from "@/components/features/orders/orders-table";
 import { OrdersMobileList } from "@/components/features/orders/orders-mobile-list";
 import { useOrders } from "@/hooks/useOrders";
+import { localISODate } from "@/lib/format";
 import type { Order, OrderStatus } from "@/types/orders";
 
 export default function OrdersPage() {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus | "all">("all");
   const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState(() => {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
-  });
+  const [dateFrom, setDateFrom] = useState(() => localISODate(new Date()));
   const [dateTo, setDateTo] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 6);
-    return d.toISOString().slice(0, 10);
+    return localISODate(d);
   });
 
-  const { data, isLoading } = useOrders({ size: 200 });
+  const { data, isLoading } = useOrders({
+    status: status !== "all" ? status : undefined,
+    from: dateFrom || undefined,
+    to: dateTo || undefined,
+  });
   const orders: Order[] = data?.items ?? [];
 
-  const dateSearchFiltered = useMemo(
+  const filtered = useMemo(
     () =>
-      orders.filter((o) => {
-        const day = o.deliveryDate.slice(0, 10);
-        return (
-          (search === "" ||
-            o.clientName.toLowerCase().includes(search.toLowerCase()) ||
-            o.id.toLowerCase().includes(search.toLowerCase())) &&
-          (!dateFrom || day >= dateFrom) &&
-          (!dateTo || day <= dateTo)
-        );
-      }),
-    [orders, search, dateFrom, dateTo],
+      search === ""
+        ? orders
+        : orders.filter(
+            (o) =>
+              o.clientName.toLowerCase().includes(search.toLowerCase()) ||
+              o.id.toLowerCase().includes(search.toLowerCase()),
+          ),
+    [orders, search],
   );
 
   const counts = useMemo(
     () =>
-      dateSearchFiltered.reduce<Record<string, number>>((acc, o) => {
+      orders.reduce<Record<string, number>>((acc, o) => {
         acc[o.status] = (acc[o.status] ?? 0) + 1;
         return acc;
       }, {}),
-    [dateSearchFiltered],
-  );
-
-  const filtered = useMemo(
-    () =>
-      status === "all"
-        ? dateSearchFiltered
-        : dateSearchFiltered.filter((o) => o.status === status),
-    [dateSearchFiltered, status],
+    [orders],
   );
 
   const hasFilters = status !== "all" || search !== "";
   const clearFilters = () => {
     setStatus("all");
     setSearch("");
-    const today = new Date().toISOString().slice(0, 10);
-    const plus6 = new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10);
-    setDateFrom(today);
-    setDateTo(plus6);
+    setDateFrom(localISODate(new Date()));
+    const d = new Date();
+    d.setDate(d.getDate() + 6);
+    setDateTo(localISODate(d));
   };
 
   return (
