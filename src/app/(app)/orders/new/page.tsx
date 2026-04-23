@@ -11,6 +11,7 @@ import { OrderWizardStepper, type WizardStep } from "@/components/features/order
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
+import { ReferenceUploader } from "@/components/features/orders/new/reference-uploader";
 import { formatCents } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 
@@ -32,6 +33,7 @@ export default function NewOrderPage() {
   const [address, setAddress] = useState("");
   const [date, setDate] = useState(defaultDatetime);
   const [payment, setPayment] = useState<PaymentMethod>("pix");
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   const { clients, products } = useOrdersDropdownData();
   const createOrder = useCreateOrder();
@@ -56,14 +58,23 @@ export default function NewOrderPage() {
 
   const selectedClient = clients.data?.find((c) => c.id === clientId);
 
-  function addProduct(p: { id: string; name: string; priceCents: number }) {
+  function addProduct(p: { id: string; name: string; priceCents: number; category: string | null }) {
     const existing = items.findIndex((i) => i.productId === p.id);
     if (existing >= 0) {
       const next = [...items];
-      next[existing].qty += 1;
+      next[existing] = { ...next[existing], qty: next[existing].qty + 1 };
       setItems(next);
     } else {
-      setItems([...items, { productId: p.id, name: p.name, unitPriceCents: p.priceCents, qty: 1 }]);
+      setItems([
+        ...items,
+        {
+          productId: p.id,
+          name: p.name,
+          unitPriceCents: p.priceCents,
+          category: p.category ?? undefined,
+          qty: 1,
+        },
+      ]);
     }
     setShowProductPicker(false);
     setProductSearch("");
@@ -75,10 +86,17 @@ export default function NewOrderPage() {
       input: {
         clientId,
         deliveryDate: new Date(date).toISOString(),
-        items: items.map((i) => ({ productId: i.productId, quantity: i.qty, unitPriceCents: i.unitPriceCents })),
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.qty,
+          unitPriceCents: i.unitPriceCents,
+          observation: i.observation,
+          massa: i.massa,
+          sabor: i.sabor,
+        })),
         delivery: deliveryMode === "entrega" ? address || "Entrega" : "pickup",
       },
-      imageFiles: [],
+      imageFiles,
     });
   }
 
@@ -272,6 +290,14 @@ export default function NewOrderPage() {
               date={date}
               onDateChange={setDate}
             />
+          </div>
+
+          {/* References section */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Referências
+            </div>
+            <ReferenceUploader files={imageFiles} onChange={setImageFiles} />
           </div>
 
           {/* Summary on mobile */}

@@ -23,6 +23,7 @@ export interface ProductDropdownDto {
   id: string;
   name: string;
   price: number;
+  category: string | null;
 }
 
 function mapProduct(dto: ProductDto): Product {
@@ -40,7 +41,7 @@ function mapProduct(dto: ProductDto): Product {
 }
 
 export function mapProductDropdown(dto: ProductDropdownDto): ProductDropdownItem {
-  return { id: dto.id, name: dto.name, priceCents: dto.price };
+  return { id: dto.id, name: dto.name, priceCents: dto.price, category: dto.category };
 }
 
 export function createProductsApi(token: string) {

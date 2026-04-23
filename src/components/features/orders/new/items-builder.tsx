@@ -1,6 +1,8 @@
 "use client";
 
-import { Minus, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Minus, Plus, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toneFor } from "@/lib/category-tone";
 import { formatCents } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -11,7 +13,13 @@ export type OrderItemDraft = {
   category?: string;
   unitPriceCents: number;
   qty: number;
+  observation?: string;
+  massa?: string;
+  sabor?: string;
 };
+
+const isBolo = (category?: string) =>
+  category?.toLowerCase() === "bolos";
 
 export function ItemsBuilder({
   items,
@@ -25,6 +33,7 @@ export function ItemsBuilder({
   size?: "sm" | "md";
 }) {
   const btn = size === "sm" ? "h-[22px] w-[22px]" : "h-[26px] w-[26px]";
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   function updateQty(i: number, delta: number) {
     const next = [...items];
@@ -32,63 +41,134 @@ export function ItemsBuilder({
     onChange(next);
   }
 
+  function updateField(i: number, field: "observation" | "massa" | "sabor", value: string) {
+    const next = [...items];
+    next[i] = { ...next[i], [field]: value || undefined };
+    onChange(next);
+  }
+
   function remove(i: number) {
     onChange(items.filter((_, idx) => idx !== i));
+    if (expandedIdx === i) setExpandedIdx(null);
+    else if (expandedIdx !== null && expandedIdx > i) setExpandedIdx(expandedIdx - 1);
+  }
+
+  function toggleExpand(i: number) {
+    setExpandedIdx(expandedIdx === i ? null : i);
   }
 
   return (
     <div className="space-y-2">
       {items.map((it, i) => {
         const tone = toneFor(it.category);
+        const expanded = expandedIdx === i;
+        const isCake = isBolo(it.category);
+        const hasDetails = !!it.observation || !!it.massa || !!it.sabor;
+
         return (
           <div
-            key={it.productId}
-            className="flex items-center gap-3 rounded-lg border border-border bg-card p-3"
+            key={`${it.productId}-${i}`}
+            className="rounded-lg border border-border bg-card"
           >
-            <div
-              className="h-10 w-10 shrink-0 rounded-md"
-              style={{
-                background: `repeating-linear-gradient(135deg, ${tone}22, ${tone}22 4px, ${tone}11 4px, ${tone}11 8px)`,
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{it.name}</div>
-              <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                {formatCents(it.unitPriceCents)} · un
+            <div className="flex items-center gap-3 p-3">
+              <div
+                className="h-10 w-10 shrink-0 rounded-md"
+                style={{
+                  background: `repeating-linear-gradient(135deg, ${tone}22, ${tone}22 4px, ${tone}11 4px, ${tone}11 8px)`,
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">{it.name}</div>
+                <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                  {formatCents(it.unitPriceCents)} · un
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => updateQty(i, -1)}
+                  className={cn("flex items-center justify-center rounded-md bg-muted text-foreground", btn)}
+                  aria-label="Diminuir quantidade"
+                >
+                  <Minus size={12} />
+                </button>
+                <span className="min-w-[18px] text-center font-mono text-sm font-semibold">
+                  {it.qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => updateQty(i, 1)}
+                  className={cn("flex items-center justify-center rounded-md bg-foreground text-background", btn)}
+                  aria-label="Aumentar quantidade"
+                >
+                  <Plus size={12} />
+                </button>
+              </div>
+              <div className="min-w-[70px] text-right font-mono text-sm font-semibold">
+                {formatCents(it.unitPriceCents * it.qty)}
+              </div>
               <button
                 type="button"
-                onClick={() => updateQty(i, -1)}
-                className={cn("flex items-center justify-center rounded-md bg-muted text-foreground", btn)}
-                aria-label="Diminuir quantidade"
+                onClick={() => toggleExpand(i)}
+                className={cn(
+                  "text-muted-foreground hover:text-foreground",
+                  hasDetails && !expanded && "text-brand",
+                )}
+                aria-label={expanded ? "Recolher detalhes" : "Expandir detalhes"}
               >
-                <Minus size={12} />
+                {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </button>
-              <span className="min-w-[18px] text-center font-mono text-sm font-semibold">
-                {it.qty}
-              </span>
               <button
                 type="button"
-                onClick={() => updateQty(i, 1)}
-                className={cn("flex items-center justify-center rounded-md bg-foreground text-background", btn)}
-                aria-label="Aumentar quantidade"
+                onClick={() => remove(i)}
+                className="text-muted-foreground hover:text-destructive"
+                aria-label="Remover item"
               >
-                <Plus size={12} />
+                <X size={14} />
               </button>
             </div>
-            <div className="min-w-[70px] text-right font-mono text-sm font-semibold">
-              {formatCents(it.unitPriceCents * it.qty)}
-            </div>
-            <button
-              type="button"
-              onClick={() => remove(i)}
-              className="text-muted-foreground hover:text-destructive"
-              aria-label="Remover item"
-            >
-              <X size={14} />
-            </button>
+
+            {expanded && (
+              <div className="border-t border-border px-3 pb-3 pt-2 space-y-2">
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
+                    Observação
+                  </label>
+                  <Input
+                    value={it.observation ?? ""}
+                    onChange={(e) => updateField(i, "observation", e.target.value)}
+                    placeholder="Ex: sem glúten, cobertura extra..."
+                    className="h-8 text-sm"
+                  />
+                </div>
+                {isCake && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
+                        Sabor
+                      </label>
+                      <Input
+                        value={it.sabor ?? ""}
+                        onChange={(e) => updateField(i, "sabor", e.target.value)}
+                        placeholder="Ex: chocolate, morango..."
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
+                        Massa
+                      </label>
+                      <Input
+                        value={it.massa ?? ""}
+                        onChange={(e) => updateField(i, "massa", e.target.value)}
+                        placeholder="Ex: branca, chocolate..."
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
       })}
