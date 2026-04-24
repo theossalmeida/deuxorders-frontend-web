@@ -15,7 +15,7 @@ export function useProduct(id: string) {
   });
 }
 
-export function useProducts(params?: { search?: string; status?: boolean }) {
+export function useProducts(params?: { search?: string; status?: boolean; size?: number }) {
   const token = useToken();
   return useQuery({
     queryKey: ["products", params],

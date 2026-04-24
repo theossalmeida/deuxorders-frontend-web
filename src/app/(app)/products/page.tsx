@@ -15,7 +15,7 @@ export default function ProductsPage() {
   const [showInactive, setShowInactive] = useState(false);
 
   const { data: products = [], isLoading } = useProducts(
-    showInactive ? undefined : { status: true },
+    showInactive ? { size: 100 } : { status: true, size: 100 },
   );
 
   const categories = useMemo(

@@ -55,11 +55,12 @@ export function createProductsApi(token: string) {
   const api = createApiClient(token);
 
   return {
-    getAll: async (params?: { search?: string; status?: boolean }) => {
+    getAll: async (params?: { search?: string; status?: boolean; size?: number }) => {
       const search = new URLSearchParams();
       if (params?.search) search.set("search", params.search);
       if (params?.status !== undefined)
         search.set("status", String(params.status));
+      if (params?.size !== undefined) search.set("size", String(params.size));
       const qs = search.toString();
       const raw = await api.get<ProductDto[] | ItemsResponse<ProductDto>>(
         `/products/all${qs ? `?${qs}` : ""}`
