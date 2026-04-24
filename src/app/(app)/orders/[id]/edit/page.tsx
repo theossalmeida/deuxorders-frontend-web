@@ -16,7 +16,7 @@ import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { EditReferenceManager } from "@/components/features/orders/edit-reference-manager";
 import { Input } from "@/components/ui/input";
-import { formatCents } from "@/lib/format";
+import { apiDatetimeLocal, formatCents } from "@/lib/format";
 import { extractReferenceObjectKey } from "@/lib/image-ref";
 import { STATUS_META } from "@/lib/order-status";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
@@ -79,7 +79,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     address ??
     (order?.delivery && order.delivery !== "pickup" ? order.delivery : "");
   const currentDate =
-    date ?? (order?.deliveryDate ? order.deliveryDate.slice(0, 16) : "");
+    date ?? (order?.deliveryDate ? apiDatetimeLocal(order.deliveryDate) : "");
   const currentReferences = order?.references ?? [];
 
   const subtotalCents = currentItems.reduce(
@@ -136,7 +136,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
 
       await updateOrder.mutateAsync({
         status: ORDER_STATUS_INT[currentStatus],
-        deliveryDate: new Date(currentDate).toISOString(),
+        deliveryDate: currentDate,
         delivery:
           currentDeliveryMode === "entrega"
             ? currentAddress || "Entrega"

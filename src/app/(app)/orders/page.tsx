@@ -12,7 +12,7 @@ import { OrdersTable } from "@/components/features/orders/orders-table";
 import { OrdersMobileList } from "@/components/features/orders/orders-mobile-list";
 import { useOrders } from "@/hooks/useOrders";
 import { localISODate } from "@/lib/format";
-import type { Order, OrderStatus } from "@/types/orders";
+import type { OrderStatus } from "@/types/orders";
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -29,20 +29,9 @@ export default function OrdersPage() {
     status: status !== "all" ? status : undefined,
     from: dateFrom || undefined,
     to: dateTo || undefined,
+    search: search || undefined,
   });
-  const orders: Order[] = data?.items ?? [];
-
-  const filtered = useMemo(
-    () =>
-      search === ""
-        ? orders
-        : orders.filter(
-            (o) =>
-              o.clientName.toLowerCase().includes(search.toLowerCase()) ||
-              o.id.toLowerCase().includes(search.toLowerCase()),
-          ),
-    [orders, search],
-  );
+  const orders = useMemo(() => data?.items ?? [], [data]);
 
   const counts = useMemo(
     () =>
@@ -53,7 +42,7 @@ export default function OrdersPage() {
     [orders],
   );
 
-  const hasFilters = status !== "all" || search !== "";
+  const hasFilters = status !== "all" || search !== "" || !!dateFrom || !!dateTo;
   const clearFilters = () => {
     setStatus("all");
     setSearch("");
@@ -109,11 +98,11 @@ export default function OrdersPage() {
         ) : (
           <>
             <div className="hidden md:block">
-              <OrdersTable orders={filtered} onClearFilters={clearFilters} hasFilters={hasFilters} />
+              <OrdersTable orders={orders} onClearFilters={clearFilters} hasFilters={hasFilters} />
             </div>
             <div className="md:hidden">
               <OrdersMobileList
-                orders={filtered}
+                orders={orders}
                 onClearFilters={clearFilters}
                 hasFilters={hasFilters}
               />

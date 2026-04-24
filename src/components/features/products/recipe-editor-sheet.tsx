@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,16 +42,17 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
 
   const [items, setItems] = useState<DraftItem[]>([]);
 
-  useEffect(() => {
-    if (open) {
+  function handleOpenChange(v: boolean) {
+    if (v) {
       setItems(
         currentItems.map((i) => ({
           materialId: i.materialId,
           quantity: String(i.quantity),
-        }))
+        })),
       );
     }
-  }, [open, currentItems]);
+    onOpenChange(v);
+  }
 
   function addItem() {
     setItems((prev) => [...prev, { materialId: "", quantity: "" }]);
@@ -88,17 +89,17 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
     }));
 
     await mutateAsync({ items: wireItems });
-    onOpenChange(false);
+    handleOpenChange(false);
   }
 
   async function handleClear() {
     if (!confirm("Limpar a receita deste produto?")) return;
     await mutateAsync({ items: [] });
-    onOpenChange(false);
+    handleOpenChange(false);
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="sm:max-w-lg flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
           <SheetTitle>Receita — {productName}</SheetTitle>

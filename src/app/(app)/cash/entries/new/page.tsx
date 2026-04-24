@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Tag, Calendar, Link2 } from "lucide-react";
+import { Tag, Calendar, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,14 +24,6 @@ import {
 } from "@/types/cash";
 
 const CATEGORIES = Object.entries(CASH_CATEGORY_LABEL) as [CashFlowCategory, string][];
-
-function formatValueDisplay(cents: number, type: CashFlowType) {
-  const brl = (cents / 100).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return brl;
-}
 
 export default function NewCashEntryPage() {
   const router = useRouter();

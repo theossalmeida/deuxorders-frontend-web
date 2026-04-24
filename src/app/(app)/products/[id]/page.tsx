@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGallery } from "@/components/features/products/detail/product-gallery";
-import { toneFor } from "@/lib/category-tone";
 import { useProduct, useToggleProductStatus, useDeleteProduct, useUpdateProduct } from "@/hooks/useProducts";
 import { ProductRecipeCard } from "@/components/features/products/detail/product-recipe-card";
 
@@ -59,7 +58,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const resolvedPrice = price || product.priceCents / 100;
   const resolvedDescription = description || product.description || "";
   const resolvedCategory = category || product.category || "";
-  const tone = toneFor(product.category ?? undefined);
   const images = [product.image, null, null, null] as (string | null)[];
 
   function handleSave() {

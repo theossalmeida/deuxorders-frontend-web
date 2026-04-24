@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { formatDate, formatCents } from "@/lib/format";
+import { localDateKey, formatDate, formatCents } from "@/lib/format";
 import { CashEntryRow } from "./cash-entry-row";
 import { EmptyState } from "@/components/data/empty-state";
 import type { CashFlowEntry } from "@/types/cash";
@@ -46,7 +46,7 @@ export function EntriesMobileList({ entries }: { entries: CashFlowEntry[] }) {
 function groupByDay(entries: CashFlowEntry[]) {
   const map = new Map<string, CashFlowEntry[]>();
   for (const e of entries) {
-    const key = e.billingDate.slice(0, 10);
+    const key = localDateKey(e.billingDate);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(e);
   }

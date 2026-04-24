@@ -1,3 +1,6 @@
+import type { MeasureUnit } from "@/types/inventory";
+import { MEASURE_UNIT_SHORT } from "@/types/inventory";
+
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
@@ -51,30 +54,41 @@ const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
   minute: "2-digit",
 });
 
+function parseDateForDisplay(iso: string): Date {
+  const value = iso.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(`${value}T00:00:00`);
+  }
+  return new Date(value);
+}
+
+function dateKeyToUtcMs(dateKey: string): number {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  return Date.UTC(y, m - 1, d);
+}
+
 export function formatDate(iso: string): string {
-  return DATE_SHORT.format(new Date(iso));
+  return DATE_SHORT.format(parseDateForDisplay(iso));
 }
 
 export function formatDateLong(iso: string): string {
-  return DATE_LONG.format(new Date(iso));
+  return DATE_LONG.format(parseDateForDisplay(iso));
 }
 
 export function formatTime(iso: string): string {
-  return TIME_FMT.format(new Date(iso));
+  return TIME_FMT.format(parseDateForDisplay(iso));
 }
 
 /** @deprecated Use formatDate + formatTime separately. */
 export function formatDateTime(iso: string): string {
-  return DATETIME_FMT.format(new Date(iso));
+  return DATETIME_FMT.format(parseDateForDisplay(iso));
 }
 
 /** "Hoje", "Amanhã", "Ontem", or short date. */
 export function formatRelativeDay(iso: string): string {
-  const d = new Date(iso);
-  const today = new Date();
-  const diff = Math.round(
-    (d.setHours(0, 0, 0, 0) - today.setHours(0, 0, 0, 0)) / 86400000
-  );
+  const dateKey = localDateKey(iso);
+  const todayKey = localISODate(new Date());
+  const diff = Math.round((dateKeyToUtcMs(dateKey) - dateKeyToUtcMs(todayKey)) / 86400000);
   if (diff === 0) return "Hoje";
   if (diff === 1) return "Amanhã";
   if (diff === -1) return "Ontem";
@@ -101,9 +115,34 @@ export function localISODatetime(date: Date): string {
   return `${localISODate(date)}T${hh}:${mm}`;
 }
 
+/** Convert an API date/datetime value to the user's local calendar date key. */
+export function localDateKey(iso: string): string {
+  return localISODate(parseDateForDisplay(iso));
+}
 
-import type { MeasureUnit } from "@/types/inventory";
-import { MEASURE_UNIT_SHORT } from "@/types/inventory";
+/** Convert an API datetime value to a value suitable for datetime-local inputs. */
+export function apiDatetimeLocal(iso: string): string {
+  return localISODatetime(parseDateForDisplay(iso));
+}
+
+/**
+ * Convert local calendar date filters to UTC bounds for automatic UTC columns.
+ * The end is exclusive: selected end day + 1 at local 00:00.
+ */
+export function localDateRangeToUtcBounds(startDate?: string, endDate?: string) {
+  const startUtc = startDate
+    ? new Date(`${startDate}T00:00:00`).toISOString()
+    : undefined;
+
+  let endUtc: string | undefined;
+  if (endDate) {
+    const end = new Date(`${endDate}T00:00:00`);
+    end.setDate(end.getDate() + 1);
+    endUtc = end.toISOString();
+  }
+
+  return { startUtc, endUtc };
+}
 
 export function formatQuantity(quantity: number, unit: MeasureUnit): string {
   return `${quantity} ${MEASURE_UNIT_SHORT[unit]}`;

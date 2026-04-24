@@ -12,7 +12,6 @@ import { StatusChip } from "@/components/data/status-chip";
 import { OrderStatusPipeline } from "@/components/features/orders/order-status-pipeline";
 import { OrderItemsTable } from "@/components/features/orders/order-items-table";
 import { formatCents, formatDate, formatTime } from "@/lib/format";
-import { STATUS_META } from "@/lib/order-status";
 import { useOrder, useUpdateOrder, useCompleteOrder, useDeleteOrder } from "@/hooks/useOrders";
 import { buildRefSrc } from "@/lib/image-ref";
 import { ORDER_STATUS_INT, type OrderStatus } from "@/types/orders";

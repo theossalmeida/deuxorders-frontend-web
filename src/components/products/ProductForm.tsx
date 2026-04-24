@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Product } from "@/types/products";
 
 const schema = z.object({
@@ -99,7 +98,14 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
           {previewUrl ? (
             <div className="relative w-24 h-24 rounded-lg border overflow-hidden">
               {blobUrl ? (
-                <img src={blobUrl} alt="preview" className="w-full h-full object-cover" />
+                <Image
+                  src={blobUrl}
+                  alt="preview"
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                  unoptimized
+                />
               ) : (
                 <Image src={previewUrl} alt="preview" fill className="object-cover" sizes="96px" />
               )}

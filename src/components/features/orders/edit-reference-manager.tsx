@@ -75,10 +75,13 @@ export function EditReferenceManager({
             key={`new-${file.name}-${i}`}
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-dashed border-brand"
           >
-            <img
+            <Image
               src={newFilePreviewUrls[i]}
               alt={file.name}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="80px"
+              unoptimized
             />
             <button
               type="button"

@@ -24,7 +24,7 @@ export default function CashEntriesPage() {
   });
   const { data: summary } = useCashSummary({});
 
-  const entries = entriesPage?.items ?? [];
+  const entries = useMemo(() => entriesPage?.items ?? [], [entriesPage]);
 
   const filtered = useMemo(
     () =>

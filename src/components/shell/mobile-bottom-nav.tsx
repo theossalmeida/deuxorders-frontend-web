@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,9 +9,13 @@ import { NAV_GROUPS, MOBILE_GROUP_TABS, isNavItemActive } from "./nav-items";
 export function MobileBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
-
-  useEffect(() => { setOpenGroup(null); }, [pathname]);
+  const [openGroupState, setOpenGroupState] = useState<{
+    pathname: string;
+    group: string | null;
+  }>({ pathname, group: null });
+  const openGroup = openGroupState.pathname === pathname ? openGroupState.group : null;
+  const setOpenGroup = (group: string | null) =>
+    setOpenGroupState({ pathname, group });
 
   return (
     <>
@@ -50,7 +54,7 @@ export function MobileBottomNav() {
               if (group!.items.length === 1) {
                 router.push(group!.items[0].href);
               } else {
-                setOpenGroup((prev) => (prev === tab.groupLabel ? null : tab.groupLabel));
+                setOpenGroup(openGroup === tab.groupLabel ? null : tab.groupLabel);
               }
             }
 

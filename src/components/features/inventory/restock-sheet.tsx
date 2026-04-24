@@ -34,20 +34,18 @@ type Props = {
 
 export function RestockSheet({ material }: Props) {
   const [open, setOpen] = useState(false);
+  const [qtyInput, setQtyInput] = useState(0);
+  const [costInput, setCostInput] = useState(0);
   const { mutateAsync, isPending } = useRestockMaterial(material.id);
 
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
-
-  const qtyInput = watch("quantity") ?? 0;
-  const costInput = watch("totalCost") ?? 0;
 
   const addedQty = Math.round(qtyInput);
   const addedCost = Math.round(costInput * 100);
@@ -63,6 +61,8 @@ export function RestockSheet({ material }: Props) {
     const rawCost = Math.round(values.totalCost * 100);
     await mutateAsync({ quantity: Math.round(values.quantity), totalCost: rawCost });
     reset();
+    setQtyInput(0);
+    setCostInput(0);
     setOpen(false);
   }
 
@@ -90,7 +90,10 @@ export function RestockSheet({ material }: Props) {
               step="1"
               min="0"
               placeholder="0"
-              {...register("quantity", { valueAsNumber: true })}
+              {...register("quantity", {
+                valueAsNumber: true,
+                onChange: (e) => setQtyInput(Number(e.target.value) || 0),
+              })}
               className="font-mono"
             />
             {errors.quantity && <p className="text-xs text-destructive">{errors.quantity.message}</p>}
@@ -103,7 +106,10 @@ export function RestockSheet({ material }: Props) {
               step="0.01"
               min="0"
               placeholder="0,00"
-              {...register("totalCost", { valueAsNumber: true })}
+              {...register("totalCost", {
+                valueAsNumber: true,
+                onChange: (e) => setCostInput(Number(e.target.value) || 0),
+              })}
               className="font-mono"
             />
             {errors.totalCost && <p className="text-xs text-destructive">{errors.totalCost.message}</p>}

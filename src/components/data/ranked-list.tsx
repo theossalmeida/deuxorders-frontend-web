@@ -11,12 +11,9 @@ type Props<T> = {
 export function RankedList<T>({
   title,
   data,
-  getValue,
   renderItem,
   className,
 }: Props<T>) {
-  const max = Math.max(...data.map((_, i) => getValue(data[i], i)), 1);
-
   return (
     <div className={cn("rounded-xl border border-border bg-card p-4", className)}>
       <div className="text-xs font-semibold">{title}</div>
