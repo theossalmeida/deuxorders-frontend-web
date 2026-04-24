@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Search } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AppHeader } from "@/components/shell/app-header";
@@ -13,6 +14,7 @@ import { DeliverySection, type DeliveryMode } from "@/components/features/orders
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
 import { ReferenceUploader } from "@/components/features/orders/new/reference-uploader";
 import { formatCents, localISODatetime } from "@/lib/format";
+import { getOrderItemRecipeIssue } from "@/lib/recipe-options";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 import type { ProductDropdownItem } from "@/types/products";
 
@@ -76,6 +78,12 @@ export default function NewOrderPage() {
 
   function handleSubmit() {
     if (!clientId || items.length === 0) return;
+    const recipeIssue = items.map(getOrderItemRecipeIssue).find(Boolean);
+    if (recipeIssue) {
+      toast.error(recipeIssue);
+      return;
+    }
+
     createOrder.mutate({
       input: {
         clientId,

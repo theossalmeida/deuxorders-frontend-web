@@ -3,6 +3,7 @@
 import { use, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import {
@@ -19,6 +20,7 @@ import { EditReferenceManager } from "@/components/features/orders/edit-referenc
 import { apiDatetimeLocal, formatCents } from "@/lib/format";
 import { extractReferenceObjectKey } from "@/lib/image-ref";
 import { STATUS_META } from "@/lib/order-status";
+import { getOrderItemRecipeIssue } from "@/lib/recipe-options";
 import { createOrdersApi, uploadToPresignedUrl } from "@/lib/api/orders";
 import { useOrder, useUpdateOrder, useDeleteReference, useOrdersDropdownData } from "@/hooks/useOrders";
 import { useToken } from "@/hooks/useToken";
@@ -120,6 +122,12 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     if (!order || !token) return;
 
     try {
+      const recipeIssue = currentItems.map(getOrderItemRecipeIssue).find(Boolean);
+      if (recipeIssue) {
+        toast.error(recipeIssue);
+        return;
+      }
+
       const api = createOrdersApi(token);
       const uploadedKeys = await Promise.all(
         newImageFiles.map(async (file) => {

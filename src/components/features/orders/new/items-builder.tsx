@@ -3,8 +3,22 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Minus, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toneFor } from "@/lib/category-tone";
-import { isCakeCategory } from "@/lib/product-categories";
+import {
+  BRIGADEIRO_FLAVORS,
+  CAKE_DOUGHS,
+  CAKE_FILLINGS,
+  COOKIE_FLAVORS,
+  getRecipeKind,
+  splitFillings,
+} from "@/lib/recipe-options";
 import { cn } from "@/lib/utils";
 
 export type OrderItemDraft = {
@@ -46,6 +60,18 @@ export function ItemsBuilder({
     onChange(next);
   }
 
+  function updateCakeFilling(i: number, filling: string) {
+    const current = splitFillings(items[i].sabor);
+    const exists = current.includes(filling);
+    const nextFillings = exists
+      ? current.filter((value) => value !== filling)
+      : current.length >= 2
+        ? current
+        : [...current, filling];
+
+    updateField(i, "sabor", nextFillings.join("|"));
+  }
+
   function updateUnitPrice(i: number, value: string) {
     const parsed = Number.parseFloat(value.replace(",", "."));
     if (!Number.isFinite(parsed)) return;
@@ -73,7 +99,15 @@ export function ItemsBuilder({
       {items.map((it, i) => {
         const tone = toneFor(it.category);
         const expanded = expandedIdx === i;
-        const isCake = isCakeCategory(it.category) || !!it.massa || !!it.sabor;
+        const recipeKind = getRecipeKind(it);
+        const isCake = recipeKind === "cake";
+        const flavorOptions =
+          recipeKind === "brigadeiro"
+            ? BRIGADEIRO_FLAVORS
+            : recipeKind === "cookie"
+              ? COOKIE_FLAVORS
+              : [];
+        const selectedFillings = splitFillings(it.sabor);
         const hasDetails = !!it.observation || !!it.massa || !!it.sabor;
         const itemKey = `${it.productId}-${i}`;
 
@@ -185,29 +219,86 @@ export function ItemsBuilder({
                   />
                 </div>
                 {isCake && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
-                        Sabor
-                      </label>
-                      <Input
-                        value={it.sabor ?? ""}
-                        onChange={(e) => updateField(i, "sabor", e.target.value)}
-                        placeholder="Ex: chocolate, morango..."
-                        className="h-8 text-sm"
-                      />
-                    </div>
+                  <div className="space-y-2">
                     <div>
                       <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
                         Massa
                       </label>
-                      <Input
+                      <Select
                         value={it.massa ?? ""}
-                        onChange={(e) => updateField(i, "massa", e.target.value)}
-                        placeholder="Ex: branca, chocolate..."
-                        className="h-8 text-sm"
-                      />
+                        onValueChange={(value) => {
+                          if (value) updateField(i, "massa", value);
+                        }}
+                      >
+                        <SelectTrigger className="h-8 w-full">
+                          <SelectValue>
+                            {it.massa || "Escolher massa"}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CAKE_DOUGHS.map((dough) => (
+                            <SelectItem key={dough} value={dough}>
+                              {dough}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
+                        Recheios
+                      </label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {CAKE_FILLINGS.map((filling) => {
+                          const active = selectedFillings.includes(filling);
+                          const disabled = !active && selectedFillings.length >= 2;
+
+                          return (
+                            <button
+                              key={filling}
+                              type="button"
+                              onClick={() => updateCakeFilling(i, filling)}
+                              disabled={disabled}
+                              className={cn(
+                                "min-h-8 rounded-md border px-2 py-1 text-left text-[11px] transition",
+                                active
+                                  ? "border-brand bg-brand-soft text-brand"
+                                  : "border-border bg-card text-foreground-soft hover:bg-accent",
+                                disabled && "cursor-not-allowed opacity-45 hover:bg-card",
+                              )}
+                            >
+                              {filling}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {flavorOptions.length > 0 && (
+                  <div>
+                    <label className="mb-1 block text-[11px] font-medium text-muted-foreground">
+                      Sabor
+                    </label>
+                    <Select
+                      value={it.sabor ?? ""}
+                      onValueChange={(value) => {
+                        if (value) updateField(i, "sabor", value);
+                      }}
+                    >
+                      <SelectTrigger className="h-8 w-full">
+                        <SelectValue>
+                          {it.sabor || "Escolher sabor"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {flavorOptions.map((flavor) => (
+                          <SelectItem key={flavor} value={flavor}>
+                            {flavor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </div>
