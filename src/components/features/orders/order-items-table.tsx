@@ -31,7 +31,14 @@ export function OrderItemsTable({ items }: { items: OrderItem[] }) {
             >
               <div className="h-10 w-10 rounded-md bg-muted" />
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{item.productName}</div>
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate text-sm font-medium">{item.productName}</span>
+                  {item.productSize ? (
+                    <span className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">
+                      {item.productSize}
+                    </span>
+                  ) : null}
+                </div>
                 <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
                   {formatCents(item.paidUnitPriceCents)} · un
                   {item.itemCanceled && (
