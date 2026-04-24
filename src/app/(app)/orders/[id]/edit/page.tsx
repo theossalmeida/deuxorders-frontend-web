@@ -2,7 +2,7 @@
 
 import { use, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import {
@@ -13,9 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
+import { ProductPickerOverlay } from "@/components/features/orders/new/product-picker-overlay";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { EditReferenceManager } from "@/components/features/orders/edit-reference-manager";
-import { Input } from "@/components/ui/input";
 import { apiDatetimeLocal, formatCents } from "@/lib/format";
 import { extractReferenceObjectKey } from "@/lib/image-ref";
 import { STATUS_META } from "@/lib/order-status";
@@ -27,6 +27,7 @@ import {
   ALL_ORDER_STATUSES,
   type OrderStatus,
 } from "@/types/orders";
+import type { ProductDropdownItem } from "@/types/products";
 
 export default function EditOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -47,10 +48,13 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
   const [productSearch, setProductSearch] = useState("");
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
 
-  const productCategoryMap = useMemo(() => {
-    const map = new Map<string, string>();
+  const productMetaMap = useMemo(() => {
+    const map = new Map<string, { category?: string; size?: string | null }>();
     for (const p of products.data ?? []) {
-      if (p.category) map.set(p.id, p.category);
+      map.set(p.id, {
+        category: p.category ?? undefined,
+        size: p.size,
+      });
     }
     return map;
   }, [products.data]);
@@ -64,12 +68,13 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
       .map((i) => ({
         productId: i.productId,
         name: i.productName,
+        size: i.productSize ?? productMetaMap.get(i.productId)?.size,
         unitPriceCents: i.paidUnitPriceCents,
         qty: i.quantity,
         observation: i.observation ?? undefined,
         massa: i.massa ?? undefined,
         sabor: i.sabor ?? undefined,
-        category: productCategoryMap.get(i.productId),
+        category: productMetaMap.get(i.productId)?.category,
       })) ??
       []);
   const currentDeliveryMode: DeliveryMode =
@@ -87,15 +92,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
     0,
   );
 
-  const filteredProducts = useMemo(
-    () =>
-      (products.data ?? []).filter((p) =>
-        p.name.toLowerCase().includes(productSearch.toLowerCase()),
-      ),
-    [products.data, productSearch],
-  );
-
-  function addProduct(p: { id: string; name: string; priceCents: number; category: string | null }) {
+  function addProduct(p: ProductDropdownItem) {
     const base = currentItems;
     const existing = base.findIndex((i) => i.productId === p.id);
     if (existing >= 0) {
@@ -108,6 +105,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
         {
           productId: p.id,
           name: p.name,
+          size: p.size,
           unitPriceCents: p.priceCents,
           category: p.category ?? undefined,
           qty: 1,
@@ -211,48 +209,13 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
 
       {/* Product picker overlay */}
       {showProductPicker && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background">
-          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-            <button
-              type="button"
-              onClick={() => setShowProductPicker(false)}
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <span className="font-semibold">Escolher produto</span>
-          </div>
-          <div className="p-4">
-            <div className="relative">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                placeholder="Buscar produto"
-                className="pl-9"
-                autoFocus
-              />
-            </div>
-          </div>
-          <ul className="flex-1 divide-y divide-border overflow-y-auto">
-            {filteredProducts.map((p) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => addProduct(p)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent"
-                >
-                  <span className="text-sm font-medium">{p.name}</span>
-                  <span className="font-mono text-sm font-semibold">
-                    {formatCents(p.priceCents)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ProductPickerOverlay
+          products={products.data ?? []}
+          search={productSearch}
+          onSearchChange={setProductSearch}
+          onClose={() => setShowProductPicker(false)}
+          onSelect={addProduct}
+        />
       )}
 
       {/* Main content */}

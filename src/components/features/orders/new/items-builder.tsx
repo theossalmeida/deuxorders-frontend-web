@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 export type OrderItemDraft = {
   productId: string;
   name: string;
+  size?: string | null;
   category?: string;
   unitPriceCents: number;
   qty: number;
@@ -32,6 +33,7 @@ export function ItemsBuilder({
 }) {
   const btn = size === "sm" ? "h-[22px] w-[22px]" : "h-[26px] w-[26px]";
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [priceInputs, setPriceInputs] = useState<Record<string, string>>({});
 
   function updateQty(i: number, delta: number) {
     const next = [...items];
@@ -42,6 +44,18 @@ export function ItemsBuilder({
   function updateField(i: number, field: "observation" | "massa" | "sabor", value: string) {
     const next = [...items];
     next[i] = { ...next[i], [field]: value || undefined };
+    onChange(next);
+  }
+
+  function updateUnitPrice(i: number, value: string) {
+    const parsed = Number.parseFloat(value.replace(",", "."));
+    if (!Number.isFinite(parsed)) return;
+
+    const next = [...items];
+    next[i] = {
+      ...next[i],
+      unitPriceCents: Math.max(0, Math.round(parsed * 100)),
+    };
     onChange(next);
   }
 
@@ -62,6 +76,7 @@ export function ItemsBuilder({
         const expanded = expandedIdx === i;
         const isCake = isCakeCategory(it.category) || !!it.massa || !!it.sabor;
         const hasDetails = !!it.observation || !!it.massa || !!it.sabor;
+        const itemKey = `${it.productId}-${i}`;
 
         return (
           <div
@@ -78,6 +93,11 @@ export function ItemsBuilder({
               />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium">{it.name}</div>
+                {it.size && (
+                  <div className="mt-0.5 text-[11px] text-muted-foreground">
+                    {it.size}
+                  </div>
+                )}
               </div>
               <button
                 type="button"
@@ -101,11 +121,34 @@ export function ItemsBuilder({
             </div>
 
             {/* Row 2: unit price + qty controls + total */}
-            <div className="mt-2 flex items-center gap-3 pl-[52px]">
-              <div className="min-w-0 flex-1 font-mono text-[11px] text-muted-foreground">
-                {formatCents(it.unitPriceCents)} · un
+            <div className="mt-2 grid grid-cols-[minmax(96px,1fr)_auto_minmax(72px,auto)] items-end gap-3 pl-[52px]">
+              <div className="min-w-0">
+                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Valor un.
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  inputMode="decimal"
+                  value={priceInputs[itemKey] ?? (it.unitPriceCents / 100).toFixed(2)}
+                  onChange={(event) => {
+                    const { value } = event.target;
+                    setPriceInputs((current) => ({ ...current, [itemKey]: value }));
+                    updateUnitPrice(i, value);
+                  }}
+                  onBlur={() =>
+                    setPriceInputs((current) => {
+                      const next = { ...current };
+                      delete next[itemKey];
+                      return next;
+                    })
+                  }
+                  className="h-8 font-mono text-sm"
+                  aria-label={`Valor unitário de ${it.name}`}
+                />
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 pb-1">
                 <button
                   type="button"
                   onClick={() => updateQty(i, -1)}
@@ -126,7 +169,7 @@ export function ItemsBuilder({
                   <Plus size={12} />
                 </button>
               </div>
-              <div className="min-w-[70px] text-right font-mono text-sm font-semibold">
+              <div className="pb-1 text-right font-mono text-sm font-semibold">
                 {formatCents(it.unitPriceCents * it.qty)}
               </div>
             </div>

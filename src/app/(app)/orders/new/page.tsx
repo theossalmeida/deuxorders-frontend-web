@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { AppHeader } from "@/components/shell/app-header";
 import { OrderWizardStepper, type WizardStep } from "@/components/features/orders/new/order-wizard-stepper";
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
+import { ProductPickerOverlay } from "@/components/features/orders/new/product-picker-overlay";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
 import { ReferenceUploader } from "@/components/features/orders/new/reference-uploader";
 import { formatCents, localISODatetime } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
+import type { ProductDropdownItem } from "@/types/products";
 
 function defaultDatetime() {
   const d = new Date();
@@ -47,17 +49,9 @@ export default function NewOrderPage() {
     [clients.data, clientSearch],
   );
 
-  const filteredProducts = useMemo(
-    () =>
-      (products.data ?? []).filter((p) =>
-        p.name.toLowerCase().includes(productSearch.toLowerCase()),
-      ),
-    [products.data, productSearch],
-  );
-
   const selectedClient = clients.data?.find((c) => c.id === clientId);
 
-  function addProduct(p: { id: string; name: string; priceCents: number; category: string | null }) {
+  function addProduct(p: ProductDropdownItem) {
     const existing = items.findIndex((i) => i.productId === p.id);
     if (existing >= 0) {
       const next = [...items];
@@ -69,6 +63,7 @@ export default function NewOrderPage() {
         {
           productId: p.id,
           name: p.name,
+          size: p.size,
           unitPriceCents: p.priceCents,
           category: p.category ?? undefined,
           qty: 1,
@@ -170,40 +165,13 @@ export default function NewOrderPage() {
 
       {/* Product picker overlay */}
       {showProductPicker && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-background">
-          <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-            <button type="button" onClick={() => setShowProductPicker(false)}>
-              <ArrowLeft size={18} />
-            </button>
-            <span className="font-semibold">Escolher produto</span>
-          </div>
-          <div className="p-4">
-            <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                placeholder="Buscar produto"
-                className="pl-9"
-                autoFocus
-              />
-            </div>
-          </div>
-          <ul className="flex-1 divide-y divide-border overflow-y-auto">
-            {filteredProducts.map((p) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => addProduct(p)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-accent"
-                >
-                  <span className="text-sm font-medium">{p.name}</span>
-                  <span className="font-mono text-sm font-semibold">{formatCents(p.priceCents)}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ProductPickerOverlay
+          products={products.data ?? []}
+          search={productSearch}
+          onSearchChange={setProductSearch}
+          onClose={() => setShowProductPicker(false)}
+          onSelect={addProduct}
+        />
       )}
 
       {/* Main content */}

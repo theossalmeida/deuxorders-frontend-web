@@ -253,14 +253,15 @@ export function createOrdersApi(token: string) {
 
     getProductsDropdown: async (): Promise<ProductDropdownItem[]> => {
       const raw = await api.get<
-        { id: string; name: string; price: number; category: string | null }[]
-        | ItemsResponse<{ id: string; name: string; price: number; category: string | null }>
-      >("/products/all?status=true&size=200");
+        { id: string; name: string; price: number; category: string | null; size: string | null }[]
+        | ItemsResponse<{ id: string; name: string; price: number; category: string | null; size: string | null }>
+      >("/products/dropdown?status=true");
       return unwrapItemsResponse(raw).map((p) => ({
         id: p.id,
         name: p.name,
         priceCents: p.price,
         category: p.category,
+        size: p.size,
       }));
     },
   };

@@ -15,4 +15,5 @@ export interface ProductDropdownItem {
   name: string;
   priceCents: number;
   category: string | null;
+  size: string | null;
 }
