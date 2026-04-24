@@ -27,6 +27,23 @@ export function PushNotificationPrompt() {
     );
   }
 
+  if (status === "backend-unavailable") {
+    return (
+      <div className="fixed inset-x-3 bottom-24 z-40 rounded-lg border border-border bg-card p-3 shadow-sm md:inset-x-auto md:right-4 md:bottom-4 md:w-72">
+        <div className="flex items-start gap-2.5">
+          <BellOff className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold">Notificacoes indisponiveis</div>
+            <div className="mt-0.5 text-xs leading-5 text-muted-foreground">
+              O servidor esta com notificacoes push desativadas.
+            </div>
+            {error ? <div className="mt-2 text-xs leading-5 text-destructive">{error}</div> : null}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isSubscribed = status === "subscribed";
 
   return (

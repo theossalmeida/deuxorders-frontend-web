@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { createApiClient } from "@/lib/api/client";
+import { ApiError, createApiClient } from "@/lib/api/client";
 import { useToken } from "@/hooks/useToken";
 
 type PushNotificationStatus =
   | "checking"
   | "unsupported"
+  | "backend-unavailable"
   | "permission-denied"
   | "permission-default"
   | "granted-not-subscribed"
@@ -15,6 +16,10 @@ type PushNotificationStatus =
 type PushSubscriptionKeys = {
   p256dh?: string;
   auth?: string;
+};
+
+type PushStatusResponse = {
+  isSubscribed: boolean;
 };
 
 type StandaloneNavigator = Navigator & {
@@ -96,6 +101,21 @@ function getSubscriptionKeys(subscription: PushSubscription) {
   return keys;
 }
 
+function isPushUnavailable(error: unknown) {
+  return error instanceof ApiError && error.status === 503;
+}
+
+async function syncSubscriptionToBackend(token: string, subscription: PushSubscription) {
+  const keys = getSubscriptionKeys(subscription);
+
+  await createApiClient(token).post<void>("/push/subscribe", {
+    endpoint: subscription.endpoint,
+    p256dh: keys.p256dh,
+    auth: keys.auth,
+    deviceLabel: getDeviceLabel(),
+  });
+}
+
 export function usePushNotifications() {
   const token = useToken();
   const [status, setStatus] = useState<PushNotificationStatus>("checking");
@@ -103,6 +123,8 @@ export function usePushNotifications() {
   const [error, setError] = useState<string | null>(null);
 
   const refreshStatus = useCallback(async () => {
+    setError(null);
+
     if (!hasPushSupport() || !isIOSDevice() || !isStandaloneApp()) {
       setStatus("unsupported");
       return;
@@ -118,7 +140,32 @@ export function usePushNotifications() {
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
-        setStatus("subscribed");
+        if (!token) {
+          setStatus("granted-not-subscribed");
+          return;
+        }
+
+        try {
+          const backendStatus = await createApiClient(token).post<PushStatusResponse>("/push/status", {
+            endpoint: subscription.endpoint,
+          });
+
+          if (backendStatus.isSubscribed) {
+            setStatus("subscribed");
+            return;
+          }
+
+          await syncSubscriptionToBackend(token, subscription);
+          setStatus("subscribed");
+        } catch (err) {
+          if (isPushUnavailable(err)) {
+            setStatus("backend-unavailable");
+            setError("Notificacoes indisponiveis no servidor.");
+            return;
+          }
+
+          setStatus("granted-not-subscribed");
+        }
       } else if (Notification.permission === "granted") {
         setStatus("granted-not-subscribed");
       } else {
@@ -127,7 +174,7 @@ export function usePushNotifications() {
     } catch {
       setStatus("unsupported");
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     let active = true;
@@ -172,18 +219,16 @@ export function usePushNotifications() {
           applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
         }));
 
-      const keys = getSubscriptionKeys(subscription);
-
-      await createApiClient(token).post<void>("/push/subscribe", {
-        endpoint: subscription.endpoint,
-        p256dh: keys.p256dh,
-        auth: keys.auth,
-        deviceLabel: getDeviceLabel(),
-      });
+      await syncSubscriptionToBackend(token, subscription);
 
       setStatus("subscribed");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel ativar notificacoes.");
+      if (isPushUnavailable(err)) {
+        setStatus("backend-unavailable");
+        setError("Notificacoes indisponiveis no servidor.");
+      } else {
+        setError(err instanceof Error ? err.message : "Nao foi possivel ativar notificacoes.");
+      }
     } finally {
       setIsLoading(false);
     }
