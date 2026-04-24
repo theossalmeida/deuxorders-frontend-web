@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useCreateCashEntry } from "@/hooks/useCashFlow";
+import { localISODate } from "@/lib/format";
 import {
   CASH_CATEGORY_LABEL,
   type CashFlowType,
@@ -41,7 +42,7 @@ export default function NewCashEntryPage() {
   const [amountStr, setAmountStr] = useState("0,00");
   const [counterparty, setCounterparty] = useState("");
   const [category, setCategory] = useState<CashFlowCategory>("Other");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => localISODate(new Date()));
   const [notes, setNotes] = useState("");
 
   const createEntry = useCreateCashEntry();

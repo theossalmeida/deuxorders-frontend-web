@@ -7,6 +7,7 @@ import { Download, Plus } from "lucide-react";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { PageFilters, periodToRange, type PeriodKey } from "@/components/data/page-filters";
+import { localISODate } from "@/lib/format";
 import { EmptyState } from "@/components/data/empty-state";
 import { DashboardKpis } from "@/components/features/dashboard/dashboard-kpis";
 import { RevenueSection } from "@/components/features/dashboard/revenue-section";
@@ -18,7 +19,7 @@ import { useDashboardAll } from "@/hooks/useDashboard";
 export default function DashboardPage() {
   const router = useRouter();
   const [period, setPeriod] = useState<PeriodKey>("7d");
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localISODate(new Date());
   const [customRange, setCustomRange] = useState({ start: today, end: today });
 
   const { startDate, endDate } =

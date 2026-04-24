@@ -12,13 +12,13 @@ import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
 import { ReferenceUploader } from "@/components/features/orders/new/reference-uploader";
-import { formatCents } from "@/lib/format";
+import { formatCents, localISODatetime } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 
 function defaultDatetime() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 16);
+  return localISODatetime(d);
 }
 
 export default function NewOrderPage() {

@@ -101,9 +101,6 @@ export function localISODatetime(date: Date): string {
   return `${localISODate(date)}T${hh}:${mm}`;
 }
 
-export function toISODate(date: Date): string {
-  return date.toISOString();
-}
 
 import type { MeasureUnit } from "@/types/inventory";
 import { MEASURE_UNIT_SHORT } from "@/types/inventory";
