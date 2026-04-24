@@ -73,16 +73,17 @@ export function useCreateOrder() {
       imageFiles: File[];
     }) => {
       const api = createOrdersApi(token!);
-      const objectKeys: string[] = [];
 
-      for (const file of imageFiles) {
-        const { uploadUrl, objectKey } = await api.getPresignedUrl({
-          fileName: file.name,
-          contentType: file.type,
-        });
-        await uploadToPresignedUrl(uploadUrl, file, file.type);
-        objectKeys.push(objectKey);
-      }
+      const objectKeys = await Promise.all(
+        imageFiles.map(async (file) => {
+          const { uploadUrl, objectKey } = await api.getPresignedUrl({
+            fileName: file.name,
+            contentType: file.type,
+          });
+          await uploadToPresignedUrl(uploadUrl, file, file.type);
+          return objectKey;
+        }),
+      );
 
       return api.create({ ...input, references: objectKeys.length ? objectKeys : undefined });
     },

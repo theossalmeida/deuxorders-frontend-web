@@ -46,7 +46,6 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
   const [showProductPicker, setShowProductPicker] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
 
   const productCategoryMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -121,42 +120,40 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
 
   async function handleSave() {
     if (!order || !token) return;
-    setIsSaving(true);
 
     try {
       const api = createOrdersApi(token);
-      const uploadedKeys: string[] = [];
-      for (const file of newImageFiles) {
-        const { uploadUrl, objectKey } = await api.getPresignedUrl({
-          fileName: file.name,
-          contentType: file.type,
-        });
-        await uploadToPresignedUrl(uploadUrl, file, file.type);
-        uploadedKeys.push(objectKey);
-      }
-
-      updateOrder.mutate(
-        {
-          status: ORDER_STATUS_INT[currentStatus],
-          deliveryDate: new Date(currentDate).toISOString(),
-          delivery:
-            currentDeliveryMode === "entrega"
-              ? currentAddress || "Entrega"
-              : "pickup",
-          items: currentItems.map((i) => ({
-            productId: i.productId,
-            quantity: i.qty,
-            paidUnitPriceCents: i.unitPriceCents,
-            observation: i.observation,
-            massa: i.massa,
-            sabor: i.sabor,
-          })),
-          references: uploadedKeys.length ? uploadedKeys : undefined,
-        },
-        { onSuccess: () => router.push(`/orders/${id}`) },
+      const uploadedKeys = await Promise.all(
+        newImageFiles.map(async (file) => {
+          const { uploadUrl, objectKey } = await api.getPresignedUrl({
+            fileName: file.name,
+            contentType: file.type,
+          });
+          await uploadToPresignedUrl(uploadUrl, file, file.type);
+          return objectKey;
+        }),
       );
-    } finally {
-      setIsSaving(false);
+
+      await updateOrder.mutateAsync({
+        status: ORDER_STATUS_INT[currentStatus],
+        deliveryDate: new Date(currentDate).toISOString(),
+        delivery:
+          currentDeliveryMode === "entrega"
+            ? currentAddress || "Entrega"
+            : "pickup",
+        items: currentItems.map((i) => ({
+          productId: i.productId,
+          quantity: i.qty,
+          paidUnitPriceCents: i.unitPriceCents,
+          observation: i.observation,
+          massa: i.massa,
+          sabor: i.sabor,
+        })),
+        references: uploadedKeys.length ? uploadedKeys : undefined,
+      });
+      router.push(`/orders/${id}`);
+    } catch {
+      // errors are shown by onError in useUpdateOrder
     }
   }
 
@@ -189,9 +186,9 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
               <Button
                 size="sm"
                 onClick={handleSave}
-                disabled={isSaving || updateOrder.isPending}
+                disabled={updateOrder.isPending}
               >
-                {isSaving || updateOrder.isPending ? "Salvando..." : "Salvar"}
+                {updateOrder.isPending ? "Salvando..." : "Salvar"}
               </Button>
             </>
           }
@@ -348,7 +345,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             <SummaryCard
               subtotalCents={subtotalCents}
               deliveryMode={currentDeliveryMode}
-              isPending={isSaving || updateOrder.isPending}
+              isPending={updateOrder.isPending}
               onSave={handleSave}
             />
           </div>
@@ -360,7 +357,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
             <SummaryCard
               subtotalCents={subtotalCents}
               deliveryMode={currentDeliveryMode}
-              isPending={isSaving || updateOrder.isPending}
+              isPending={updateOrder.isPending}
               onSave={handleSave}
             />
           </div>
@@ -379,10 +376,10 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
           </Button>
           <Button
             className="flex-[2]"
-            disabled={isSaving || updateOrder.isPending}
+            disabled={updateOrder.isPending}
             onClick={handleSave}
           >
-            {isSaving || updateOrder.isPending ? "Salvando..." : "Salvar alterações"}
+            {updateOrder.isPending ? "Salvando..." : "Salvar alterações"}
           </Button>
         </div>
       </div>
