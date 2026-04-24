@@ -19,6 +19,7 @@ export interface OrderUpdateResult {
 import { ClientDropdownItem } from "@/types/clients";
 import { ProductDropdownItem } from "@/types/products";
 import { ItemsResponse, unwrapItemsResponse } from "./client";
+import { localDatetimeToUtcIso } from "@/lib/format";
 
 interface OrderItemDto {
   productId: string;
@@ -148,7 +149,7 @@ function toCreateOrderItemWire(input: OrderItemInput): CreateOrderItemWire {
 function toCreateOrderWire(input: CreateOrderInput): CreateOrderWire {
   return {
     clientId: input.clientId,
-    deliveryDate: input.deliveryDate,
+    deliveryDate: localDatetimeToUtcIso(input.deliveryDate),
     items: input.items.map(toCreateOrderItemWire),
     references: input.references,
     delivery: input.delivery,
@@ -168,7 +169,9 @@ function toUpdateOrderItemWire(input: OrderItemUpdate): UpdateOrderItemWire {
 
 function toUpdateOrderWire(input: UpdateOrderInput): UpdateOrderWire {
   return {
-    deliveryDate: input.deliveryDate,
+    deliveryDate: input.deliveryDate
+      ? localDatetimeToUtcIso(input.deliveryDate)
+      : undefined,
     status: input.status,
     items: input.items?.map(toUpdateOrderItemWire),
     references: input.references,

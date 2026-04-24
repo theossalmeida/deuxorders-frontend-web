@@ -92,7 +92,8 @@ export function formatRelativeDay(iso: string): string {
   if (diff === 0) return "Hoje";
   if (diff === 1) return "Amanhã";
   if (diff === -1) return "Ontem";
-  return formatDate(iso);
+  return "";
+  //return formatDate(iso);
 }
 
 export function formatPercentDelta(v: number): string {
@@ -123,6 +124,18 @@ export function localDateKey(iso: string): string {
 /** Convert an API datetime value to a value suitable for datetime-local inputs. */
 export function apiDatetimeLocal(iso: string): string {
   return localISODatetime(parseDateForDisplay(iso));
+}
+
+/** Convert a datetime-local value to an API-safe UTC ISO string. */
+export function localDatetimeToUtcIso(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
+    ? `${trimmed}T00:00`
+    : trimmed;
+
+  return new Date(normalized).toISOString();
 }
 
 /**
