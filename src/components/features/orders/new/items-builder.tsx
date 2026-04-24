@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Minus, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toneFor } from "@/lib/category-tone";
-import { formatCents } from "@/lib/format";
 import { isCakeCategory } from "@/lib/product-categories";
 import { cn } from "@/lib/utils";
 
@@ -120,8 +119,8 @@ export function ItemsBuilder({
               </button>
             </div>
 
-            {/* Row 2: unit price + qty controls + total */}
-            <div className="mt-2 grid grid-cols-[minmax(96px,1fr)_auto_minmax(72px,auto)] items-end gap-3 pl-[52px]">
+            {/* Row 2: unit price + qty controls */}
+            <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 pl-[52px]">
               <div className="min-w-0">
                 <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Valor un.
@@ -168,9 +167,6 @@ export function ItemsBuilder({
                 >
                   <Plus size={12} />
                 </button>
-              </div>
-              <div className="pb-1 text-right font-mono text-sm font-semibold">
-                {formatCents(it.unitPriceCents * it.qty)}
               </div>
             </div>
 
