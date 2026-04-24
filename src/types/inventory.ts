@@ -29,6 +29,20 @@ export interface ProductRecipe {
   items: RecipeItem[];
 }
 
+export type ProductRecipeOptionType = "Dough" | "Filling" | "Flavor";
+
+export interface ProductRecipeOption {
+  id: string;
+  type: ProductRecipeOptionType;
+  name: string;
+  hasRecipe: boolean;
+  items: RecipeItem[];
+}
+
+export interface ProductRecipeOptions {
+  options: ProductRecipeOption[];
+}
+
 export interface CreateMaterialInput {
   name: string;
   quantity: number;
@@ -48,6 +62,11 @@ export interface RestockInput {
 
 export interface SetRecipeInput {
   items: Array<{ materialId: string; quantity: number }>;
+}
+
+export interface SetRecipeOptionInput extends SetRecipeInput {
+  type: ProductRecipeOptionType;
+  name: string;
 }
 
 export const MEASURE_UNIT_LABEL: Record<MeasureUnit, string> = {

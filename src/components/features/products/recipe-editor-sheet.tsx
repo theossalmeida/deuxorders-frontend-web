@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useInventoryDropdown } from "@/hooks/useInventory";
 import { useSetProductRecipe } from "@/hooks/useProducts";
-import { MEASURE_UNIT_SHORT, type RecipeItem } from "@/types/inventory";
+import { MEASURE_UNIT_SHORT, type RecipeItem, type SetRecipeInput } from "@/types/inventory";
 
 type DraftItem = {
   materialId: string;
@@ -34,11 +34,26 @@ type Props = {
   currentItems: RecipeItem[];
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  title?: string;
+  description?: string;
+  isSaving?: boolean;
+  onSaveRecipe?: (input: SetRecipeInput) => Promise<void>;
 };
 
-export function RecipeEditorSheet({ productId, productName, currentItems, open, onOpenChange }: Props) {
+export function RecipeEditorSheet({
+  productId,
+  productName,
+  currentItems,
+  open,
+  onOpenChange,
+  title,
+  description,
+  isSaving,
+  onSaveRecipe,
+}: Props) {
   const { data: dropdown = [] } = useInventoryDropdown();
   const { mutateAsync, isPending } = useSetProductRecipe(productId);
+  const pending = isSaving ?? isPending;
 
   const [items, setItems] = useState<DraftItem[]>([]);
 
@@ -88,13 +103,13 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
       quantity: Math.round(parseFloat(item.quantity)),
     }));
 
-    await mutateAsync({ items: wireItems });
+    await (onSaveRecipe ?? mutateAsync)({ items: wireItems });
     handleOpenChange(false);
   }
 
   async function handleClear() {
     if (!confirm("Limpar a receita deste produto?")) return;
-    await mutateAsync({ items: [] });
+    await (onSaveRecipe ?? mutateAsync)({ items: [] });
     handleOpenChange(false);
   }
 
@@ -102,8 +117,8 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent className="sm:max-w-lg flex flex-col gap-0 p-0">
         <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
-          <SheetTitle>Receita — {productName}</SheetTitle>
-          <SheetDescription>Ingredientes usados na produção de uma unidade.</SheetDescription>
+          <SheetTitle>{title ?? `Receita — ${productName}`}</SheetTitle>
+          <SheetDescription>{description ?? "Ingredientes usados na produção de uma unidade."}</SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -178,14 +193,14 @@ export function RecipeEditorSheet({ productId, productName, currentItems, open, 
 
         <div className="border-t border-border px-6 py-4 flex gap-2">
           {currentItems.length > 0 && (
-            <Button type="button" variant="outline" size="sm" className="text-destructive hover:text-destructive gap-1.5" onClick={handleClear} disabled={isPending}>
+            <Button type="button" variant="outline" size="sm" className="text-destructive hover:text-destructive gap-1.5" onClick={handleClear} disabled={pending}>
               Limpar receita
             </Button>
           )}
           <div className="flex-1" />
           <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button type="button" size="sm" onClick={handleSave} disabled={isPending}>
-            {isPending ? <Loader2 size={14} className="animate-spin" /> : "Salvar"}
+          <Button type="button" size="sm" onClick={handleSave} disabled={pending}>
+            {pending ? <Loader2 size={14} className="animate-spin" /> : "Salvar"}
           </Button>
         </div>
       </SheetContent>

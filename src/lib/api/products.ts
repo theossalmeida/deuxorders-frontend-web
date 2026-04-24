@@ -1,6 +1,13 @@
 import { createApiClient, ItemsResponse, unwrapItemsResponse } from "./client";
 import { Product, ProductDropdownItem } from "@/types/products";
-import { ProductRecipe, SetRecipeInput, MeasureUnit } from "@/types/inventory";
+import {
+  ProductRecipe,
+  ProductRecipeOptions,
+  ProductRecipeOption,
+  SetRecipeInput,
+  SetRecipeOptionInput,
+  MeasureUnit,
+} from "@/types/inventory";
 
 const MEASURE_UNIT_FROM_INT: Record<number, MeasureUnit> = { 1: "ML", 2: "G", 3: "U" };
 function normalizeMeasureUnit(v: MeasureUnit | number): MeasureUnit {
@@ -27,6 +34,30 @@ export interface ProductDropdownDto {
   size: string | null;
 }
 
+interface RecipeItemDto {
+  materialId: string;
+  materialName: string;
+  quantity: number;
+  measureUnit: MeasureUnit | number;
+}
+
+interface ProductRecipeDto {
+  hasRecipe: boolean;
+  items: RecipeItemDto[];
+}
+
+interface ProductRecipeOptionDto {
+  id: string;
+  type: "Dough" | "Filling" | "Flavor";
+  name: string;
+  hasRecipe: boolean;
+  items: RecipeItemDto[];
+}
+
+interface ProductRecipeOptionsDto {
+  options: ProductRecipeOptionDto[];
+}
+
 function mapProduct(dto: ProductDto): Product {
   return {
     id: dto.id,
@@ -48,6 +79,29 @@ export function mapProductDropdown(dto: ProductDropdownDto): ProductDropdownItem
     priceCents: dto.price,
     category: dto.category,
     size: dto.size,
+  };
+}
+
+function mapRecipe(dto: ProductRecipeDto): ProductRecipe {
+  return {
+    hasRecipe: dto.hasRecipe,
+    items: dto.items.map((item) => ({
+      ...item,
+      measureUnit: normalizeMeasureUnit(item.measureUnit),
+    })),
+  };
+}
+
+function mapRecipeOption(dto: ProductRecipeOptionDto): ProductRecipeOption {
+  return {
+    id: dto.id,
+    type: dto.type,
+    name: dto.name,
+    hasRecipe: dto.hasRecipe,
+    items: dto.items.map((item) => ({
+      ...item,
+      measureUnit: normalizeMeasureUnit(item.measureUnit),
+    })),
   };
 }
 
@@ -85,17 +139,24 @@ export function createProductsApi(token: string) {
     delete: (id: string) => api.delete<void>(`/products/${id}`),
 
     getRecipe: async (productId: string): Promise<ProductRecipe> => {
-      const raw = await api.get<ProductRecipe>(`/products/${productId}/recipe`);
-      return {
-        ...raw,
-        items: raw.items.map((item) => ({
-          ...item,
-          measureUnit: normalizeMeasureUnit(item.measureUnit as MeasureUnit | number),
-        })),
-      };
+      return mapRecipe(await api.get<ProductRecipeDto>(`/products/${productId}/recipe`));
     },
 
     setRecipe: (productId: string, input: SetRecipeInput) =>
       api.put<ProductRecipe>(`/products/${productId}/recipe`, input),
+
+    getRecipeOptions: async (productId: string): Promise<ProductRecipeOptions> => {
+      const raw = await api.get<ProductRecipeOptionsDto>(`/products/${productId}/recipe-options`);
+      return { options: raw.options.map(mapRecipeOption) };
+    },
+
+    setRecipeOption: async (productId: string, input: SetRecipeOptionInput): Promise<ProductRecipeOption> =>
+      mapRecipeOption(
+        await api.put<ProductRecipeOptionDto>(`/products/${productId}/recipe-options`, {
+          type: input.type,
+          name: input.name,
+          items: input.items,
+        }),
+      ),
   };
 }

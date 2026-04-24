@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createProductsApi } from "@/lib/api/products";
 import { useToken } from "./useToken";
-import { SetRecipeInput } from "@/types/inventory";
+import { SetRecipeInput, SetRecipeOptionInput } from "@/types/inventory";
 
 export function useProduct(id: string) {
   const token = useToken();
@@ -98,6 +98,29 @@ export function useSetProductRecipe(productId: string) {
       qc.invalidateQueries({ queryKey: ["products", productId, "recipe"] });
       qc.invalidateQueries({ queryKey: ["products", productId] });
       toast.success("Receita salva.");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useProductRecipeOptions(productId: string) {
+  const token = useToken();
+  return useQuery({
+    queryKey: ["products", productId, "recipe-options"],
+    queryFn: () => createProductsApi(token!).getRecipeOptions(productId),
+    enabled: !!token && !!productId,
+  });
+}
+
+export function useSetProductRecipeOption(productId: string) {
+  const token = useToken();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SetRecipeOptionInput) =>
+      createProductsApi(token!).setRecipeOption(productId, input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["products", productId, "recipe-options"] });
+      toast.success("Receita da opção salva.");
     },
     onError: (e: Error) => toast.error(e.message),
   });
