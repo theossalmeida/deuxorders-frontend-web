@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { ImagePlus, X } from "lucide-react";
 import { buildRefSrc } from "@/lib/image-ref";
 import { cn } from "@/lib/utils";
@@ -51,10 +52,12 @@ export function EditReferenceManager({
             key={key}
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-border"
           >
-            <img
+            <Image
               src={buildRefSrc(key)}
               alt="Referência"
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="80px"
             />
             <button
               type="button"

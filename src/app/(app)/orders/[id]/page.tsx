@@ -3,6 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Truck, ShoppingBag, Pencil, Trash2, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
@@ -226,12 +227,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     href={buildRefSrc(key)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block h-20 w-20 overflow-hidden rounded-lg border border-border transition hover:ring-2 hover:ring-brand"
+                    className="relative block h-20 w-20 overflow-hidden rounded-lg border border-border transition hover:ring-2 hover:ring-brand"
                   >
-                    <img
+                    <Image
                       src={buildRefSrc(key)}
                       alt="Referência"
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="80px"
                     />
                   </a>
                 ))}
