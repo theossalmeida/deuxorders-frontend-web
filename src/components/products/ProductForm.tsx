@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -50,11 +50,13 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
       : undefined,
   });
 
-  const previewUrl = imageFile
-    ? URL.createObjectURL(imageFile)
-    : removeImage
-    ? null
-    : product?.image;
+  const blobUrl = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : null),
+    [imageFile],
+  );
+  useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
+
+  const previewUrl = blobUrl ?? (removeImage ? null : product?.image ?? null);
 
   async function submit(data: FormData) {
     await onSubmit({ ...data, Image: imageFile, removeImage });

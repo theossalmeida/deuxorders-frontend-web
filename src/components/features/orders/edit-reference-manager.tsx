@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { buildRefSrc } from "@/lib/image-ref";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,15 @@ export function EditReferenceManager({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const total = existingKeys.length + newFiles.length;
+
+  const newFilePreviewUrls = useMemo(
+    () => newFiles.map((f) => URL.createObjectURL(f)),
+    [newFiles],
+  );
+  useEffect(
+    () => () => newFilePreviewUrls.forEach(URL.revokeObjectURL),
+    [newFilePreviewUrls],
+  );
 
   function handleFiles(incoming: FileList | null) {
     if (!incoming) return;
@@ -64,7 +73,7 @@ export function EditReferenceManager({
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-dashed border-brand"
           >
             <img
-              src={URL.createObjectURL(file)}
+              src={newFilePreviewUrls[i]}
               alt={file.name}
               className="h-full w-full object-cover"
             />
