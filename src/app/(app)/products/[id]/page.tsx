@@ -12,7 +12,7 @@ import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductGallery } from "@/components/features/products/detail/product-gallery";
 import { toneFor } from "@/lib/category-tone";
-import { useProduct, useToggleProductStatus, useDeleteProduct } from "@/hooks/useProducts";
+import { useProduct, useToggleProductStatus, useDeleteProduct, useUpdateProduct } from "@/hooks/useProducts";
 import { ProductRecipeCard } from "@/components/features/products/detail/product-recipe-card";
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,6 +22,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   const { mutate: toggleStatus, isPending: togglingStatus } = useToggleProductStatus();
   const { mutate: deleteProduct, isPending: deleting } = useDeleteProduct();
+  const { mutate: updateProduct, isPending: saving } = useUpdateProduct(id);
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
@@ -60,7 +61,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const resolvedCategory = category || product.category || "";
   const tone = toneFor(product.category ?? undefined);
   const images = [product.image, null, null, null] as (string | null)[];
-  const margin = resolvedPrice > 0 ? ((resolvedPrice - resolvedPrice * 0.6) / resolvedPrice) * 100 : 0;
+
+  function handleSave() {
+    if (!product) return;
+    const fd = new FormData();
+    fd.append("Name", resolvedName);
+    fd.append("Price", String(resolvedPrice));
+    fd.append("Description", resolvedDescription);
+    fd.append("Category", resolvedCategory);
+    updateProduct(fd);
+  }
 
   function handleDelete() {
     if (!confirm("Excluir este produto? Esta ação não pode ser desfeita.")) return;
@@ -92,7 +102,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               >
                 <Trash2 size={14} /> Excluir
               </Button>
-              <Button size="sm">Salvar alterações</Button>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
+                {saving ? "Salvando..." : "Salvar alterações"}
+              </Button>
             </>
           }
         />
@@ -167,18 +179,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Preço e estoque
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Preço</Label>
+                <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Preço (R$)</Label>
                 <Input value={resolvedPrice} type="number" step="0.01" onChange={(e) => setPrice(parseFloat(e.target.value) || 0)} className="font-mono" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Custo</Label>
-                <Input type="number" step="0.01" className="font-mono" placeholder="0,00" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Margem</Label>
-                <Input value={`${margin.toFixed(1)}%`} readOnly className="font-mono bg-muted" />
               </div>
             </div>
           </div>
