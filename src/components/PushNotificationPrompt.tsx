@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 export function PushNotificationPrompt() {
-  const { status, isLoading, error, enable, disable } = usePushNotifications();
+  const { status, isLoading, error, enable } = usePushNotifications();
 
-  if (status === "checking" || status === "unsupported") {
+  if (status === "checking" || status === "unsupported" || status === "subscribed") {
     return null;
   }
 
@@ -44,32 +44,26 @@ export function PushNotificationPrompt() {
     );
   }
 
-  const isSubscribed = status === "subscribed";
-
   return (
     <div className="fixed inset-x-3 bottom-24 z-40 rounded-lg border border-border bg-card p-3 shadow-sm md:inset-x-auto md:right-4 md:bottom-4 md:w-72">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold">Notificacoes</div>
-          <div className="mt-0.5 text-xs text-muted-foreground">
-            {isSubscribed ? "Ativas neste dispositivo." : "Inativas neste dispositivo."}
-          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">Inativas neste dispositivo.</div>
         </div>
         <Button
           type="button"
           size="sm"
-          variant={isSubscribed ? "outline" : "default"}
+          variant="default"
           disabled={isLoading}
-          onClick={isSubscribed ? disable : enable}
+          onClick={enable}
         >
           {isLoading ? (
             <Loader2 className="animate-spin" aria-hidden />
-          ) : isSubscribed ? (
-            <BellOff aria-hidden />
           ) : (
             <Bell aria-hidden />
           )}
-          {isSubscribed ? "Desativar notificacoes" : "Ativar notificacoes"}
+          Ativar notificacoes
         </Button>
       </div>
       {error ? <div className="mt-2 text-xs leading-5 text-destructive">{error}</div> : null}
