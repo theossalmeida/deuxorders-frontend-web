@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Tag, Calendar, Link2 } from "lucide-react";
+import { Tag, Calendar, Link2, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,6 +71,27 @@ export default function NewCashEntryPage() {
 
   return (
     <>
+      {/* Desktop top bar */}
+      <div className="sticky top-0 z-20 hidden items-center justify-between bg-background px-6 py-4 md:flex">
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => router.back()}>
+            <ArrowLeft size={18} />
+          </button>
+          <span className="font-semibold">Novo lançamento</span>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.back()}>
+            Cancelar
+          </Button>
+          <Button
+            disabled={!counterparty || parseAmount() === 0 || createEntry.isPending}
+            onClick={handleSave}
+          >
+            {createEntry.isPending ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+      </div>
+
       {/* Mobile top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between bg-background px-4 pt-14 pb-3 md:hidden">
         <button
