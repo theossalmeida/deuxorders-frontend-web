@@ -19,19 +19,21 @@ export default function CashEntriesPage() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState<CashFlowType | "all">("all");
 
-  const { data: entriesPage, isLoading } = useCashEntries({ size: 200 });
+  const { data: entriesPage, isLoading } = useCashEntries({
+    type: type !== "all" ? type : undefined,
+  });
   const { data: summary } = useCashSummary({});
 
-  const entries = entriesPage?.items ?? [];
+  const entries = useMemo(() => entriesPage?.items ?? [], [entriesPage]);
 
   const filtered = useMemo(
     () =>
-      entries.filter(
-        (e) =>
-          (type === "all" || e.type === type) &&
-          (search === "" || e.counterparty.toLowerCase().includes(search.toLowerCase())),
-      ),
-    [entries, type, search],
+      search === ""
+        ? entries
+        : entries.filter((e) =>
+            e.counterparty.toLowerCase().includes(search.toLowerCase()),
+          ),
+    [entries, search],
   );
 
   return (

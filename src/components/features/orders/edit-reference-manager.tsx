@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { ImagePlus, X } from "lucide-react";
 import { buildRefSrc } from "@/lib/image-ref";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,15 @@ export function EditReferenceManager({
   const inputRef = useRef<HTMLInputElement>(null);
   const total = existingKeys.length + newFiles.length;
 
+  const newFilePreviewUrls = useMemo(
+    () => newFiles.map((f) => URL.createObjectURL(f)),
+    [newFiles],
+  );
+  useEffect(
+    () => () => newFilePreviewUrls.forEach(URL.revokeObjectURL),
+    [newFilePreviewUrls],
+  );
+
   function handleFiles(incoming: FileList | null) {
     if (!incoming) return;
     const remaining = MAX_REFERENCES - total;
@@ -42,10 +52,12 @@ export function EditReferenceManager({
             key={key}
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-border"
           >
-            <img
+            <Image
               src={buildRefSrc(key)}
               alt="Referência"
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="80px"
             />
             <button
               type="button"
@@ -63,10 +75,13 @@ export function EditReferenceManager({
             key={`new-${file.name}-${i}`}
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-dashed border-brand"
           >
-            <img
-              src={URL.createObjectURL(file)}
+            <Image
+              src={newFilePreviewUrls[i]}
               alt={file.name}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="80px"
+              unoptimized
             />
             <button
               type="button"

@@ -180,16 +180,23 @@ export function createOrdersApi(token: string) {
   const api = createApiClient(token);
 
   return {
-    getAll: async (params?: { page?: number; size?: number; status?: OrderStatus }) => {
-      const search = new URLSearchParams();
-      const pageSize = params?.size || 100;
-      search.set("size", String(pageSize));
+    getAll: async (params?: {
+      page?: number;
+      size?: number;
+      status?: OrderStatus;
+      from?: string;
+      to?: string;
+      search?: string;
+    }) => {
+      const qs = new URLSearchParams();
+      if (params?.size) qs.set("size", String(params.size));
+      if (params?.page) qs.set("page", String(params.page));
+      if (params?.status) qs.set("status", params.status);
+      if (params?.from) qs.set("from", params.from);
+      if (params?.to) qs.set("to", params.to);
+      if (params?.search) qs.set("search", params.search);
 
-      if (params?.page) search.set("page", String(params.page));
-      if (params?.status) search.set("status", params.status);
-
-      const qs = search.toString();
-      const dto = await api.get<PaginatedOrdersDto>(`/orders/all?${qs}`);
+      const dto = await api.get<PaginatedOrdersDto>(`/orders/all?${qs.toString()}`);
       return mapPaginatedOrders(dto);
     },
 

@@ -7,6 +7,7 @@ import {
   TopClient,
   DashboardFilters,
 } from "@/types/dashboard";
+import { localDateRangeToUtcBounds } from "@/lib/format";
 
 interface DashboardSummaryDto {
   totalRevenue: number;
@@ -86,8 +87,12 @@ function mapTopClient(dto: TopClientDto): TopClient {
 
 function buildDashboardParams(filters: DashboardFilters): string {
   const p = new URLSearchParams();
-  if (filters.startDate) p.set("startDate", filters.startDate);
-  if (filters.endDate) p.set("endDate", filters.endDate);
+  const { startUtc, endUtc } = localDateRangeToUtcBounds(
+    filters.startDate,
+    filters.endDate,
+  );
+  if (startUtc) p.set("createdAtFrom", startUtc);
+  if (endUtc) p.set("createdAtTo", endUtc);
   if (filters.status) p.set("status", filters.status);
   const qs = p.toString();
   return qs ? `?${qs}` : "";

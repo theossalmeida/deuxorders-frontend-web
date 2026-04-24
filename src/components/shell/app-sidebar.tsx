@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -16,9 +17,11 @@ type Props = {
 export function AppSidebar({ badges, user }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const qc = useQueryClient();
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
+    qc.clear();
     toast.success("Sessão encerrada.");
     router.replace("/login");
   }

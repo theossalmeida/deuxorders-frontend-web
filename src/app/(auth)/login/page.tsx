@@ -53,18 +53,11 @@ function LoginForm() {
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
-    if (cooldownUntil <= Date.now()) {
-      setRemaining(0);
-      return;
-    }
+    if (cooldownUntil <= Date.now()) return;
     const id = setInterval(() => {
       const r = Math.ceil((cooldownUntil - Date.now()) / 1000);
-      if (r <= 0) {
-        setRemaining(0);
-        clearInterval(id);
-      } else {
-        setRemaining(r);
-      }
+      if (r <= 0) { setRemaining(0); clearInterval(id); }
+      else setRemaining(r);
     }, 500);
     return () => clearInterval(id);
   }, [cooldownUntil]);

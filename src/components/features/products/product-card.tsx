@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCents } from "@/lib/format";
@@ -18,7 +19,13 @@ export function ProductCard({ product }: { product: Product }) {
       <Link href={`/products/${product.id}`} className="block">
         <div className="relative aspect-square">
           {product.image ? (
-            <img src={buildRefSrc(product.image)} alt={product.name} className="h-full w-full object-cover" />
+            <Image
+              src={buildRefSrc(product.image)}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, 200px"
+            />
           ) : (
             <div
               className="h-full w-full"

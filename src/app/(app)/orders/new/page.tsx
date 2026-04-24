@@ -6,24 +6,23 @@ import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AppHeader } from "@/components/shell/app-header";
-import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { OrderWizardStepper, type WizardStep } from "@/components/features/orders/new/order-wizard-stepper";
 import { ItemsBuilder, type OrderItemDraft } from "@/components/features/orders/new/items-builder";
 import { DeliverySection, type DeliveryMode } from "@/components/features/orders/new/delivery-section";
 import { PaymentMethodPicker, type PaymentMethod } from "@/components/features/orders/new/payment-method-picker";
 import { ReferenceUploader } from "@/components/features/orders/new/reference-uploader";
-import { formatCents } from "@/lib/format";
+import { formatCents, localISODatetime } from "@/lib/format";
 import { useCreateOrder, useOrdersDropdownData } from "@/hooks/useOrders";
 
 function defaultDatetime() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 16);
+  return localISODatetime(d);
 }
 
 export default function NewOrderPage() {
   const router = useRouter();
-  const [step, setStep] = useState<WizardStep>("Cliente");
+  const step: WizardStep = "Cliente";
   const [clientId, setClientId] = useState("");
   const [clientSearch, setClientSearch] = useState("");
   const [items, setItems] = useState<OrderItemDraft[]>([]);
@@ -85,7 +84,7 @@ export default function NewOrderPage() {
     createOrder.mutate({
       input: {
         clientId,
-        deliveryDate: new Date(date).toISOString(),
+        deliveryDate: date,
         items: items.map((i) => ({
           productId: i.productId,
           quantity: i.qty,

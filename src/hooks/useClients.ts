@@ -19,7 +19,7 @@ export function useClients(params?: { search?: string; status?: boolean; size?: 
   const token = useToken();
   
   return useQuery({
-    queryKey: ["clients", params, token],
+    queryKey: ["clients", params],
     queryFn: () => createClientsApi(token!).getAll(params),
     enabled: !!token,
     staleTime: 1000 * 60 * 2,

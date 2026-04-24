@@ -40,12 +40,12 @@ type Props = {
 
 export function NewMaterialSheet({ compact = false }: Props) {
   const [open, setOpen] = useState(false);
+  const [measureUnit, setMeasureUnit] = useState<MeasureUnit>("G");
   const { mutateAsync, isPending } = useCreateMaterial();
 
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     reset,
     formState: { errors },
@@ -54,12 +54,11 @@ export function NewMaterialSheet({ compact = false }: Props) {
     defaultValues: { measureUnit: "G" },
   });
 
-  const measureUnit = watch("measureUnit");
-
   async function onSubmit(values: FormValues) {
     const rawCost = Math.round(values.totalCost * 100);
     await mutateAsync({ name: values.name, measureUnit: values.measureUnit, quantity: values.quantity, totalCost: rawCost });
     reset();
+    setMeasureUnit("G");
     setOpen(false);
   }
 
@@ -94,7 +93,12 @@ export function NewMaterialSheet({ compact = false }: Props) {
             <Label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Unidade de medida</Label>
             <Select
               value={measureUnit}
-              onValueChange={(v) => v !== null && setValue("measureUnit", v as MeasureUnit)}
+              onValueChange={(v) => {
+                if (v === null) return;
+                const next = v as MeasureUnit;
+                setMeasureUnit(next);
+                setValue("measureUnit", next, { shouldDirty: true, shouldValidate: true });
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione">

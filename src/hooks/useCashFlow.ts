@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createCashApi } from "@/lib/api/cash";
+import { localDateKey } from "@/lib/format";
 import { useToken } from "./useToken";
 import type {
   CashFlowEntry,
@@ -24,7 +25,7 @@ function buildChartData(entries: CashFlowEntry[]): CashChartPoint[] {
   const map = new Map<string, { in: number; out: number }>();
   for (const e of entries) {
     if (e.deletedAt) continue;
-    const day = e.billingDate.slice(0, 10);
+    const day = localDateKey(e.billingDate);
     const acc = map.get(day) ?? { in: 0, out: 0 };
     if (e.type === "Inflow") acc.in += e.amountCents;
     else acc.out += e.amountCents;
@@ -67,7 +68,7 @@ export function useCashFlowChart(filters: Pick<CashFlowFilters, "from" | "to">) 
   return useQuery({
     queryKey: ["cash", "chart", filters],
     queryFn: async () => {
-      const result = await createCashApi(token!).list({ ...filters, size: 500 });
+      const result = await createCashApi(token!).list({ ...filters, size: 100 });
       return buildChartData(result.items);
     },
     enabled: !!token,

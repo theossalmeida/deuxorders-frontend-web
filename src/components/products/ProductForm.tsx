@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Product } from "@/types/products";
 
 const schema = z.object({
@@ -50,11 +50,13 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
       : undefined,
   });
 
-  const previewUrl = imageFile
-    ? URL.createObjectURL(imageFile)
-    : removeImage
-    ? null
-    : product?.image;
+  const blobUrl = useMemo(
+    () => (imageFile ? URL.createObjectURL(imageFile) : null),
+    [imageFile],
+  );
+  useEffect(() => () => { if (blobUrl) URL.revokeObjectURL(blobUrl); }, [blobUrl]);
+
+  const previewUrl = blobUrl ?? (removeImage ? null : product?.image ?? null);
 
   async function submit(data: FormData) {
     await onSubmit({ ...data, Image: imageFile, removeImage });
@@ -94,12 +96,19 @@ export function ProductForm({ product, onSubmit, isLoading }: Props) {
         <Label>Imagem (opcional)</Label>
         <div className="flex items-center gap-3">
           {previewUrl ? (
-            <div className="relative w-24 h-24">
-              <img
-                src={previewUrl}
-                alt="preview"
-                className="w-24 h-24 object-cover rounded-lg border"
-              />
+            <div className="relative w-24 h-24 rounded-lg border overflow-hidden">
+              {blobUrl ? (
+                <Image
+                  src={blobUrl}
+                  alt="preview"
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                  unoptimized
+                />
+              ) : (
+                <Image src={previewUrl} alt="preview" fill className="object-cover" sizes="96px" />
+              )}
               <button
                 type="button"
                 onClick={() => {

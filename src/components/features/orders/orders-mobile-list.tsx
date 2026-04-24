@@ -1,5 +1,5 @@
 import { EmptyState } from "@/components/data/empty-state";
-import { formatRelativeDay, formatDate } from "@/lib/format";
+import { localDateKey, formatRelativeDay, formatDate } from "@/lib/format";
 import { OrderCard } from "./order-card";
 import type { Order } from "@/types/orders";
 
@@ -64,7 +64,7 @@ export function OrdersMobileList({
 function groupByDay(orders: Order[]) {
   const map = new Map<string, Order[]>();
   for (const o of orders) {
-    const key = o.deliveryDate.slice(0, 10);
+    const key = localDateKey(o.deliveryDate);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(o);
   }

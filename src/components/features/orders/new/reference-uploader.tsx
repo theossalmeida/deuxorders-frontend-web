@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,12 @@ export function ReferenceUploader({
   onChange: (files: File[]) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const previewUrls = useMemo(
+    () => files.map((f) => URL.createObjectURL(f)),
+    [files],
+  );
+  useEffect(() => () => previewUrls.forEach(URL.revokeObjectURL), [previewUrls]);
 
   function handleFiles(incoming: FileList | null) {
     if (!incoming) return;
@@ -36,10 +43,13 @@ export function ReferenceUploader({
             key={`${file.name}-${i}`}
             className="group relative h-20 w-20 overflow-hidden rounded-lg border border-border"
           >
-            <img
-              src={URL.createObjectURL(file)}
+            <Image
+              src={previewUrls[i]}
               alt={file.name}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="80px"
+              unoptimized
             />
             <button
               type="button"

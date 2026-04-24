@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Tag, Calendar, Link2 } from "lucide-react";
+import { Tag, Calendar, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useCreateCashEntry } from "@/hooks/useCashFlow";
+import { localISODate } from "@/lib/format";
 import {
   CASH_CATEGORY_LABEL,
   type CashFlowType,
@@ -23,14 +24,6 @@ import {
 } from "@/types/cash";
 
 const CATEGORIES = Object.entries(CASH_CATEGORY_LABEL) as [CashFlowCategory, string][];
-
-function formatValueDisplay(cents: number, type: CashFlowType) {
-  const brl = (cents / 100).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return brl;
-}
 
 export default function NewCashEntryPage() {
   const router = useRouter();
@@ -41,7 +34,7 @@ export default function NewCashEntryPage() {
   const [amountStr, setAmountStr] = useState("0,00");
   const [counterparty, setCounterparty] = useState("");
   const [category, setCategory] = useState<CashFlowCategory>("Other");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(() => localISODate(new Date()));
   const [notes, setNotes] = useState("");
 
   const createEntry = useCreateCashEntry();
