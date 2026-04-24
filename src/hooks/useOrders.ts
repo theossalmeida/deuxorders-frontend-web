@@ -178,7 +178,7 @@ export function useDeleteOrder() {
     mutationFn: (id: string) => createOrdersApi(token!).delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["orders"] });
-      toast.success("Pedido excluído.");
+      toast.success("Pedido cancelado.");
       router.push("/orders");
     },
     onError: (e: Error) => toast.error(e.message),

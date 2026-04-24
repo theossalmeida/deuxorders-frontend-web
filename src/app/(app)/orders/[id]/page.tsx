@@ -4,7 +4,7 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Truck, ShoppingBag, Pencil, Trash2, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Truck, ShoppingBag, Pencil, Ban, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shell/app-header";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +30,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   const deleteOrder = useDeleteOrder();
 
   function handleDelete() {
-    if (!confirm("Excluir este pedido? Esta ação não pode ser desfeita.")) return;
+    if (!confirm("Cancelar este pedido?")) return;
     deleteOrder.mutate(id);
   }
 
@@ -71,8 +71,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           subtitle={`${order.id} · ${formatDate(order.deliveryDate)}`}
           actions={
             <>
-              <Button variant="outline" size="sm" onClick={() => router.back()}>
-                Voltar
+              <Button variant="outline" size="sm" asChild nativeButton={false}>
+                <Link href={`/orders`}>
+                  <ArrowLeft size={14} />
+                  Voltar
+                </Link>
               </Button>
               <Button
                 variant="outline"
@@ -81,7 +84,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 onClick={handleDelete}
                 disabled={deleteOrder.isPending}
               >
-                <Trash2 size={14} /> Excluir
+                <Ban size={14} /> Cancelar
               </Button>
               <Button variant="outline" size="sm" asChild nativeButton={false}>
                 <Link href={`/orders/${id}/edit`}>
@@ -105,14 +108,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between bg-background px-4 pt-14 pb-3 md:hidden">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
-        >
-          <ArrowLeft size={16} />
-          Voltar
-        </button>
+        <Button variant="outline" size="sm" asChild nativeButton={false}>
+          <Link href={`/orders`}>
+            <ArrowLeft size={14} />
+            Voltar
+          </Link>
+        </Button>
         <div className="text-center">
           <div className="font-mono text-[11px] text-muted-foreground">{order.id}</div>
           <div className="text-sm font-semibold">{order.clientName}</div>
@@ -124,7 +125,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             disabled={deleteOrder.isPending}
             className="text-destructive disabled:opacity-50"
           >
-            <Trash2 size={18} />
+            <Ban size={18} />
           </button>
           <Link href={`/orders/${id}/edit`} className="text-muted-foreground">
             <Pencil size={18} />

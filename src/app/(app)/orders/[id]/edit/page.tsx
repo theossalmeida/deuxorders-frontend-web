@@ -128,6 +128,7 @@ export default function EditOrderPage({ params }: { params: Promise<{ id: string
           const { uploadUrl, objectKey } = await api.getPresignedUrl({
             fileName: file.name,
             contentType: file.type,
+            orderId: id,
           });
           await uploadToPresignedUrl(uploadUrl, file, file.type);
           return objectKey;

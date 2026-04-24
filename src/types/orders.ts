@@ -81,6 +81,7 @@ export interface UpdateOrderInput {
 export interface PresignedUrlRequest {
   fileName: string;
   contentType: string;
+  orderId?: string;
 }
 
 export interface PresignedUrlResponse {
