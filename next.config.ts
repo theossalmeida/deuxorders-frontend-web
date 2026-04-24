@@ -50,6 +50,7 @@ const securityHeaders = [
       "img-src 'self' https: data: blob:", 
       "font-src 'self'",
       `connect-src ${connectSrc}`,
+      "worker-src 'self'",
       "object-src 'none'",
       "frame-ancestors 'none'",
       "base-uri 'self'",

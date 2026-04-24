@@ -26,6 +26,12 @@ const display = Fraunces({
 
 export const metadata: Metadata = {
   title: "Deuxcerie ERP",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Deuxcerie",
+  },
   description: "Sistema de gestão de pedidos",
 };
 
