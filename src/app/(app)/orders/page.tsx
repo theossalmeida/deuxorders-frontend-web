@@ -2,15 +2,21 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Download } from "lucide-react";
+import { Download, FileText, Loader2, Plus, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { SkeletonList } from "@/components/ui/skeleton-list";
 import { OrdersToolbar } from "@/components/features/orders/orders-toolbar";
 import { OrdersTable } from "@/components/features/orders/orders-table";
 import { OrdersMobileList } from "@/components/features/orders/orders-mobile-list";
-import { useOrders } from "@/hooks/useOrders";
+import { useExportOrders, useOrders } from "@/hooks/useOrders";
 import { localISODate } from "@/lib/format";
 import type { OrderStatus } from "@/types/orders";
 
@@ -31,6 +37,15 @@ export default function OrdersPage() {
     to: dateTo || undefined,
     search: search || undefined,
   });
+  const exportFilters = useMemo(
+    () => ({
+      startDate: dateFrom || undefined,
+      endDate: dateTo || undefined,
+      status: status !== "all" ? status : undefined,
+    }),
+    [dateFrom, dateTo, status],
+  );
+  const exportOrders = useExportOrders(exportFilters);
   const orders = useMemo(() => data?.items ?? [], [data]);
 
   const counts = useMemo(
@@ -60,9 +75,10 @@ export default function OrdersPage() {
           subtitle={`${orders.length} pedidos`}
           actions={
             <>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Download size={14} /> Exportar
-              </Button>
+              <ExportButton
+                isPending={exportOrders.isPending}
+                onExport={(format) => exportOrders.mutate(format)}
+              />
               <Button size="sm" className="gap-1.5" onClick={() => router.push("/orders/new")}>
                 <Plus size={14} /> Novo pedido
               </Button>
@@ -74,9 +90,16 @@ export default function OrdersPage() {
       <MobileTopBar
         title="Pedidos"
         right={
-          <Button size="sm" className="h-9 gap-1.5" onClick={() => router.push("/orders/new")}>
-            <Plus size={14} /> Novo
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <ExportButton
+              compact
+              isPending={exportOrders.isPending}
+              onExport={(format) => exportOrders.mutate(format)}
+            />
+            <Button size="sm" className="h-9 gap-1.5" onClick={() => router.push("/orders/new")}>
+              <Plus size={14} /> Novo
+            </Button>
+          </div>
         }
       />
 
@@ -111,5 +134,44 @@ export default function OrdersPage() {
         )}
       </div>
     </>
+  );
+}
+
+function ExportButton({
+  compact = false,
+  isPending,
+  onExport,
+}: {
+  compact?: boolean;
+  isPending: boolean;
+  onExport: (format: "csv" | "pdf") => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            size={compact ? "icon" : "sm"}
+            className={compact ? "h-9 w-9" : "gap-1.5"}
+            disabled={isPending}
+            aria-label="Exportar pedidos"
+          >
+            {isPending ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {!compact && "Exportar"}
+          </Button>
+        }
+      />
+      <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuItem onClick={() => onExport("csv")}>
+          <Table2 size={14} />
+          CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onExport("pdf")}>
+          <FileText size={14} />
+          PDF
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
