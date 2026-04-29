@@ -192,7 +192,7 @@ export function createOrdersApi(token: string) {
       search?: string;
     }) => {
       const qs = new URLSearchParams();
-      if (params?.size) qs.set("size", String(params.size));
+      qs.set("size", String(params?.size ?? 100));
       if (params?.page) qs.set("page", String(params.page));
       if (params?.status) qs.set("status", params.status);
       if (params?.from) qs.set("from", params.from);

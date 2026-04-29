@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { createDashboardApi } from "@/lib/api/dashboard";
 import { createOrdersApi, uploadToPresignedUrl, OrderUpdateResult } from "@/lib/api/orders";
 import { useToken } from "./useToken";
 import {
@@ -11,6 +12,9 @@ import {
   UpdateOrderInput,
   OrderStatus,
 } from "@/types/orders";
+import type { DashboardFilters } from "@/types/dashboard";
+
+type ExportFormat = "csv" | "pdf";
 
 export function useOrders(params?: {
   page?: number;
@@ -26,6 +30,34 @@ export function useOrders(params?: {
     queryKey: ["orders", params],
     queryFn: () => createOrdersApi(token!).getAll(params),
     enabled: !!token,
+  });
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+export function useExportOrders(filters: DashboardFilters) {
+  const token = useToken();
+
+  return useMutation({
+    mutationFn: async (format: ExportFormat) => {
+      if (!token) throw new Error("Sessão expirada. Faça login novamente.");
+      const blob = await createDashboardApi(token).exportOrders(filters, format);
+      return { blob, format };
+    },
+    onSuccess: ({ blob, format }) => {
+      downloadBlob(blob, `pedidos_${new Date().toISOString().slice(0, 10)}.${format}`);
+      toast.success(`Exportação ${format.toUpperCase()} iniciada.`);
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 }
 
