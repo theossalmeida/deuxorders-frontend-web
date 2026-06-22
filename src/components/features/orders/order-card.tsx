@@ -23,7 +23,9 @@ export function OrderCard({ order }: { order: Order }) {
           {isDelivery ? <Truck size={12} /> : <ShoppingBag size={12} />}
           {isDelivery ? "Entrega" : "Retirada"}
         </span>
-        <span className="text-[11px] text-muted-foreground">· {order.items.length} itens</span>
+        <span className="text-[11px] text-muted-foreground">
+          · {order.items.filter((i) => !i.itemCanceled).length} itens
+        </span>
       </div>
     </Link>
   );
