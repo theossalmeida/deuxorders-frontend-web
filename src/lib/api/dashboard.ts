@@ -147,7 +147,11 @@ export function createDashboardApi(token: string) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!res.ok) throw new Error("Falha ao exportar.");
+      if (!res.ok) {
+        const message = await res.text();
+        throw new Error(message || "Falha ao exportar.");
+      }
+
       return res.blob();
     },
   };
