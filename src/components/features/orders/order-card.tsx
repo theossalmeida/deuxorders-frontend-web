@@ -26,6 +26,16 @@ export function OrderCard({ order }: { order: Order }) {
         <span className="text-[11px] text-muted-foreground">
           · {order.items.filter((i) => !i.itemCanceled).length} itens
         </span>
+        <a 
+          href={`https://wa.me/${c.mobile.replace(/\D/g, "")}`}
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center text-muted-foreground hover:text-green-500 transition-colors duration-200 p-1"
+          onClick={(e) => e.stopPropagation()} // Agora o stopPropagation funcionará perfeitamente
+          title="Chamar no WhatsApp"
+        >
+          <MessageCircle size={14} className="stroke-[2.5]" />
+        </a>
       </div>
     </Link>
   );
