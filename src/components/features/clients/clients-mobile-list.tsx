@@ -1,10 +1,12 @@
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation"; // Importe o useRouter
+import { ChevronRight, MessageCircle } from "lucide-react";
 import { ClientAvatar } from "./client-avatar";
 import { EmptyState } from "@/components/data/empty-state";
 import type { Client } from "@/types/clients";
 
 export function ClientsMobileList({ clients }: { clients: Client[] }) {
+  const router = useRouter();
+
   if (clients.length === 0) {
     return <EmptyState title="Nenhum cliente encontrado" />;
   }
@@ -19,9 +21,10 @@ export function ClientsMobileList({ clients }: { clients: Client[] }) {
           <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
             {g.items.map((c) => (
               <li key={c.id}>
-                <Link
-                  href={`/clients/${c.id}`}
-                  className="flex items-center gap-3 px-3.5 py-3 active:bg-accent"
+                {/* Mudamos de <Link> para <div> com onClick programático */}
+                <div
+                  onClick={() => router.push(`/clients/${c.id}`)}
+                  className="flex cursor-pointer items-center gap-3 px-3.5 py-3 active:bg-accent"
                 >
                   <ClientAvatar name={c.name} />
                   <div className="min-w-0 flex-1">
@@ -33,12 +36,25 @@ export function ClientsMobileList({ clients }: { clients: Client[] }) {
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                      {c.mobile}
+                    
+                    <div className="font-mono text-xs text-foreground-soft flex items-center gap-2 mt-0.5">
+                      <span>{c.mobile || "—"}</span>
+                      {c.mobile && (
+                        <a 
+                          href={`https://wa.me/${c.mobile.replace(/\D/g, "")}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-muted-foreground hover:text-green-500 transition-colors duration-200 p-1"
+                          onClick={(e) => e.stopPropagation()} // Agora o stopPropagation funcionará perfeitamente
+                          title="Chamar no WhatsApp"
+                        >
+                          <MessageCircle size={14} className="stroke-[2.5]" />
+                        </a>
+                      )}
                     </div>
                   </div>
                   <ChevronRight size={14} className="text-muted-foreground" />
-                </Link>
+                </div>
               </li>
             ))}
           </ul>

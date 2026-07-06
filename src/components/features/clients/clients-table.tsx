@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { ClientAvatar } from "./client-avatar";
 import { EmptyState } from "@/components/data/empty-state";
 import { useToggleClientStatus } from "@/hooks/useClients";
 import type { Client } from "@/types/clients";
+
 
 export function ClientsTable({ clients }: { clients: Client[] }) {
   const router = useRouter();
@@ -35,8 +36,26 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
           >
             <ClientAvatar name={c.name} size="sm" />
             <div className="truncate font-medium">{c.name}</div>
-            <div className="font-mono text-xs text-foreground-soft">{c.mobile}</div>
+            
+            {/* Coluna do Telefone unificada com o Link do WhatsApp */}
+            <div className="font-mono text-xs text-foreground-soft flex items-center gap-2">
+              <span>{c.mobile || "—"}</span>
+              {c.mobile && (
+                <a 
+                  href={`https://wa.me/${c.mobile.replace(/\D/g, "")}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-muted-foreground hover:text-green-500 transition-colors duration-200 p-1"
+                  onClick={(e) => e.stopPropagation()} // Impede de abrir a rota do cliente ao clicar no ícone
+                  title="Chamar no WhatsApp"
+                >
+                  <MessageCircle size={14} className="stroke-[2.5]" />
+                </a>
+              )}
+            </div>
+
             <div className="font-mono text-xs">—</div>
+            
             <div onClick={(e) => e.stopPropagation()}>
               <Switch
                 checked={c.status}
