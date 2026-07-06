@@ -42,6 +42,7 @@ interface OrderDto {
   status: OrderStatus;
   clientId: string;
   clientName: string;
+  clientMobile: string;
   totalPaid: number;
   totalValue: number;
   references: string[] | null;
@@ -116,6 +117,7 @@ export function mapOrder(dto: OrderDto): Order {
     status: dto.status,
     clientId: dto.clientId,
     clientName: dto.clientName,
+    clientMobile: dto.clientMobile,
     totalPaidCents: dto.totalPaid,
     totalValueCents: dto.totalValue,
     references: dto.references ?? [],

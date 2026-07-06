@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Truck, ShoppingBag } from "lucide-react";
+import { Truck, ShoppingBag, MessageCircle } from "lucide-react";
 import { StatusChip } from "@/components/data/status-chip";
 import { formatCents, formatTime } from "@/lib/format";
 import type { Order } from "@/types/orders";
@@ -26,12 +26,12 @@ export function OrderCard({ order }: { order: Order }) {
         <span className="text-[11px] text-muted-foreground">
           · {order.items.filter((i) => !i.itemCanceled).length} itens
         </span>
-        <a 
-          href={`https://wa.me/${c.mobile.replace(/\D/g, "")}`}
-          target="_blank" 
+        <a
+          href={`https://wa.me/${order.clientMobile.replace(/\D/g, "")}`}
+          target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center text-muted-foreground hover:text-green-500 transition-colors duration-200 p-1"
-          onClick={(e) => e.stopPropagation()} // Agora o stopPropagation funcionará perfeitamente
+          onClick={(e) => e.stopPropagation()}
           title="Chamar no WhatsApp"
         >
           <MessageCircle size={14} className="stroke-[2.5]" />

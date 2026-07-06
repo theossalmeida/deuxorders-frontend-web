@@ -27,6 +27,7 @@ export interface Order {
   status: OrderStatus;
   clientId: string;
   clientName: string;
+  clientMobile: string;
   totalPaidCents: number;
   totalValueCents: number;
   references: string[];
