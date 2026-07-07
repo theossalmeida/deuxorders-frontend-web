@@ -5,6 +5,7 @@ import { ChevronRight, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { ClientAvatar } from "./client-avatar";
 import { EmptyState } from "@/components/data/empty-state";
+import { EditClientSheet } from "./edit-client-sheet";
 import { useToggleClientStatus } from "@/hooks/useClients";
 import type { Client } from "@/types/clients";
 
@@ -19,7 +20,7 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <div className="grid grid-cols-[50px_1fr_180px_100px_100px_40px] border-b border-border bg-muted/40 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="grid grid-cols-[50px_1fr_180px_100px_100px_72px] border-b border-border bg-muted/40 px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
         <div />
         <div>Nome</div>
         <div>Telefone</div>
@@ -31,7 +32,7 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
         {clients.map((c) => (
           <li
             key={c.id}
-            className="grid cursor-pointer grid-cols-[50px_1fr_180px_100px_100px_40px] items-center px-4 py-3 text-sm transition-colors hover:bg-accent"
+            className="grid cursor-pointer grid-cols-[50px_1fr_180px_100px_100px_72px] items-center px-4 py-3 text-sm transition-colors hover:bg-accent"
             onClick={() => router.push(`/clients/${c.id}`)}
           >
             <ClientAvatar name={c.name} size="sm" />
@@ -63,7 +64,8 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
                 className="scale-75"
               />
             </div>
-            <div className="flex justify-end text-muted-foreground">
+            <div className="flex justify-end items-center gap-0.5 text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+              <EditClientSheet client={c} compact />
               <ChevronRight size={14} />
             </div>
           </li>

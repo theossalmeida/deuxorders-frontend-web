@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AppHeader } from "@/components/shell/app-header";
@@ -12,6 +12,7 @@ import { ClientContactCard } from "@/components/features/clients/detail/client-c
 import { ClientNotesCard } from "@/components/features/clients/detail/client-notes-card";
 import { ClientOrdersHistory } from "@/components/features/clients/detail/client-orders-history";
 import { useClient, useToggleClientStatus, useDeleteClient } from "@/hooks/useClients";
+import { EditClientSheet } from "@/components/features/clients/edit-client-sheet";
 
 export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -66,6 +67,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                 />
                 {client.status ? "Ativo" : "Inativo"}
               </div>
+              <EditClientSheet client={client} />
               <Button
                 variant="outline"
                 size="sm"
@@ -89,12 +91,13 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           <ArrowLeft size={18} />
         </button>
         <span className="font-semibold">{client.name}</span>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1">
           <Switch
             checked={client.status}
             disabled={togglingStatus}
             onCheckedChange={(v) => toggleStatus({ id: client.id, active: v })}
           />
+          <EditClientSheet client={client} compact />
           <Button
             variant="ghost"
             size="icon"

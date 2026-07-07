@@ -1,7 +1,8 @@
-import { useRouter } from "next/navigation"; // Importe o useRouter
+import { useRouter } from "next/navigation";
 import { ChevronRight, MessageCircle } from "lucide-react";
 import { ClientAvatar } from "./client-avatar";
 import { EmptyState } from "@/components/data/empty-state";
+import { EditClientSheet } from "./edit-client-sheet";
 import type { Client } from "@/types/clients";
 
 export function ClientsMobileList({ clients }: { clients: Client[] }) {
@@ -53,7 +54,10 @@ export function ClientsMobileList({ clients }: { clients: Client[] }) {
                       )}
                     </div>
                   </div>
-                  <ChevronRight size={14} className="text-muted-foreground" />
+                  <div className="flex items-center gap-0.5 text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+                    <EditClientSheet client={c} compact />
+                    <ChevronRight size={14} />
+                  </div>
                 </div>
               </li>
             ))}

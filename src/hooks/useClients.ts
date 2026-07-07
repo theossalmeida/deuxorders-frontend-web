@@ -47,6 +47,7 @@ export function useUpdateClient(id: string) {
     mutationFn: (input: UpdateClientInput) => createClientsApi(token!).update(id, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["clients"] });
+      qc.invalidateQueries({ queryKey: ["clients", id] });
       toast.success("Cliente atualizado.");
     },
     onError: (e: Error) => toast.error(e.message),
