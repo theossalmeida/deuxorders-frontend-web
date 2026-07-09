@@ -33,7 +33,7 @@ Web order management system for **Deuxcerie** — a responsive Next.js replicati
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 18
 - Access to the Deuxcerie API (or a local instance at `http://localhost:5062`)
 
 ### Installation
