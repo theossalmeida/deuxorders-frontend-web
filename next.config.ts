@@ -6,10 +6,10 @@ const allowedApiOrigin = process.env.ALLOWED_API_ORIGIN ?? "https://deuxerp-api.
 
 const connectSrc = [
   "'self'",
-  allowedApiOrigin,
+  process.env.ALLOWED_API_ORIGIN,
   "https://*.r2.cloudflarestorage.com",
   ...(isDev ? ["http://localhost:5047"] : []),
-].join(" ");
+].filter(Boolean).join(" ");
 
 const scriptSrc = [
   "'self'",
