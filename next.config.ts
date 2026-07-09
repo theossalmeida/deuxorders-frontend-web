@@ -2,11 +2,12 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+const allowedApiOrigin = process.env.ALLOWED_API_ORIGIN ?? "https://deuxerp-api.fly.dev";
+
 const connectSrc = [
   "'self'",
-  "https://deux-erp.deuxcerie.com.br",
-  "https://deuxerp-api.fly.dev",
-  "https://*.r2.cloudflarestorage.com", // presigned upload PUTs
+  allowedApiOrigin,
+  "https://*.r2.cloudflarestorage.com",
   ...(isDev ? ["http://localhost:5047"] : []),
 ].join(" ");
 
