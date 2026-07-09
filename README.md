@@ -12,14 +12,14 @@ Web order management system for **Deuxcerie** — a responsive Next.js replicati
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router, TypeScript) |
-| Styling | Tailwind CSS + shadcn/ui |
-| Data fetching | TanStack Query v5 |
-| Forms | React Hook Form + Zod |
-| Charts | Recharts |
-| Notifications | Sonner |
+| Layer         | Technology                          |
+| ------------- | ----------------------------------- |
+| Framework     | Next.js 16 (App Router, TypeScript) |
+| Styling       | Tailwind CSS + shadcn/ui            |
+| Data fetching | TanStack Query v5                   |
+| Forms         | React Hook Form + Zod               |
+| Charts        | Recharts                            |
+| Notifications | Sonner                              |
 
 ## Security
 
