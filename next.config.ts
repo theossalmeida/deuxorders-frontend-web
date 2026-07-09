@@ -4,11 +4,10 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const connectSrc = [
   "'self'",
-  "https://deux-erp.deuxcerie.com.br",
-  "https://deuxerp-api.fly.dev",
-  "https://*.r2.cloudflarestorage.com", // presigned upload PUTs
+  process.env.ALLOWED_API_ORIGIN,
+  "https://*.r2.cloudflarestorage.com",
   ...(isDev ? ["http://localhost:5047"] : []),
-].join(" ");
+].filter(Boolean).join(" ");
 
 const scriptSrc = [
   "'self'",
