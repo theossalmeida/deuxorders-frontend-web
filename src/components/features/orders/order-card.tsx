@@ -26,6 +26,7 @@ export function OrderCard({ order }: { order: Order }) {
         <span className="text-[11px] text-muted-foreground">
           · {order.items.filter((i) => !i.itemCanceled).length} itens
         </span>
+        {order.clientMobile ?
         <a
           href={`https://wa.me/${order.clientMobile.replace(/\D/g, "")}`}
           target="_blank"
@@ -36,6 +37,7 @@ export function OrderCard({ order }: { order: Order }) {
         >
           <MessageCircle size={14} className="stroke-[2.5]" />
         </a>
+        : null}
       </div>
     </Link>
   );
