@@ -1,0 +1,124 @@
+name: DeuxERP Frontend CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 06:00 America/Sao_Paulo (09:00 UTC). GitHub schedules use UTC.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+
+jobs:
+  test:
+    name: Lint, build, unit and integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    env:
+      NEXT_PUBLIC_API_URL: https://deuxerp-api.fly.dev
+      ALLOWED_API_ORIGIN: https://deuxerp-api.fly.dev
+      BACKEND_URL: https://deuxerp-api.fly.dev
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ci-placeholder-vapid-key
+      XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
+      XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
+      XRAY_PROJECT_KEY: DEUX
+      XRAY_TEST_PLAN_KEY: DEUX-73
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        if: ${{ !cancelled() }}
+        run: npm run test:integration
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ github.run_attempt }}
+          path: TestResults/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish test report
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
+        if: always()
+        with:
+          name: Vitest results
+          path: "TestResults/*.xml"
+          reporter: java-junit
+          fail-on-error: true
+
+      - name: Import test results into Xray Cloud
+        if: ${{ always() && github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          if [[ -z "$XRAY_CLIENT_ID" || -z "$XRAY_CLIENT_SECRET" ]]; then
+            echo "Xray credentials are not configured; skipping result import."
+            exit 0
+          fi
+
+          xray_token="$(
+            jq -n \
+              --arg client_id "$XRAY_CLIENT_ID" \
+              --arg client_secret "$XRAY_CLIENT_SECRET" \
+              '{client_id: $client_id, client_secret: $client_secret}' |
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --data-binary @- \
+              "https://xray.cloud.getxray.app/api/v2/authenticate" |
+            tr -d '"'
+          )"
+          echo "::add-mask::$xray_token"
+
+          import_xray_report() {
+            local report="$1"
+
+            if [[ ! -f "$report" ]]; then
+              echo "Xray report was not generated: $report"
+              return 0
+            fi
+
+            echo "Importing $report into Xray"
+            curl --fail-with-body --silent --show-error \
+              --request POST \
+              --header "Authorization: Bearer $xray_token" \
+              --header "Content-Type: text/xml" \
+              --data-binary "@$report" \
+              "https://xray.cloud.getxray.app/api/v2/import/execution/junit?projectKey=${XRAY_PROJECT_KEY}&testPlanKey=${XRAY_TEST_PLAN_KEY}&revision=${GITHUB_SHA}"
+            echo
+          }
+
+          import_xray_report "TestResults/unit-tests.xml"
+          import_xray_report "TestResults/integration-tests.xml"
