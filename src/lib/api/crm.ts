@@ -48,11 +48,15 @@ export function createCrmApi(token: string) {
       search?: string;
       page?: number;
       size?: number;
+      lastOrderFrom?: string;
+      lastOrderTo?: string;
     }): Promise<PaginatedCrmSummaries> => {
       const qs = new URLSearchParams();
       if (params?.search) qs.set("search", params.search);
+      if (params?.lastOrderFrom) qs.set("lastOrderFrom", params.lastOrderFrom);
+      if (params?.lastOrderTo) qs.set("lastOrderTo", params.lastOrderTo);
       qs.set("page", String(params?.page ?? 1));
-      qs.set("size", String(params?.size ?? 100));
+      qs.set("size", String(params?.size ?? 20));
 
       const dto = await api.get<PaginatedCrmDto>(`/crm/list?${qs.toString()}`);
       return {
