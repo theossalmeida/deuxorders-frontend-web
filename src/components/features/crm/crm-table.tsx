@@ -35,7 +35,7 @@ export function CrmTable({ clients }: { clients: CrmClientSummary[] }) {
           const whatsappHref = c.mobile
             ? buildWhatsAppLink(
                 c.mobile,
-                isLapsedTier(tier) ? buildWinBackMessage(c.lastOrderInfo.products[0]) : undefined,
+                isLapsedTier(tier) ? buildWinBackMessage(c.name, c.lastOrderInfo.products[0]) : undefined,
               )
             : undefined;
 
