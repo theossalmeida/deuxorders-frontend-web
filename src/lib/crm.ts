@@ -68,9 +68,9 @@ export function getTierDateBounds(
 export function buildWinBackMessage(clientName: string, firstProductName?: string): string {
   const firstName = clientName.trim().split(/\s+/)[0] ?? clientName;
   if (firstProductName) {
-    return `Oi *${firstName}*, sentimos sua falta aqui na deuxcerie, vimos que seu último pedido foi um *${firstProductName}*, por isso estamos te dando 5% de desconto no seu próximo pedido.`;
+    return `Oi *${firstName}*, sentimos sua falta aqui na Deuxcerie, vimos que seu último pedido foi um *${firstProductName}*, por isso estamos te dando 5% de desconto no seu próximo pedido.`;
   }
-  return `Oi *${firstName}*, sentimos sua falta aqui na deuxcerie! Estamos te dando 5% de desconto no seu próximo pedido.`;
+  return `Oi *${firstName}*, sentimos sua falta aqui na Deuxcerie! Estamos te dando 5% de desconto no seu próximo pedido.`;
 }
 
 export function buildWhatsAppLink(mobile: string, message?: string): string {
