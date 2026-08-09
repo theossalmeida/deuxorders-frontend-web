@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AppHeader } from "@/components/shell/app-header";
 import { MobileTopBar } from "@/components/shell/mobile-top-bar";
 import { SkeletonList } from "@/components/ui/skeleton-list";
@@ -19,7 +19,10 @@ export default function CrmPage() {
   const [tier, setTier] = useState<CrmTier | "all">("all");
   const [page, setPage] = useState(1);
 
-  const bounds = tier === "all" ? {} : getTierDateBounds(tier);
+  // Computed once per tier selection — getTierDateBounds() defaults to `now = new Date()`,
+  // so calling it unmemoized on every render would produce a new queryKey each time and
+  // refetch in an infinite loop.
+  const bounds = useMemo(() => (tier === "all" ? {} : getTierDateBounds(tier)), [tier]);
 
   const { data, isLoading } = useCrmList({
     search: search || undefined,
