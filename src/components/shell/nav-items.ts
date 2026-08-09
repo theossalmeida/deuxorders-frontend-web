@@ -6,6 +6,7 @@ import {
   Wallet,
   Receipt,
   Warehouse,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,18 +25,12 @@ export type NavItem = {
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Vendas",
+    label: "Pedidos",
     items: [
       { href: "/dashboard", label: "Painel",   icon: LayoutGrid },
       { href: "/orders",    label: "Pedidos",  icon: ShoppingCart, badgeKey: "pendingOrders", inMobile: true },
       { href: "/products",  label: "Produtos", icon: Package },
-      { href: "/clients",   label: "Clientes", icon: Users },
-    ],
-  },
-  {
-    label: "Estoque",
-    items: [
-      { href: "/inventory", label: "Estoque", icon: Warehouse, inMobile: true },
+      { href: "/inventory", label: "Estoque",  icon: Warehouse },
     ],
   },
   {
@@ -43,6 +38,13 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/cash",         label: "Caixa",       icon: Wallet, inMobile: true },
       { href: "/cash/entries", label: "Lançamentos", icon: Receipt },
+    ],
+  },
+  {
+    label: "Clientes",
+    items: [
+      { href: "/clients", label: "Clientes", icon: Users, inMobile: true },
+      { href: "/crm",      label: "CRM",      icon: Handshake },
     ],
   },
 ];
@@ -54,9 +56,9 @@ export type MobileGroupTab = {
 };
 
 export const MOBILE_GROUP_TABS: MobileGroupTab[] = [
-  { groupLabel: "Vendas",      tabLabel: "Pedidos", tabIcon: ShoppingCart },
-  { groupLabel: "Estoque",     tabLabel: "Estoque", tabIcon: Warehouse },
-  { groupLabel: "Financeiro",  tabLabel: "Caixa",   tabIcon: Wallet },
+  { groupLabel: "Pedidos",     tabLabel: "Pedidos",  tabIcon: ShoppingCart },
+  { groupLabel: "Financeiro",  tabLabel: "Caixa",    tabIcon: Wallet },
+  { groupLabel: "Clientes",    tabLabel: "Clientes", tabIcon: Users },
 ];
 
 /** @deprecated — use MOBILE_GROUP_TABS */
