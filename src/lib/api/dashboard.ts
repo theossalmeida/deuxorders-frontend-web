@@ -91,8 +91,8 @@ function buildDashboardParams(filters: DashboardFilters): string {
     filters.startDate,
     filters.endDate,
   );
-  if (startUtc) p.set("createdAtFrom", startUtc);
-  if (endUtc) p.set("createdAtTo", endUtc);
+  if (startUtc) p.set("deliveryDateFrom", startUtc);
+  if (endUtc) p.set("deliveryDateTo", endUtc);
   if (filters.status) p.set("status", filters.status);
   const qs = p.toString();
   return qs ? `?${qs}` : "";
